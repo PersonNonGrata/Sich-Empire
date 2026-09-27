@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-bg: #080A0E;
+    --color-surface: #0E121A;
+    --color-surface-card: #131823;
+    --color-oak: #16110D;
+    --color-oak-border: #382A1E;
+    --color-parchment: #F4EAD4;
+    --color-parchment-deep: #E8D8B6;
+    --color-parchment-border: #C5AF88;
+    --color-ink: #1C1815;
+    --color-ink-muted: #544D45;
+    --color-gold: #C9A96E;
+    --color-gold-bright: #E2C48C;
+    --color-bronze: #9A773F;
+    --color-wax: #8E2525;
+    --color-wax-border: #5A1616;
+    --color-border: #232A39;
+    --color-border-subtle: #191E29;
+    --color-text: #F3EFE6;
+    --color-text-muted: #8E93A0;
+    --color-text-dim: #5D6372;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, .font-serif {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    letter-spacing: 0.015em;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+  }
+}
+
+/* Custom scrollbar for authentic ledger aesthetic */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #090B0F;
+}
+::-webkit-scrollbar-thumb {
+  background: #232B3A;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C9A96E;
+}
+
+/* Paper document effect */
+.parchment-sheet {
+  background: #F4EAD4;
+  background-image: 
+    radial-gradient(ellipse at 50% 10%, rgba(255, 255, 255, 0.4) 0%, rgba(0, 0, 0, 0.04) 100%),
+    linear-gradient(to bottom, #F7EEDB 0%, #EFE1C5 50%, #E8D7B8 100%);
+  color: #1A1714;
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.4),
+    0 10px 25px -5px rgba(0, 0, 0, 0.6),
+    inset 0 0 40px rgba(180, 140, 80, 0.15);
+}
+
+/* Wax seal effect */
+.wax-seal {
+  background: radial-gradient(circle at 35% 35%, #B33434 0%, #7D1D1D 60%, #4D1010 100%);
+  box-shadow: 
+    0 2px 5px rgba(0,0,0,0.5),
+    inset 0 1px 2px rgba(255,255,255,0.3),
+    inset 0 -2px 4px rgba(0,0,0,0.6);
+}
+
+/* Dark wood / obsidian table texture */
+.desk-surface {
+  background-color: #0B0E14;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(201, 169, 110, 0.05) 0%, transparent 60%),
+    linear-gradient(180deg, #10141D 0%, #0A0D13 100%);
+}

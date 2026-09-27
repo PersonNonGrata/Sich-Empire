@@ -1,0 +1,473 @@
+import { Scenario } from '../types.ts';
+
+export const councilMeetingScenario: Scenario = {
+  id: 'scenario_first_council',
+  title: 'Перше засідання Ради',
+  year: 1848,
+  location: 'Золота Палата Гетьманського Палацу, Хортиця',
+  tags: ['рада', 'армія', 'бюджет', 'старшина', '1848'],
+  priority: 100,
+  importance: 'major',
+  conditions: [
+    {
+      type: 'YEAR',
+      operator: '==',
+      value: 1848,
+    },
+    {
+      type: 'SCENARIO_NOT_COMPLETED',
+      scenarioId: 'scenario_first_council',
+    },
+  ],
+  characters: ['general_chaika', 'maria_levytska', 'ostap_kovalenko', 'mykola_berest', 'jan_korchak'],
+  speakerId: 'general_chaika',
+  speakerRole: 'Генерал Кордонних Корпусів Січі',
+  speakerQuote:
+    '«Ясновельможний Гетьмане! Навколо нас палає вся Європа — імперії тріщать, народи повстають. Якщо ми не кинемо золото у ливарні та не подвоїмо прикордонні сотні, завтра чужі полки диктуватимуть нам волю на дніпровських порогах. Армія вимагає золота негайно!»',
+  introduction:
+    'Перші дні після присяги на вірність козацькому народу. За масивним дубовим столом Золотої Палати зібралася Рада Старшини. Генерал Данило Чайка гучно вдаряє кулаком по карті рубежів, тоді як представники громад і шляхти застерігають від спустошення скарбниці.',
+  situation:
+    'Генералітет вимагає екстреного виділення 10 мільйонів карбованців на фортифікації та платню регулярним полкам. Від вашого першого слова залежить баланс влади: посилити армію, заощадити гроші для міст чи започаткувати наукову реформу.',
+  choices: [
+    {
+      id: 'choice_fund_army',
+      text: 'Збільшити фінансування армії на першу вимогу генерала.',
+      description: 'Виділити 10 мільйонів карбованців з резервів на негайне посилення кордонів, закупівлю коней та виплату козацької платні.',
+      politicalCost: {
+        economicCost: 10,
+        militaryCost: 0,
+        politicalCost: {
+          faction_communities: -8,
+          faction_landed_aristocracy: -10,
+          faction_military_command: 15,
+        },
+        capitalCost: 5,
+      },
+      politicalReactions: [
+        { factionId: 'faction_military_command', reaction: 'support', note: 'Повний тріумф генералітету' },
+        { factionId: 'faction_communities', reaction: 'concern', note: 'Побоювання росту військових податків' },
+        { factionId: 'faction_landed_aristocracy', reaction: 'opposition', note: 'Обурення спустошенням скарбниці' },
+      ],
+      consequences: [
+
+        {
+          type: 'STATE_CHANGE',
+          metric: 'militaryStrength',
+          value: 5,
+          label: 'Військова міць',
+        },
+        {
+          type: 'STATE_CHANGE',
+          metric: 'treasury',
+          value: -10,
+          label: 'Державна скарбниця',
+        },
+        {
+          type: 'RELATIONSHIP_CHANGE',
+          characterId: 'general_chaika',
+          trustChange: 10,
+          respectChange: 6,
+          loyaltyChange: 8,
+          label: 'Генерал Чайка схвалює рішучу підтримку армії',
+        },
+        {
+          type: 'RELATIONSHIP_CHANGE',
+          characterId: 'maria_levytska',
+          trustChange: -6,
+          respectChange: -2,
+          label: 'Марія Левицька засуджує надмірний мілітаризм',
+        },
+        {
+          type: 'RELATIONSHIP_CHANGE',
+          characterId: 'ostap_kovalenko',
+          trustChange: 4,
+          label: 'Остап Коваленко підтримує козацький стрій',
+        },
+        {
+          type: 'FACTION_CHANGE',
+          factionId: 'faction_military_command',
+          influenceChange: 10,
+          loyaltyChange: 10,
+          tensionChange: -15,
+          label: 'Військове керівництво зміцнює вплив у Раді',
+        },
+        {
+          type: 'FACTION_CHANGE',
+          factionId: 'faction_communities',
+          tensionChange: 10,
+          label: 'Громади стурбовані зростанням військових витрат',
+        },
+        {
+          type: 'TENSION',
+          key: 'tension_might_prosperity',
+          value: 12,
+          label: 'СИЛА ↔ ДОБРОБУТ (перевага військового кулака)',
+        },
+        {
+          type: 'TENSION',
+          key: 'tension_freedom_order',
+          value: 8,
+          label: 'СВОБОДА ↔ ПОРЯДОК (посилення військової дисципліни)',
+        },
+        {
+          type: 'FLAG',
+          flag: 'army_budget_boosted',
+          value: true,
+          label: 'Армійський бюджет розширено',
+        },
+        {
+          type: 'FLAG',
+          flag: 'first_council_choice',
+          value: 'fund_army',
+        },
+        {
+          type: 'PSYCHOLOGICAL_SIGNAL',
+          dimension: 'ORDER',
+          value: 1,
+          contextNote: 'Пріоритет мілітарного порядку та оборони',
+        },
+        {
+          type: 'PSYCHOLOGICAL_SIGNAL',
+          dimension: 'POWER',
+          value: 1,
+          contextNote: 'Спирання на силовий важіль держави',
+        },
+        {
+          type: 'HISTORY_EVENT',
+          eventType: 'MILITARY_ACT',
+          title: 'Щедре фінансування прикордонних корпусів Січі',
+          description: 'Гетьман без вагань відкрив скарбницю для армії. Генералітет отримав повну підтримку, проте державні резерви зазнали відчутного удару.',
+          importance: 'major',
+          tags: ['армія', 'бюджет', 'рада_1848'],
+        },
+        {
+          type: 'SCHEDULE_CONSEQUENCE',
+          consequenceData: {
+            triggerYear: 1851,
+            title: 'Казна у борговому зашморгу',
+            description: 'Масивні витрати 1848 року вичерпали запас золота. Військові вимагають нових траншів, тоді як міські цехи бунтують проти податкового тиску.',
+            conditions: [
+              {
+                type: 'HAS_FLAG',
+                flag: 'army_budget_boosted',
+                value: true,
+              },
+            ],
+            consequences: [
+              {
+                type: 'STATE_CHANGE',
+                metric: 'prosperity',
+                value: -4,
+                label: 'Економічний тиск',
+              },
+              {
+                type: 'TENSION',
+                key: 'tension_might_prosperity',
+                value: 15,
+                label: 'Загострення бюджетного дефіциту',
+              },
+            ],
+          },
+        },
+      ],
+      historyEvent: {
+        type: 'MILITARY_ACT',
+        title: 'Щедре фінансування прикордонних корпусів Січі',
+        description: 'Гетьман підтримав генералітет у першому державному рішенні.',
+        importance: 'major',
+        tags: ['армія', 'бюджет'],
+      },
+    },
+    {
+      id: 'choice_refuse_funding',
+      text: 'Відмовити у додаткових коштах та зберегти скарбницю.',
+      description: 'Суворо заявити генералу, що державі потрібні ресурси для мануфактур і доріг, а полки мають навчитися жити за наявними коштами.',
+      consequences: [
+        {
+          type: 'STATE_CHANGE',
+          metric: 'militaryStrength',
+          value: -5,
+          label: 'Військова міць',
+        },
+        {
+          type: 'STATE_CHANGE',
+          metric: 'treasury',
+          value: 8,
+          label: 'Державна скарбниця',
+        },
+        {
+          type: 'RELATIONSHIP_CHANGE',
+          characterId: 'general_chaika',
+          trustChange: -14,
+          respectChange: -5,
+          loyaltyChange: -8,
+          label: 'Генерал Чайка розлючений зневагою до прикордонників',
+        },
+        {
+          type: 'RELATIONSHIP_CHANGE',
+          characterId: 'jan_korchak',
+          trustChange: 6,
+          respectChange: 4,
+          label: 'Ян Корчак схвалює збереження грошей землевласників',
+        },
+        {
+          type: 'RELATIONSHIP_CHANGE',
+          characterId: 'maria_levytska',
+          trustChange: 6,
+          label: 'Марія Левицька задоволена стриманням генералів',
+        },
+        {
+          type: 'FACTION_CHANGE',
+          factionId: 'faction_military_command',
+          tensionChange: 25,
+          loyaltyChange: -15,
+          label: 'Офіцерський корпус охоплений глухим невдоволенням',
+        },
+        {
+          type: 'FACTION_CHANGE',
+          factionId: 'faction_landed_aristocracy',
+          loyaltyChange: 8,
+          label: 'Шляхта вітає захист бюджету від мілітарного тиску',
+        },
+        {
+          type: 'TENSION',
+          key: 'tension_might_prosperity',
+          value: -12,
+          label: 'СИЛА ↔ ДОБРОБУТ (збереження цивільних коштів)',
+        },
+        {
+          type: 'FLAG',
+          flag: 'army_budget_cut',
+          value: true,
+          label: 'Фінансування армії обмежено',
+        },
+        {
+          type: 'FLAG',
+          flag: 'first_council_choice',
+          value: 'refuse_funding',
+        },
+        {
+          type: 'PSYCHOLOGICAL_SIGNAL',
+          dimension: 'ECONOMY',
+          value: 1,
+          contextNote: 'Ощадливість та захист державних резервів',
+        },
+        {
+          type: 'PSYCHOLOGICAL_SIGNAL',
+          dimension: 'RESPONSIBILITY',
+          value: 1,
+          contextNote: 'Непіддатливість на силовий шантаж генералітету',
+        },
+        {
+          type: 'HISTORY_EVENT',
+          eventType: 'ECONOMIC_MEASURE',
+          title: 'Жорстка ощадливість скарбниці: відхилення вимог генералітету',
+          description: 'Гетьман відхилив ультиматум генерала Чайки, зберігши золотий запас держави цілим, проте посіявши насіння образи серед військової старшини.',
+          importance: 'major',
+          tags: ['економіка', 'відмова', 'рада_1848'],
+        },
+        {
+          type: 'SCHEDULE_CONSEQUENCE',
+          consequenceData: {
+            triggerYear: 1851,
+            title: 'Тривога на кордоні: розбій та чужі розвідники',
+            description: 'Через брак фінансування передові пости залишилися без ремонту й пороху. Ворожі розвідувальні роз’їзди перетинають кордон, випробовуючи Січ на міцність.',
+            conditions: [
+              {
+                type: 'HAS_FLAG',
+                flag: 'army_budget_cut',
+                value: true,
+              },
+            ],
+            consequences: [
+              {
+                type: 'STATE_CHANGE',
+                metric: 'stability',
+                value: -6,
+                label: 'Стабільність рубежів',
+              },
+              {
+                type: 'REGION_CHANGE',
+                regionId: 'region_sich_core',
+                tensionChange: 15,
+                label: 'Тривога у прикордонних полках',
+              },
+            ],
+          },
+        },
+      ],
+      historyEvent: {
+        type: 'ECONOMIC_MEASURE',
+        title: 'Жорстка фінансова дисципліна скарбниці',
+        description: 'Гетьман відмовив генералу Чайці у розширенні бюджету.',
+        importance: 'standard',
+        tags: ['економіка', 'відмова'],
+      },
+    },
+    {
+      id: 'choice_reform_army',
+      text: 'Запропонувати глибоку реформу війська замість простого збільшення витрат.',
+      description: 'Спрямувати помірні 4 мільйони карбованців на залучення молодих інженерів Миколи Береста, розробку нарізної артилерії та перехід полків на новий вишкіл.',
+      politicalCost: {
+        economicCost: 4,
+        militaryCost: 0,
+        politicalCost: {
+          faction_reformers: 15,
+          faction_military_command: 5,
+          faction_old_sich: -6,
+        },
+        capitalCost: 4,
+      },
+      proposalVoting: {
+        domain: 'education',
+        impactStrength: 60,
+        requiredCapital: 4,
+      },
+      politicalReactions: [
+        { factionId: 'faction_reformers', reaction: 'support', note: 'Ідеальне втілення технічної модернізації' },
+        { factionId: 'faction_military_command', reaction: 'neutral', note: 'Схвалення за умови реальних результатів' },
+        { factionId: 'faction_old_sich', reaction: 'concern', note: 'Занепокоєння витісненням козацьких традицій' },
+      ],
+      consequences: [
+        {
+          type: 'CREATE_PROMISE',
+          promise: {
+            text: 'Провести технологічну реформу війська протягом трьох років (до 1851 р.)',
+            targetFaction: 'faction_military_command',
+            deadlineYear: 1851,
+            importance: 'major',
+            conditionDescription: 'Завершити розробку нарізних гармат або переозброєння до 1851 р.',
+          },
+          label: 'Обітниця перед Військовим Керівництвом: завершити реформу до 1851 року',
+        },
+        {
+          type: 'STATE_CHANGE',
+          metric: 'treasury',
+          value: -4,
+          label: 'Державна скарбниця',
+        },
+
+        {
+          type: 'STATE_CHANGE',
+          metric: 'militaryStrength',
+          value: 2,
+          label: 'Військова міць (початок реформи)',
+        },
+        {
+          type: 'RELATIONSHIP_CHANGE',
+          characterId: 'mykola_berest',
+          trustChange: 14,
+          respectChange: 12,
+          loyaltyChange: 10,
+          label: 'Микола Берест натхненний підтримкою інженерного проєкту',
+        },
+        {
+          type: 'RELATIONSHIP_CHANGE',
+          characterId: 'general_chaika',
+          trustChange: 4,
+          respectChange: 10,
+          label: 'Генерал Чайка поважає стратегічний задум Гетьмана',
+        },
+        {
+          type: 'RELATIONSHIP_CHANGE',
+          characterId: 'ostap_kovalenko',
+          trustChange: -6,
+          label: 'Остап Коваленко хвилюється за витіснення козацького звичаю машинами',
+        },
+        {
+          type: 'FACTION_CHANGE',
+          factionId: 'faction_reformers',
+          influenceChange: 15,
+          loyaltyChange: 15,
+          label: 'Реформатори отримують мандат на модернізацію',
+        },
+        {
+          type: 'FACTION_CHANGE',
+          factionId: 'faction_old_sich',
+          tensionChange: 15,
+          label: 'Стара Січ ревниво сприймає новації інженерів',
+        },
+        {
+          type: 'TENSION',
+          key: 'tension_tradition_reform',
+          value: 15,
+          label: 'ТРАДИЦІЯ ↔ РЕФОРМА (поштовх до технічного оновлення)',
+        },
+        {
+          type: 'FLAG',
+          flag: 'military_reform_instituted',
+          value: true,
+          label: 'Започатковано технологічну військову реформу',
+        },
+        {
+          type: 'FLAG',
+          flag: 'first_council_choice',
+          value: 'reform_army',
+        },
+        {
+          type: 'PSYCHOLOGICAL_SIGNAL',
+          dimension: 'CREATION',
+          value: 1,
+          contextNote: 'Конструктивна модернізація та стратегічне творення',
+        },
+        {
+          type: 'PSYCHOLOGICAL_SIGNAL',
+          dimension: 'KNOWLEDGE',
+          value: 1,
+          contextNote: 'Залучення науки та інженерії до оборони',
+        },
+        {
+          type: 'HISTORY_EVENT',
+          eventType: 'REFORM',
+          title: 'Універсал про Політехнічну Модернізацію Січового Війська',
+          description: 'Гетьман дав старт великій військовій реформі: поєднано ресурси генералітету та технічної колегії для створення нарізної артилерії нового зразка.',
+          importance: 'critical',
+          tags: ['реформа', 'інновація', 'військо', '1848'],
+        },
+        {
+          type: 'SCHEDULE_CONSEQUENCE',
+          consequenceData: {
+            triggerYear: 1851,
+            title: 'Тріумф нарізної артилерії: новий сталевий полк',
+            description: 'Інженери завершили випробування першої нарізної батареї. Точність та дальність стрільби шокують іноземних військових аташе.',
+            conditions: [
+              {
+                type: 'HAS_FLAG',
+                flag: 'military_reform_instituted',
+                value: true,
+              },
+            ],
+            consequences: [
+              {
+                type: 'STATE_CHANGE',
+                metric: 'militaryStrength',
+                value: 8,
+                label: 'Військова міць (плоди реформи)',
+              },
+              {
+                type: 'STATE_CHANGE',
+                metric: 'prosperity',
+                value: 4,
+                label: 'Промисловий ріст ливарень',
+              },
+              {
+                type: 'ADD_DISCOVERY',
+                discoveryId: 'rifled_cannon_sich',
+                label: 'Нарізна польова гармата конструкції Береста',
+              },
+            ],
+          },
+        },
+      ],
+      historyEvent: {
+        type: 'REFORM',
+        title: 'Початок Великої Військової Реформи',
+        description: 'Гетьман обрав шлях наукової та технічної модернізації.',
+        importance: 'critical',
+        tags: ['реформа', 'модернізація'],
+      },
+    },
+  ],
+  reflection:
+    'Рішення першого засідання Ради заклало фундаментальний вектор правління. Персонажі та фракції побачили, ким є новий володар Січі. Держава відповіла негайно, але головні наслідки проявляться у наступні роки.',
+};

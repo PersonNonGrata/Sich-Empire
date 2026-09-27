@@ -1,0 +1,6 @@
+{
+  "name": "Імперія Січ",
+  "description": "Альтернативно-історична стратегічна психологічна гра: архітектурний фундамент та сценарний рушій Імперії Січ.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

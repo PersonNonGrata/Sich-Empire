@@ -1,0 +1,200 @@
+import { Scenario } from '../types.ts';
+
+export const galiciaPetitionScenario: Scenario = {
+  id: 'scenario_petition_galicia_land',
+  title: 'Петиція: Вимога Галицьких Землевласників',
+  year: 1849,
+  location: 'Палата Сеймикових Послів, Хортиця',
+  tags: ['петиція', 'земля', 'галичина', 'шляхта', 'політика'],
+  priority: 92,
+  importance: 'standard',
+  conditions: [
+    {
+      type: 'SCENARIO_NOT_COMPLETED',
+      scenarioId: 'scenario_petition_galicia_land',
+    },
+  ],
+  characters: ['jan_korchak', 'maria_levytska', 'general_chaika', 'ostap_kovalenko'],
+  speakerId: 'jan_korchak',
+  speakerRole: 'Маршалок Галицького Земського Сеймику',
+  speakerQuote:
+    '«Ясновельможний Гетьмане! Ми привезли підписи трьохсот родин галицької шляхти. Земельний закон 1848 року загрожує нашим маєткам та давнім судовим вольностям. Якщо Січ хоче нашого зерна, золота та спокою на кордонах — закон має бути негайно переглянутий!»',
+  introduction:
+    'Делегація галицьких землевласників на чолі з Яном Корчаком прибула до столиці. Вони подають офіційну петицію з вимогою скасувати обмеження на розмір латифундій та надати землевласникам виключне право на соляні рудні.',
+  situation:
+    'Перед Гетьманом класична дилема влади: задовольнити вимоги багатої аристократії ціною обурення селянських громад, або ж відкинути петицію, ризикуючи втратити лояльність західного пограниччя.',
+  choices: [
+    {
+      id: 'choice_petition_agree',
+      text: 'Погодитися: задовольнити петицію та закріпити недоторканність маєтків.',
+      description: 'Видати гетьманський грамотний лист на користь галицької шляхти, закріпивши непорушність латифундій.',
+      consequences: [
+        {
+          type: 'FACTION_CHANGE',
+          factionId: 'faction_landed_aristocracy',
+          loyaltyChange: 20,
+          influenceChange: 10,
+          label: 'Шляхта Галичини висловлює повну вірність Гетьману',
+        },
+        {
+          type: 'FACTION_CHANGE',
+          factionId: 'faction_communities',
+          loyaltyChange: -15,
+          tensionChange: 15,
+          label: 'Громади обурені поступками великим панам',
+        },
+        {
+          type: 'REGION_CHANGE',
+          regionId: 'region_galicia',
+          loyaltyChange: 15,
+          prosperityChange: 5,
+          label: 'Галичина зміцнює зв’язок зі столицею',
+        },
+        {
+          type: 'POLITICAL_COST',
+          cost: {
+            politicalCost: {
+              faction_communities: -15,
+              faction_old_sich: -10,
+            },
+            capitalCost: 5,
+          },
+        },
+        {
+          type: 'HISTORY_EVENT',
+          eventType: 'COUNCIL_DECISION',
+          title: 'Ухвалення Галицької Земельної Грамоти',
+          description: 'Гетьман підтвердив привілеї галицьких землевласників, закріпивши союз з аграрною елітою.',
+          importance: 'standard',
+          tags: ['петиція', 'земля', 'шляхта'],
+        },
+      ],
+    },
+    {
+      id: 'choice_petition_refuse',
+      text: 'Відмовити: оголосити, що земля є надбанням усього народу Січі.',
+      description: 'Рішуче відхилити петицію, попередивши шляхту про неприпустимість сепаратизму та шантажу.',
+      consequences: [
+        {
+          type: 'FACTION_CHANGE',
+          factionId: 'faction_landed_aristocracy',
+          loyaltyChange: -25,
+          tensionChange: 30,
+          label: 'Землевласники ображені та розривають зв’язки з урядом',
+        },
+        {
+          type: 'FACTION_CHANGE',
+          factionId: 'faction_communities',
+          loyaltyChange: 15,
+          label: 'Селяни та громади вітають захист народних прав',
+        },
+        {
+          type: 'REGION_CHANGE',
+          regionId: 'region_galicia',
+          unrestChange: 20,
+          loyaltyChange: -15,
+          label: 'У Галичині назріває податковий страйк',
+        },
+        {
+          type: 'POLITICAL_COST',
+          cost: {
+            politicalCost: {
+              faction_landed_aristocracy: -25,
+            },
+            capitalCost: 8,
+          },
+        },
+        {
+          type: 'HISTORY_EVENT',
+          eventType: 'COUNCIL_DECISION',
+          title: 'Відхилення Шляхетської Петиції про Землю',
+          description: 'Гетьман суворо відмовив галицьким магнатам, підтвердивши народну основу земельного устрою.',
+          importance: 'standard',
+          tags: ['відмова', 'громади', 'земля'],
+        },
+      ],
+    },
+    {
+      id: 'choice_petition_commission',
+      text: 'Створити Паритетну Земельну Комісію для вивчення питання.',
+      description: 'Призначити змішану комісію з представників шляхти Яна Корчака та київських юристів Марії Левицької з терміном роботи 2 роки.',
+      consequences: [
+        {
+          type: 'STATE_CHANGE',
+          metric: 'stability',
+          value: 3,
+          label: 'Зняття гостроти конфлікту через правову процедуру',
+        },
+        {
+          type: 'FACTION_CHANGE',
+          factionId: 'faction_reformers',
+          loyaltyChange: 10,
+          label: 'Реформатори схвалюють інституційний підхід',
+        },
+        {
+          type: 'POLITICAL_CAPITAL_CHANGE',
+          value: 4,
+          label: 'Дипломатична витримка зберігає політичний простір',
+        },
+        {
+          type: 'CREATE_PROMISE',
+          promise: {
+            text: 'Завершити розгляд земельної реформи комісією та ухвалити справедливий закон',
+            targetFaction: 'faction_landed_aristocracy',
+            deadlineYear: 1851,
+            importance: 'standard',
+          },
+          label: 'Дано обіцянку завершити реформу до 1851 року',
+        },
+        {
+          type: 'HISTORY_EVENT',
+          eventType: 'REFORM',
+          title: 'Створення Генеральної Земельної Комісії Січі',
+          description: 'Гетьман передав суперечку щодо земель у руки фахових правників та сеймикових послів.',
+          importance: 'standard',
+          tags: ['комісія', 'право', 'обіцянка'],
+        },
+      ],
+    },
+    {
+      id: 'choice_petition_compromise',
+      text: 'Запропонувати компроміс: знизити експортні мита взамін на продаж надлишків селянам.',
+      description: 'Шляхта отримує безмитний експорт зерна до Чорного Моря, але зобов’язується продавати вільні наділи селянським громадам у кредит.',
+      consequences: [
+        {
+          type: 'STATE_CHANGE',
+          metric: 'prosperity',
+          value: 5,
+          label: 'Стимулювання аграрного експорту',
+        },
+        {
+          type: 'FACTION_CHANGE',
+          factionId: 'faction_landed_aristocracy',
+          loyaltyChange: 12,
+          label: 'Землевласники приймають компроміс заради вигоди',
+        },
+        {
+          type: 'FACTION_CHANGE',
+          factionId: 'faction_communities',
+          loyaltyChange: 10,
+          label: 'Громади раді можливості викупу землі',
+        },
+        {
+          type: 'POLITICAL_CAPITAL_CHANGE',
+          value: 6,
+          label: 'Блискучий державний компроміс посилює владу',
+        },
+        {
+          type: 'HISTORY_EVENT',
+          eventType: 'DIPLOMATIC_PACT',
+          title: 'Галицько-Дніпровський Аграрний Компроміс',
+          description: 'Гетьман поєднав торговельний зиск великих латифундистів із земельними потребами вільних селян.',
+          importance: 'major',
+          tags: ['компроміс', 'аграрна_угода', 'розквіт'],
+        },
+      ],
+    },
+  ],
+  reflection:
+    'Петиції від воєводств — це пульс держави. Той, хто вміє перетворювати вимоги еліт на загальнонаціональний консенсус, керує без потреби оголювати шаблю.',
+};
