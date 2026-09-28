@@ -367,7 +367,7 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
 
           {/* One canonical silhouette for the alternate 1848 Sich Empire.
               Its territorial canon is kept separate from the real-world 1848 base,
-              so the surrounding European powers retain their historical geography. */
+              so the surrounding European powers retain their historical geography.
               No individual Sich polygon receives a stroke, so there are no internal seams. */}
           <g filter={`url(#sichMapOuterBorder-${mapId})`}>
             <rect
