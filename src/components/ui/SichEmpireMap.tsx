@@ -73,6 +73,7 @@ function geometryToPaths(
 export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
   const compact = variant === 'prologue';
   const [features, setFeatures] = useState<GeoFeature[]>([]);
+  const [contextFeatures, setContextFeatures] = useState<GeoFeature[]>([]);
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -90,6 +91,11 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
         );
         if (!selected.length) throw new Error('Historical empire polygons not found');
         setFeatures(selected);
+        const contextNames = new Set([
+          'Sweden', 'Prussia', 'Austrian Empire', 'Holy Roman Empire',
+          'Ottoman Empire', 'Nogai Horde', 'Quazaq Khanate', 'Denmark-Norway'
+        ]);
+        setContextFeatures(data.features.filter((feature) => contextNames.has(feature.properties?.NAME ?? '')));
       })
       .catch(() => {
         if (!cancelled) setError(true);
@@ -103,10 +109,10 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
   const bounds = useMemo(() => {
     const points = features.flatMap((feature) => collectPoints(feature.geometry.coordinates));
     // Focus the view on Eastern Europe + the core Muscovite/Siberian extent.
-    const minLon = 10;
-    const maxLon = 90;
-    const minLat = 43;
-    const maxLat = 70;
+    const minLon = 8;
+    const maxLon = 86;
+    const minLat = 38;
+    const maxLat = 69;
     if (!points.length) return { minLon, maxLon, minLat, maxLat };
     return { minLon, maxLon, minLat, maxLat };
   }, [features]);
@@ -114,6 +120,11 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
   const paths = useMemo(
     () => features.flatMap((feature) => geometryToPaths(feature.geometry, bounds)),
     [features, bounds]
+  );
+
+  const contextPaths = useMemo(
+    () => contextFeatures.flatMap((feature) => geometryToPaths(feature.geometry, bounds)),
+    [contextFeatures, bounds]
   );
 
   return (
@@ -156,8 +167,11 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
           {/* Real historical polygons from the 1700 historical-basemaps dataset.
               Adjacent/overlapping historical territories share one fill and no internal stroke,
               producing the alternate-history union used by the game. */}
+          {contextPaths.map((d, index) => (
+            <path key={`context-${index}`} d={d} fill="#26333A" stroke="#56636A" strokeWidth="1" opacity=".72" />
+          ))}
           {paths.map((d, index) => (
-            <path key={index} d={d} fill="url(#sichMapLand)" stroke="#D8AD58" strokeWidth="1.8" />
+            <path key={index} d={d} fill="url(#sichMapLand)" stroke="#D8AD58" strokeWidth="1.6" />
           ))}
 
           {/* Major rivers / orientation only. Political borders are deliberately omitted. */}
@@ -180,7 +194,7 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
                   filter={city.capital ? 'url(#sichMapGlow)' : undefined}
                 />
                 {city.capital && <path d={`M${x} ${y - 16} l-5 8 h10 Z`} fill="#E2BE65" />}
-                {!compact || city.capital ? (
+                {!compact || ['Львів', 'Вільно', 'МОСКВА', 'КАЗАНЬ'].includes(city.name) ? (
                   <text
                     x={x + city.dx}
                     y={y + city.dy}
@@ -198,7 +212,7 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
           })}
 
           <text x="500" y="330" textAnchor="middle" fill="#2A2116"
-            fontSize={compact ? 25 : 30} fontFamily="Georgia, serif"
+            fontSize={compact ? 23 : 30} fontFamily="Georgia, serif"
             fontWeight="700" letterSpacing="4">
             ІМПЕРІЯ СІЧ
           </text>
@@ -215,6 +229,8 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
         ІСТОРИЧНА ОСНОВА · 1700
       </text>
       <text x="48" y="486" fill="#78909A" fontSize="11" fontFamily="Georgia, serif">ЧОРНЕ МОРЕ</text>
+      <text x="125" y="125" fill="#71818A" fontSize="10" fontFamily="Georgia, serif">ЄВРОПА</text>
+      <text x="785" y="430" fill="#71818A" fontSize="10" fontFamily="Georgia, serif">КАСПІЙСЬКЕ МОРЕ</text>
       <text x="800" y="65" fill="#78909A" fontSize="10" fontFamily="Georgia, serif">СХІД</text>
 
       <g transform="translate(70 405)">
