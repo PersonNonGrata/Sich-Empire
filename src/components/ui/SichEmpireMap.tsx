@@ -26,13 +26,13 @@ const TARGET_NAMES = new Set([
 ]);
 
 const CITIES = [
-  { name: 'Львів', lon: 24.03, lat: 49.84, dx: -8, dy: -9, anchor: 'end' as const },
-  { name: 'Вільно', lon: 25.28, lat: 54.69, dx: 8, dy: -9, anchor: 'start' as const },
-  { name: 'КИЇВ', lon: 30.52, lat: 50.45, dx: 9, dy: -2, anchor: 'start' as const, capital: true },
-  { name: 'МОСКВА', lon: 37.62, lat: 55.76, dx: 9, dy: -5, anchor: 'start' as const },
-  { name: 'КАЗАНЬ', lon: 49.12, lat: 55.79, dx: 8, dy: -5, anchor: 'start' as const },
-  { name: 'АРХАНГЕЛЬСЬК', lon: 40.52, lat: 64.54, dx: 8, dy: -5, anchor: 'start' as const },
-  { name: 'ТОБОЛЬСЬК', lon: 68.25, lat: 58.20, dx: 8, dy: -5, anchor: 'start' as const },
+  { name: 'ЛЬВІВ', lon: 24.03, lat: 49.84, dx: -9, dy: -9, anchor: 'end' as const },
+  { name: 'ВІЛЬНО', lon: 25.28, lat: 54.69, dx: 8, dy: -9, anchor: 'start' as const },
+  { name: 'КИЇВ', lon: 30.52, lat: 50.45, dx: 10, dy: -4, anchor: 'start' as const, capital: true },
+  { name: 'ВАРШАВА', lon: 21.01, lat: 52.23, dx: 8, dy: 12, anchor: 'start' as const },
+  { name: 'МОСКВА', lon: 37.62, lat: 55.76, dx: 8, dy: -7, anchor: 'start' as const },
+  { name: 'ВІДЕНЬ', lon: 16.37, lat: 48.21, dx: -8, dy: -8, anchor: 'end' as const },
+  { name: 'БЕРЛІН', lon: 13.40, lat: 52.52, dx: -8, dy: -8, anchor: 'end' as const },
 ];
 
 function collectPoints(coordinates: unknown, out: number[][] = []) {
@@ -93,7 +93,10 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
         setFeatures(selected);
         const contextNames = new Set([
           'Sweden', 'Prussia', 'Austrian Empire', 'Holy Roman Empire',
-          'Ottoman Empire', 'Nogai Horde', 'Quazaq Khanate', 'Denmark-Norway'
+          'Ottoman Empire', 'Denmark-Norway', 'France', 'Spain', 'Portugal',
+          'England', 'Scotland', 'Dutch Republic', 'Venice', 'Papal States',
+          'Kingdom of Hungary', 'Transylvania', 'Crimean Khanate', 'Moldavia',
+          'Wallachia', 'Brandenburg'
         ]);
         setContextFeatures(data.features.filter((feature) => contextNames.has(feature.properties?.NAME ?? '')));
       })
@@ -108,11 +111,12 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
 
   const bounds = useMemo(() => {
     const points = features.flatMap((feature) => collectPoints(feature.geometry.coordinates));
-    // Focus the view on Eastern Europe + the core Muscovite/Siberian extent.
-    const minLon = 8;
-    const maxLon = 86;
-    const minLat = 38;
-    const maxLat = 69;
+    // Europe-first framing. The eastern edge stops around Moscow/European Russia;
+    // Siberia and the distant Asian extent are intentionally outside the composition.
+    const minLon = -12;
+    const maxLon = 62;
+    const minLat = 35;
+    const maxLat = 71;
     if (!points.length) return { minLon, maxLon, minLat, maxLat };
     return { minLon, maxLon, minLat, maxLat };
   }, [features]);
@@ -165,20 +169,13 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
       ) : paths.length ? (
         <g>
           {/* Real historical polygons from the 1700 historical-basemaps dataset.
-              Adjacent/overlapping historical territories share one fill and no internal stroke,
-              producing the alternate-history union used by the game. */}
+              The viewport is deliberately European; the alternate-history union is clipped by the map frame. */}
           {contextPaths.map((d, index) => (
             <path key={`context-${index}`} d={d} fill="#26333A" stroke="#56636A" strokeWidth="1" opacity=".72" />
           ))}
           {paths.map((d, index) => (
             <path key={index} d={d} fill="url(#sichMapLand)" stroke="#D8AD58" strokeWidth="1.6" />
           ))}
-
-          {/* Major rivers / orientation only. Political borders are deliberately omitted. */}
-          <path
-            d="M258 52 C255 105 270 143 263 185 C256 222 267 259 260 303 C254 342 269 375 286 405"
-            fill="none" stroke="#6B9294" strokeWidth="2.4" opacity=".72"
-          />
 
           {CITIES.map((city) => {
             const [x, y] = project(city.lon, city.lat, bounds);
@@ -194,7 +191,7 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
                   filter={city.capital ? 'url(#sichMapGlow)' : undefined}
                 />
                 {city.capital && <path d={`M${x} ${y - 16} l-5 8 h10 Z`} fill="#E2BE65" />}
-                {!compact || ['Львів', 'Вільно', 'МОСКВА', 'КАЗАНЬ'].includes(city.name) ? (
+                {!compact || ['ЛЬВІВ', 'ВІЛЬНО', 'КИЇВ', 'ВАРШАВА', 'МОСКВА'].includes(city.name) ? (
                   <text
                     x={x + city.dx}
                     y={y + city.dy}
@@ -212,8 +209,8 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
           })}
 
           <text x="500" y="330" textAnchor="middle" fill="#2A2116"
-            fontSize={compact ? 23 : 30} fontFamily="Georgia, serif"
-            fontWeight="700" letterSpacing="4">
+            fontSize={compact ? 21 : 30} fontFamily="Georgia, serif"
+            fontWeight="700" letterSpacing="3">
             ІМПЕРІЯ СІЧ
           </text>
         </g>
@@ -229,9 +226,8 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
         ІСТОРИЧНА ОСНОВА · 1700
       </text>
       <text x="48" y="486" fill="#78909A" fontSize="11" fontFamily="Georgia, serif">ЧОРНЕ МОРЕ</text>
-      <text x="125" y="125" fill="#71818A" fontSize="10" fontFamily="Georgia, serif">ЄВРОПА</text>
-      <text x="785" y="430" fill="#71818A" fontSize="10" fontFamily="Georgia, serif">КАСПІЙСЬКЕ МОРЕ</text>
-      <text x="800" y="65" fill="#78909A" fontSize="10" fontFamily="Georgia, serif">СХІД</text>
+      <text x="815" y="430" fill="#71818A" fontSize="10" fontFamily="Georgia, serif">КАСПІЙСЬКЕ МОРЕ</text>
+      <text x="500" y="42" textAnchor="middle" fill="#71818A" fontSize="10" fontFamily="monospace" letterSpacing="3">ЄВРОПА · 1700</text>
 
       <g transform="translate(70 405)">
         <circle r="24" fill="none" stroke="#B89A5B" strokeWidth="1" />
