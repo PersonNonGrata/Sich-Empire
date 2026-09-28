@@ -71,7 +71,9 @@ export interface GameState {
   military: MilitaryState;
 
   // Stage 4 Political Machine Core
-  politicalCapital: number;              // 0 - 100 (Hetman capacity to act)
+  politicalWill: number;
+  /** @deprecated Legacy save compatibility only. */
+  politicalCapital?: number;              // 0 - 100 (Hetman capacity to act)
   legitimacy: LegitimacyBreakdown;       // Multi-component legitimacy
   institutions: Institution[];           // Key state institutions
   promises: Promise[];                   // Hetman oaths & deadlines
