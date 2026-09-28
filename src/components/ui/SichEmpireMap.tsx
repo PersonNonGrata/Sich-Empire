@@ -1,136 +1,221 @@
-import React from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 type Variant = 'prologue' | 'state';
 
+type GeoFeature = {
+  type: 'Feature';
+  properties?: { NAME?: string; [key: string]: unknown };
+  geometry: {
+    type: 'Polygon' | 'MultiPolygon';
+    coordinates: number[][][] | number[][][][];
+  };
+};
+
+type GeoJSONCollection = {
+  type: 'FeatureCollection';
+  features: GeoFeature[];
+};
+
+const WORLD_1700_URL =
+  'https://raw.githubusercontent.com/aourednik/historical-basemaps/da7a4b735ecef70aebdc9c73e409d8a2500d50f3/geojson/world_1700.geojson';
+
+const TARGET_NAMES = new Set([
+  'Polish–Lithuanian Commonwealth',
+  'Polish-Lithuanian Commonwealth',
+  'Tsardom of Muscovy',
+]);
+
+const CITIES = [
+  { name: 'Львів', lon: 24.03, lat: 49.84, dx: -8, dy: -9, anchor: 'end' as const },
+  { name: 'Вільно', lon: 25.28, lat: 54.69, dx: 8, dy: -9, anchor: 'start' as const },
+  { name: 'КИЇВ', lon: 30.52, lat: 50.45, dx: 9, dy: -2, anchor: 'start' as const, capital: true },
+  { name: 'МОСКВА', lon: 37.62, lat: 55.76, dx: 9, dy: -5, anchor: 'start' as const },
+  { name: 'КАЗАНЬ', lon: 49.12, lat: 55.79, dx: 8, dy: -5, anchor: 'start' as const },
+  { name: 'АРХАНГЕЛЬСЬК', lon: 40.52, lat: 64.54, dx: 8, dy: -5, anchor: 'start' as const },
+  { name: 'ТОБОЛЬСЬК', lon: 68.25, lat: 58.20, dx: 8, dy: -5, anchor: 'start' as const },
+];
+
+function collectPoints(coordinates: unknown, out: number[][] = []) {
+  if (!Array.isArray(coordinates)) return out;
+  if (coordinates.length >= 2 && typeof coordinates[0] === 'number' && typeof coordinates[1] === 'number') {
+    out.push([coordinates[0] as number, coordinates[1] as number]);
+    return out;
+  }
+  for (const child of coordinates) collectPoints(child, out);
+  return out;
+}
+
+function project(lon: number, lat: number, bounds: { minLon: number; maxLon: number; minLat: number; maxLat: number }) {
+  const x = ((lon - bounds.minLon) / (bounds.maxLon - bounds.minLon)) * 1000;
+  const y = ((bounds.maxLat - lat) / (bounds.maxLat - bounds.minLat)) * 520;
+  return [x, y] as const;
+}
+
+function ringToPath(ring: number[][], bounds: { minLon: number; maxLon: number; minLat: number; maxLat: number }) {
+  return ring.map(([lon, lat], index) => {
+    const [x, y] = project(lon, lat, bounds);
+    return `${index === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ') + ' Z';
+}
+
+function geometryToPaths(
+  geometry: GeoFeature['geometry'],
+  bounds: { minLon: number; maxLon: number; minLat: number; maxLat: number }
+) {
+  if (geometry.type === 'Polygon') {
+    return (geometry.coordinates as number[][][]).map((ring) => ringToPath(ring, bounds));
+  }
+  return (geometry.coordinates as number[][][][]).flatMap((polygon) =>
+    polygon.map((ring) => ringToPath(ring, bounds))
+  );
+}
+
 export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
   const compact = variant === 'prologue';
+  const [features, setFeatures] = useState<GeoFeature[]>([]);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch(WORLD_1700_URL)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Map request failed: ${response.status}`);
+        return response.json() as Promise<GeoJSONCollection>;
+      })
+      .then((data) => {
+        if (cancelled) return;
+        const selected = data.features.filter((feature) =>
+          TARGET_NAMES.has(feature.properties?.NAME ?? '')
+        );
+        if (!selected.length) throw new Error('Historical empire polygons not found');
+        setFeatures(selected);
+      })
+      .catch(() => {
+        if (!cancelled) setError(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const bounds = useMemo(() => {
+    const points = features.flatMap((feature) => collectPoints(feature.geometry.coordinates));
+    // Focus the view on Eastern Europe + the core Muscovite/Siberian extent.
+    const minLon = 10;
+    const maxLon = 90;
+    const minLat = 43;
+    const maxLat = 70;
+    if (!points.length) return { minLon, maxLon, minLat, maxLat };
+    return { minLon, maxLon, minLat, maxLat };
+  }, [features]);
+
+  const paths = useMemo(
+    () => features.flatMap((feature) => geometryToPaths(feature.geometry, bounds)),
+    [features, bounds]
+  );
+
   return (
     <svg
       viewBox="0 0 1000 520"
       className="absolute inset-0 h-full w-full"
       role="img"
-      aria-label="Схематична історично зорієнтована карта Імперії Січ"
+      aria-label="Історично зорієнтована карта Імперії Січ"
       preserveAspectRatio="xMidYMid meet"
     >
       <defs>
-        <linearGradient id="sichLand" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id="sichMapLand" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#D8B76D" />
           <stop offset="0.55" stopColor="#B48B43" />
           <stop offset="1" stopColor="#806333" />
         </linearGradient>
-        <radialGradient id="sichSea" cx="42%" cy="42%">
+        <radialGradient id="sichMapSea" cx="42%" cy="42%">
           <stop offset="0" stopColor="#1D3441" />
           <stop offset="1" stopColor="#08131B" />
         </radialGradient>
-        <filter id="softGlow">
-          <feGaussianBlur stdDeviation="7" result="blur" />
+        <filter id="sichMapGlow">
+          <feGaussianBlur stdDeviation="6" result="blur" />
           <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
         </filter>
       </defs>
 
-      <rect width="1000" height="520" fill="url(#sichSea)" />
+      <rect width="1000" height="520" fill="url(#sichMapSea)" />
 
-      {/* Canonical territorial silhouette.
-          Geographic reference frame: Europe 1701; Polish-Lithuanian Commonwealth c.1701;
-          Tsardom of Russia c.1700/1708; Homann-Ides 1704.
-          The game fiction merges these historical territories into one state with Kyiv as capital. */}
-      <path
-        d="M118 148
-           C151 118 188 105 224 111
-           C258 116 279 96 314 91
-           C350 86 379 99 412 91
-           C447 83 475 69 511 76
-           C548 83 578 70 615 78
-           C653 86 677 72 713 84
-           C748 96 777 91 809 105
-           C842 119 868 121 891 141
-           C913 161 910 183 926 201
-           C942 220 935 240 947 259
-           C958 278 949 299 956 319
-           C962 340 948 355 950 376
-           C952 399 935 412 918 423
-           C895 438 868 432 846 444
-           C819 459 793 449 767 458
-           C735 469 710 455 682 463
-           C652 471 628 456 599 462
-           C568 468 544 451 514 457
-           C483 463 461 446 432 449
-           C399 452 379 435 350 437
-           C319 439 300 420 272 419
-           C244 418 227 400 204 392
-           C181 384 170 365 175 343
-           C180 321 163 304 169 282
-           C175 260 159 243 165 220
-           C171 199 157 182 151 167
-           C144 153 130 154 118 148Z"
-        fill="url(#sichLand)"
-        stroke="#E0B85C"
-        strokeWidth="3"
-      />
+      {error ? (
+        <g>
+          <text x="500" y="245" textAnchor="middle" fill="#C9A96E" fontSize="18" fontFamily="Georgia, serif">
+            Карту не вдалося завантажити
+          </text>
+          <text x="500" y="270" textAnchor="middle" fill="#8E93A0" fontSize="11" fontFamily="monospace">
+            Потрібне з'єднання з історичним набором геоданих
+          </text>
+        </g>
+      ) : paths.length ? (
+        <g>
+          {/* Real historical polygons from the 1700 historical-basemaps dataset.
+              Adjacent/overlapping historical territories share one fill and no internal stroke,
+              producing the alternate-history union used by the game. */}
+          {paths.map((d, index) => (
+            <path key={index} d={d} fill="url(#sichMapLand)" stroke="#D8AD58" strokeWidth="1.8" />
+          ))}
 
-      {/* Western / central historical zones, intentionally subtle. */}
-      <path d="M223 112 C238 151 226 187 236 222 C247 260 230 300 244 338 C251 365 265 394 281 416"
-        fill="none" stroke="#735A35" strokeWidth="1.5" strokeDasharray="5 6" opacity=".65" />
-      <path d="M387 98 C374 139 391 179 380 218 C368 257 386 292 374 332 C367 364 382 405 399 444"
-        fill="none" stroke="#735A35" strokeWidth="1.5" strokeDasharray="5 6" opacity=".65" />
-      <path d="M564 79 C548 123 567 162 554 201 C543 238 561 275 550 314 C542 350 559 407 577 457"
-        fill="none" stroke="#735A35" strokeWidth="1.5" strokeDasharray="5 6" opacity=".65" />
+          {/* Major rivers / orientation only. Political borders are deliberately omitted. */}
+          <path
+            d="M258 52 C255 105 270 143 263 185 C256 222 267 259 260 303 C254 342 269 375 286 405"
+            fill="none" stroke="#6B9294" strokeWidth="2.4" opacity=".72"
+          />
 
-      {/* Major rivers: simplified, not a political boundary. */}
-      <path d="M265 121 C252 164 267 197 256 230 C244 266 259 301 250 337 C244 365 255 391 275 416"
-        fill="none" stroke="#6B9294" strokeWidth="3" opacity=".75" />
-      <path d="M256 230 C294 237 316 252 350 270 C384 288 407 300 445 303"
-        fill="none" stroke="#6B9294" strokeWidth="2" opacity=".7" />
-      <path d="M468 93 C454 131 468 165 458 199 C448 233 462 267 478 291 C491 311 499 345 493 382"
-        fill="none" stroke="#6B9294" strokeWidth="2" opacity=".65" />
-      <path d="M671 86 C657 123 672 155 665 188 C658 221 672 254 690 276 C706 296 714 329 708 359"
-        fill="none" stroke="#6B9294" strokeWidth="1.8" opacity=".55" />
+          {CITIES.map((city) => {
+            const [x, y] = project(city.lon, city.lat, bounds);
+            return (
+              <g key={city.name}>
+                <circle
+                  cx={x}
+                  cy={y}
+                  r={city.capital ? 9 : 3.5}
+                  fill="#11161A"
+                  stroke="#E2BE65"
+                  strokeWidth={city.capital ? 2.5 : 1.4}
+                  filter={city.capital ? 'url(#sichMapGlow)' : undefined}
+                />
+                {city.capital && <path d={`M${x} ${y - 16} l-5 8 h10 Z`} fill="#E2BE65" />}
+                {!compact || city.capital ? (
+                  <text
+                    x={x + city.dx}
+                    y={y + city.dy}
+                    textAnchor={city.anchor}
+                    fill={city.capital ? '#FFF1C9' : '#E8E0CF'}
+                    fontSize={city.capital ? 15 : 9}
+                    fontFamily="Georgia, serif"
+                    fontWeight={city.capital ? 700 : 500}
+                  >
+                    {city.name}
+                  </text>
+                ) : null}
+              </g>
+            );
+          })}
 
-      {/* Kyiv: fixed canonical capital. */}
-      <g filter="url(#softGlow)">
-        <circle cx="267" cy="230" r="13" fill="#10151A" stroke="#F0CA70" strokeWidth="3" />
-        <path d="M267 208 L259 220 H275 Z" fill="#F0CA70" />
-      </g>
-      <text x="286" y="226" fill="#FFF1C9" fontSize={compact ? 17 : 19} fontFamily="Georgia, serif" fontWeight="700">КИЇВ</text>
-      <text x="286" y="243" fill="#DDB86B" fontSize="10" fontFamily="monospace" letterSpacing="1.5">СТОЛИЦЯ</text>
-
-      {!compact && (
-        <>
-          <g fill="#171B1D" stroke="#E2BE65" strokeWidth="1.7">
-            <circle cx="191" cy="181" r="4" />
-            <circle cx="206" cy="285" r="4" />
-            <circle cx="247" cy="154" r="4" />
-            <circle cx="329" cy="177" r="4" />
-            <circle cx="388" cy="151" r="4" />
-            <circle cx="457" cy="223" r="4" />
-            <circle cx="560" cy="184" r="4" />
-            <circle cx="648" cy="145" r="4" />
-            <circle cx="734" cy="206" r="4" />
-            <circle cx="820" cy="260" r="4" />
-          </g>
-          <g fill="#F1E7D1" fontSize="11" fontFamily="Georgia, serif">
-            <text x="175" y="172">ЛЬВІВ</text>
-            <text x="190" y="302">ВІННИЦЯ</text>
-            <text x="252" y="145">МІНСЬК</text>
-            <text x="335" y="170">СМОЛЕНСЬК</text>
-            <text x="394" y="143">МОСКВА</text>
-            <text x="464" y="218">ХАРКІВ</text>
-            <text x="567" y="179">КАЗАНЬ</text>
-            <text x="655" y="140">ПЕРМ</text>
-            <text x="741" y="201">ТОБОЛЬСЬК</text>
-            <text x="826" y="255">СИБІР</text>
-          </g>
-        </>
+          <text x="500" y="330" textAnchor="middle" fill="#2A2116"
+            fontSize={compact ? 25 : 30} fontFamily="Georgia, serif"
+            fontWeight="700" letterSpacing="4">
+            ІМПЕРІЯ СІЧ
+          </text>
+        </g>
+      ) : (
+        <g>
+          <text x="500" y="250" textAnchor="middle" fill="#C9A96E" fontSize="12" fontFamily="monospace" letterSpacing="2">
+            ЗАВАНТАЖЕННЯ ІСТОРИЧНОЇ КАРТИ…
+          </text>
+        </g>
       )}
 
-      <text x={compact ? 405 : 390} y="336" fill="#2A2116" fontSize={compact ? 25 : 30}
-        fontFamily="Georgia, serif" fontWeight="700" letterSpacing="4">ІМПЕРІЯ СІЧ</text>
-
       <text x="42" y="35" fill="#C9A96E" fontSize="10" fontFamily="monospace" letterSpacing="2">
-        ІСТОРИЧНА ОСНОВА · БЛИЗЬКО 1700
+        ІСТОРИЧНА ОСНОВА · 1700
       </text>
       <text x="48" y="486" fill="#78909A" fontSize="11" fontFamily="Georgia, serif">ЧОРНЕ МОРЕ</text>
-      <text x="760" y="65" fill="#78909A" fontSize="10" fontFamily="Georgia, serif">СХІДНІ ЗЕМЛІ</text>
+      <text x="800" y="65" fill="#78909A" fontSize="10" fontFamily="Georgia, serif">СХІД</text>
 
       <g transform="translate(70 405)">
         <circle r="24" fill="none" stroke="#B89A5B" strokeWidth="1" />
