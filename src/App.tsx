@@ -212,31 +212,115 @@ export default function App() {
               </div>
 
               <div className="relative mx-auto w-full max-w-xl aspect-[1.35/1] rounded-2xl overflow-hidden border border-[#3A4354] bg-[#0D121A] shadow-[0_20px_80px_rgba(0,0,0,0.5)]">
-                <svg viewBox="0 0 600 445" className="absolute inset-0 w-full h-full" role="img" aria-label="Карта Імперії Січ">
+                <svg viewBox="0 0 600 445" className="absolute inset-0 w-full h-full" role="img" aria-label="Карта Імперії Січ, 1848">
                   <defs>
                     <linearGradient id="prologueLand" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#303B35" />
-                      <stop offset="100%" stopColor="#18231F" />
+                      <stop offset="0%" stopColor="#D7B56A" />
+                      <stop offset="55%" stopColor="#B58C45" />
+                      <stop offset="100%" stopColor="#806334" />
                     </linearGradient>
                     <radialGradient id="prologueSea">
-                      <stop offset="0%" stopColor="#182A38" />
-                      <stop offset="100%" stopColor="#0B141D" />
+                      <stop offset="0%" stopColor="#203442" />
+                      <stop offset="100%" stopColor="#0A151E" />
                     </radialGradient>
                   </defs>
+
                   <rect width="600" height="445" fill="url(#prologueSea)" />
-                  <path d="M105 58 C170 30 226 60 277 48 C332 35 372 65 425 58 C490 50 533 93 505 135 C475 176 508 205 475 239 C450 266 463 307 418 329 C370 353 330 334 287 365 C245 396 192 371 166 334 C139 296 94 286 84 243 C73 198 101 170 84 129 C72 98 82 72 105 58Z" fill="url(#prologueLand)" stroke="#8C7650" strokeWidth="3"/>
-                  <path d="M154 111 C208 93 252 119 300 106 C349 93 392 109 424 139 C447 161 423 190 391 203 C353 218 339 246 304 255 C270 264 239 242 209 248 C177 255 151 233 160 203 C168 178 143 145 154 111Z" fill="#26342F" stroke="#526257" strokeWidth="2"/>
-                  <path d="M118 266 C184 248 238 270 294 261 C347 253 393 270 454 251" fill="none" stroke="#B39A63" strokeWidth="2" strokeDasharray="7 8" opacity=".75"/>
-                  <path d="M177 92 C191 146 205 201 224 253 C240 300 280 330 325 345" fill="none" stroke="#6F806F" strokeWidth="3" opacity=".7"/>
-                  <circle cx="290" cy="226" r="8" fill="#C9A96E" />
-                  <circle cx="290" cy="226" r="17" fill="none" stroke="#C9A96E" strokeOpacity=".35" />
-                  <circle cx="218" cy="139" r="4" fill="#C9A96E" />
-                  <circle cx="375" cy="174" r="4" fill="#C9A96E" />
-                  <text x="303" y="221" fill="#F3EFE6" fontSize="16" fontFamily="serif">ХОРТИЦЯ</text>
-                  <text x="195" y="130" fill="#B9C0C9" fontSize="13" fontFamily="serif">КИЇВ</text>
-                  <text x="382" y="168" fill="#B9C0C9" fontSize="13" fontFamily="serif">ГАЛИЧИНА</text>
-                  <text x="408" y="319" fill="#8093A0" fontSize="12" fontFamily="serif">ЧОРНЕ МОРЕ</text>
-                  <text x="30" y="30" fill="#C9A96E" fontSize="11" fontFamily="monospace" letterSpacing="2">КАРТА ДЕРЖАВИ · 1848</text>
+
+                  {/* subdued neighbouring realms */}
+                  <path d="M18 105 L68 73 L112 90 L106 145 L75 170 L25 155Z" fill="#514A43" stroke="#81796D" strokeWidth="1.5"/>
+                  <path d="M24 185 L78 168 L116 190 L105 244 L51 253 L18 226Z" fill="#394B59" stroke="#81796D" strokeWidth="1.5"/>
+                  <path d="M72 285 L120 265 L153 296 L133 347 L86 356 L57 326Z" fill="#4C4541" stroke="#81796D" strokeWidth="1.5"/>
+                  <path d="M428 330 L492 315 L552 340 L574 391 L530 422 L459 407 L423 370Z" fill="#55463F" stroke="#81796D" strokeWidth="1.5"/>
+                  <path d="M478 72 L536 52 L583 81 L575 136 L531 153 L491 126Z" fill="#4A4740" stroke="#81796D" strokeWidth="1.5"/>
+
+                  {/* Empire of Sich: Kyiv-centered, west to the Polish-Lithuanian lands and east through Muscovy/Siberian frontier */}
+                  <path
+                    d="M151 78
+                       C188 57 223 62 254 53
+                       C291 42 326 49 357 42
+                       C399 34 438 44 465 57
+                       C493 70 530 69 552 91
+                       C568 108 557 129 563 149
+                       C570 173 554 191 561 213
+                       C567 238 548 255 535 272
+                       C522 291 532 312 513 327
+                       C489 346 460 335 438 349
+                       C414 365 392 354 367 366
+                       C338 380 312 365 286 374
+                       C257 384 231 368 208 373
+                       C182 378 165 359 144 351
+                       C122 343 112 323 119 302
+                       C126 280 111 262 119 241
+                       C128 220 116 198 124 177
+                       C132 157 119 138 128 117
+                       C134 101 139 89 151 78Z"
+                    fill="url(#prologueLand)"
+                    stroke="#D7AA4A"
+                    strokeWidth="3"
+                  />
+
+                  {/* internal regional divisions: broad historical zones */}
+                  <path d="M205 69 C214 116 204 156 216 196 C225 233 215 278 227 323 C233 342 240 357 252 370" fill="none" stroke="#735B37" strokeWidth="1.4" strokeDasharray="5 5" opacity=".75"/>
+                  <path d="M313 51 C300 96 313 139 300 181 C291 222 304 262 291 306 C285 332 292 352 304 369" fill="none" stroke="#735B37" strokeWidth="1.4" strokeDasharray="5 5" opacity=".75"/>
+                  <path d="M412 45 C398 88 416 127 403 166 C393 209 411 248 397 290 C390 317 399 341 412 355" fill="none" stroke="#735B37" strokeWidth="1.4" strokeDasharray="5 5" opacity=".75"/>
+
+                  {/* major rivers */}
+                  <path d="M250 72 C245 120 257 151 247 184 C237 218 247 251 238 286 C231 315 244 342 260 367" fill="none" stroke="#6D8D8C" strokeWidth="2.4" opacity=".8"/>
+                  <path d="M247 184 C275 193 294 205 322 220 C346 233 366 239 396 242" fill="none" stroke="#6D8D8C" strokeWidth="1.8" opacity=".7"/>
+                  <path d="M348 53 C343 91 352 124 344 155 C337 183 347 205 361 222 C372 237 380 262 375 292" fill="none" stroke="#6D8D8C" strokeWidth="1.7" opacity=".65"/>
+
+                  {/* Kyiv capital marker */}
+                  <circle cx="247" cy="184" r="10" fill="#171B1D" stroke="#E2BE65" strokeWidth="2"/>
+                  <path d="M247 168 L241 178 L253 178Z" fill="#E2BE65"/>
+                  <text x="261" y="180" fill="#FFF4D7" fontSize="14" fontFamily="serif" fontWeight="700">КИЇВ</text>
+                  <text x="261" y="195" fill="#E2BE65" fontSize="9" fontFamily="monospace" letterSpacing="1">СТОЛИЦЯ</text>
+
+                  {/* principal cities */}
+                  <g fill="#171B1D" stroke="#E2BE65" strokeWidth="1.5">
+                    <circle cx="179" cy="142" r="3.5"/><circle cx="190" cy="222" r="3.5"/>
+                    <circle cx="273" cy="238" r="3.5"/><circle cx="335" cy="222" r="3.5"/>
+                    <circle cx="319" cy="122" r="3.5"/><circle cx="385" cy="112" r="3.5"/>
+                    <circle cx="435" cy="151" r="3.5"/><circle cx="451" cy="218" r="3.5"/>
+                    <circle cx="484" cy="269" r="3.5"/><circle cx="395" cy="305" r="3.5"/>
+                  </g>
+                  <g fill="#EFE6D0" fontSize="9.5" fontFamily="serif">
+                    <text x="164" y="135">ЛЬВІВ</text>
+                    <text x="174" y="238">ВІЛЬНО</text>
+                    <text x="280" y="252">ХАРКІВ</text>
+                    <text x="342" y="216">МОСКВА</text>
+                    <text x="305" y="113">МІНСЬК</text>
+                    <text x="373" y="104">НОВГОРОД</text>
+                    <text x="423" y="143">КАЗАНЬ</text>
+                    <text x="459" y="213">САМАРА</text>
+                    <text x="490" y="264">АСТРАХАНЬ</text>
+                    <text x="401" y="319">ОДЕСА</text>
+                  </g>
+
+                  {/* terrain hints */}
+                  <g fill="none" stroke="#5C4C32" strokeWidth="1.2" opacity=".55">
+                    <path d="M430 76 l10 -12 l10 12 l10 -12 l10 12"/>
+                    <path d="M475 292 l10 -13 l10 13 l10 -13 l10 13"/>
+                    <path d="M165 300 l9 -11 l9 11 l9 -11 l9 11"/>
+                  </g>
+                  <g fill="#4F5D45" opacity=".55">
+                    <path d="M295 82 l6 -12 l6 12Z M309 90 l6 -12 l6 12Z M324 80 l6 -12 l6 12Z"/>
+                    <path d="M420 280 l6 -12 l6 12Z M434 288 l6 -12 l6 12Z M448 278 l6 -12 l6 12Z"/>
+                  </g>
+
+                  {/* map labels */}
+                  <text x="302" y="291" fill="#2B241A" fontSize="22" fontFamily="serif" fontWeight="700" letterSpacing="5">ІМПЕРІЯ СІЧ</text>
+                  <text x="34" y="31" fill="#C9A96E" fontSize="10" fontFamily="monospace" letterSpacing="2">ЄВРОПА · 1848</text>
+                  <text x="43" y="394" fill="#8295A0" fontSize="10" fontFamily="serif">ЧОРНЕ МОРЕ</text>
+                  <text x="91" y="78" fill="#8D9AA0" fontSize="9" fontFamily="serif">ЄВРОПА</text>
+                  <text x="501" y="52" fill="#8D9AA0" fontSize="9" fontFamily="serif">СХІДНІ ЗЕМЛІ</text>
+
+                  {/* simple compass */}
+                  <g transform="translate(55 338)">
+                    <circle r="22" fill="none" stroke="#B89A5B" strokeWidth="1"/>
+                    <path d="M0 -17 L4 0 L0 17 L-4 0Z" fill="#B89A5B"/>
+                    <text x="-3" y="-27" fill="#C9A96E" fontSize="8">N</text>
+                  </g>
                 </svg>
                 <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#080A0E] to-transparent" />
               </div>
