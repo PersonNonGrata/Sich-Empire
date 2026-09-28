@@ -29,7 +29,7 @@ export function migrateSave(raw: any): GameState {
         ...fresh.empire,
         ...(raw.empire || {}),
       },
-      politicalCapital: typeof raw.politicalCapital === 'number' ? raw.politicalCapital : fresh.politicalCapital,
+      politicalWill: typeof raw.politicalWill === 'number' ? raw.politicalWill : (typeof raw.politicalCapital === 'number' ? raw.politicalCapital : fresh.politicalWill),
       legitimacy: raw.legitimacy ? { ...fresh.legitimacy, ...raw.legitimacy } : fresh.legitimacy,
       institutions: Array.isArray(raw.institutions) && raw.institutions.length > 0 ? raw.institutions : fresh.institutions,
       promises: Array.isArray(raw.promises) ? raw.promises : [],
@@ -105,6 +105,12 @@ export function migrateSave(raw: any): GameState {
     state = raw as GameState;
   }
 
+
+  // Canonical political resource: migrate legacy Political Capital to Political Will.
+  if (typeof state.politicalWill !== 'number') {
+    state.politicalWill = typeof state.politicalCapital === 'number' ? state.politicalCapital : fresh.politicalWill;
+  }
+  delete (state as any).politicalCapital;
 
   // Ensure economy and military structures are present
   if (!state.economy) {
