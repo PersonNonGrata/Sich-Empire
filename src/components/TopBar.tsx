@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { GameState } from '../game/state/types.ts';
 import { CoatOfArms } from './ui/CoatOfArms.tsx';
 import { MetricModal, MetricType } from './ui/MetricModal.tsx';
-import { Coins, Shield, Landmark, Save, Settings } from 'lucide-react';
+import { Coins, Landmark, Save, Settings, Scale } from 'lucide-react';
 
 interface TopBarProps {
   state: GameState;
@@ -64,7 +64,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             </button>
           </div>
 
-          {/* Center (Desktop only): Top 4 Core Metrics */}
+          {/* Center (Desktop only): only the three signals needed during rule */}
           <div className="hidden md:flex items-center gap-1.5 sm:gap-2.5 font-mono text-xs">
             {/* 1. Treasury */}
             <button
@@ -84,36 +84,23 @@ export const TopBar: React.FC<TopBarProps> = ({
               </div>
             </button>
 
-            {/* 2. Military (Readiness & Strength) */}
+            {/* 2. Political Will */}
             <button
-              onClick={() => setSelectedMetric('militaryStrength')}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-[#111622] hover:bg-[#182030] border border-[#232B3B] hover:border-[#EF4444]/50 transition-all cursor-pointer text-left min-h-[36px]"
-              title="Натисніть для пояснення показника Війська"
+              onClick={() => setSelectedMetric(null)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-[#111622] border border-[#232B3B] transition-all cursor-default min-h-[36px]"
+              title="Політична воля Гетьмана"
             >
-              <Shield className="w-3.5 h-3.5 text-[#EF4444] shrink-0" />
+              <Scale className="w-3.5 h-3.5 text-[#C9A96E] shrink-0" />
               <div className="flex items-center gap-1 leading-none">
-                <span className="text-[10px] text-[#8E93A0] hidden md:inline">Готовність:</span>
-                <span className="font-bold text-[#EF4444]">{state.military?.readiness ?? 70}%</span>
-                <span className="text-[10px] text-[#8E93A0] hidden sm:inline">({state.military?.strength ?? empire.militaryStrength}%)</span>
+                <span className="text-[10px] text-[#8E93A0]">Політична воля:</span>
+                <span className="font-bold text-[#C9A96E]">{state.politicalWill ?? 55}</span>
               </div>
             </button>
 
-            {/* 3. Prosperity */}
-            <button
-              onClick={() => setSelectedMetric('prosperity')}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-[#111622] hover:bg-[#182030] border border-[#232B3B] hover:border-[#34D399]/50 transition-all cursor-pointer text-left min-h-[36px]"
-              title="Натисніть для пояснення показника Добробуту"
-            >
-              <div className="flex items-center gap-1 leading-none">
-                <span className="text-[10px] text-[#8E93A0] hidden md:inline">Добробут:</span>
-                <span className="font-bold text-[#34D399]">{state.economy?.publicProsperity ?? empire.prosperity}%</span>
-              </div>
-            </button>
-
-            {/* 4. Stability */}
+            {/* 3. Stability */}
             <button
               onClick={() => setSelectedMetric('stability')}
-              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-[#111622] hover:bg-[#182030] border border-[#232B3B] hover:border-[#60A5FA]/50 transition-all cursor-pointer text-left min-h-[36px]"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-[#111622] hover:bg-[#182030] border border-[#232B3B] hover:border-[#60A5FA]/50 transition-all cursor-pointer text-left min-h-[36px]"
               title="Натисніть для пояснення показника Стабільності"
             >
               <Landmark className="w-3.5 h-3.5 text-[#60A5FA] shrink-0" />
