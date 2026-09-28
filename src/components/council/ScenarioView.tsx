@@ -543,6 +543,9 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
               </div>
             </div>
 
+
+          )}
+
             {/* Explicit seal confirmation: prevents accidental canonical choices on touch screens. */}
             {pendingChoice && (
               <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-3 sm:p-4">
@@ -562,7 +565,6 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                 </div>
               </div>
             )}
-          )}
         </div>
       </article>
     </div>
