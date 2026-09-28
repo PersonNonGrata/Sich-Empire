@@ -16,7 +16,9 @@ type GeoJSONCollection = {
   features: GeoFeature[];
 };
 
-const WORLD_1700_URL =
+const WORLD_1848_BASE_URL =
+  'https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1815.geojson';
+const SICH_CANON_URL =
   'https://raw.githubusercontent.com/aourednik/historical-basemaps/da7a4b735ecef70aebdc9c73e409d8a2500d50f3/geojson/world_1700.geojson';
 const UKRAINE_URL =
   'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/ukraine.geojson';
@@ -35,11 +37,11 @@ const COUNTRY_LABELS = [
   { name: 'ІМПЕРІЯ СІЧ', lon: 31.5, lat: 53.5, size: 24, power: 'sich' as const, weight: 700 },
   { name: 'ОСМАНСЬКА ІМПЕРІЯ', lon: 27.0, lat: 40.8, size: 9, power: 'ottoman' as const, weight: 700 },
   { name: 'АВСТРІЯ', lon: 14.4, lat: 47.6, size: 10, power: 'austria' as const, weight: 700 },
-  { name: 'НІМЕЧЧИНА', lon: 10.5, lat: 50.5, size: 10, power: 'germany' as const, weight: 700 },
-  { name: 'ШВЕЦІЯ', lon: 16.0, lat: 61.0, size: 10, power: 'sweden' as const, weight: 700 },
+  { name: 'НІМЕЦЬКИЙ СОЮЗ', lon: 10.5, lat: 50.5, size: 9, power: 'germany' as const, weight: 700 },
+  { name: 'ШВЕЦІЯ-НОРВЕГІЯ', lon: 16.0, lat: 61.0, size: 8, power: 'sweden' as const, weight: 700 },
   { name: 'ФРАНЦІЯ', lon: 2.2, lat: 46.4, size: 10, power: 'france' as const, weight: 700 },
-  { name: 'АНГЛІЯ', lon: -0.7, lat: 52.7, size: 9, power: 'england' as const, weight: 700 },
-  { name: 'ІТАЛІЯ', lon: 12.4, lat: 42.3, size: 10, power: 'italy' as const, weight: 700 },
+  { name: 'ВЕЛИКА БРИТАНІЯ', lon: -0.7, lat: 52.7, size: 8, power: 'england' as const, weight: 700 },
+  { name: 'ІТАЛІЙСЬКІ ДЕРЖАВИ', lon: 12.4, lat: 42.3, size: 8, power: 'italy' as const, weight: 700 },
 ];
 
 const POWER_COLORS = {
@@ -114,27 +116,37 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
   useEffect(() => {
     let cancelled = false;
 
-    fetch(WORLD_1700_URL)
+    fetch(WORLD_1848_BASE_URL)
       .then((response) => {
         if (!response.ok) throw new Error(`Map request failed: ${response.status}`);
         return response.json() as Promise<GeoJSONCollection>;
       })
       .then((data) => {
         if (cancelled) return;
-        const selected = data.features.filter((feature) =>
-          TARGET_NAMES.has(feature.properties?.NAME ?? '')
-        );
-        if (!selected.length) throw new Error('Historical empire polygons not found');
-        setFeatures(selected);
         const contextNames = new Set([
-          'Sweden', 'Prussia', 'Austrian Empire', 'Holy Roman Empire',
+          'Sweden', 'Prussia', 'Austrian Empire', 'German Confederation',
           'Ottoman Empire', 'Denmark-Norway', 'France', 'Spain', 'Portugal',
-          'England', 'Scotland', 'Ireland', 'Dutch Republic', 'Venice', 'Papal States',
-          'Kingdom of Hungary', 'Transylvania', 'Moldavia', 'Wallachia', 'Brandenburg',
-          'Bavaria', 'Saxony', 'Hanover', 'Switzerland', 'Sardinia-Piedmont',
-          'Kingdom of Naples', 'Tuscany', 'Piedmont', 'Two Sicilies', 'Greece'
+          'England', 'Scotland', 'Ireland', 'Dutch Republic', 'Belgium', 'Switzerland',
+          'Kingdom of Hungary', 'Transylvania', 'Moldavia', 'Wallachia', 'Bavaria',
+          'Saxony', 'Hanover', 'Sardinia-Piedmont', 'Kingdom of Naples', 'Tuscany',
+          'Piedmont', 'Two Sicilies', 'Greece', 'Russian Empire', 'Denmark'
         ]);
         setContextFeatures(data.features.filter((feature) => contextNames.has(feature.properties?.NAME ?? '')));
+      })
+      .catch(() => {
+        if (!cancelled) setError(true);
+      });
+
+    fetch(SICH_CANON_URL)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Sich canon request failed: ${response.status}`);
+        return response.json() as Promise<GeoJSONCollection>;
+      })
+      .then((data) => {
+        if (cancelled) return;
+        const selected = data.features.filter((feature) => TARGET_NAMES.has(feature.properties?.NAME ?? ''));
+        if (!selected.length) throw new Error('Historical Sich canon polygons not found');
+        setFeatures(selected);
       })
       .catch(() => {
         if (!cancelled) setError(true);
@@ -299,13 +311,13 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
         </g>
       ) : paths.length ? (
         <g>
-          {/* Real historical polygons from the 1700 historical-basemaps dataset.
-              The viewport is deliberately European; the alternate-history union is clipped by the map frame. */}
+          {/* Historical European base: the nearest broad continental snapshot available
+              in the source dataset to the game's 1848 start date. */}
           {contextPaths.flatMap(({ name, paths: featurePaths }) => featurePaths.map((d, index) => {
             const power: PowerKey | null =
               name === 'Ottoman Empire' ? 'ottoman' :
               name === 'Austrian Empire' ? 'austria' :
-              name === 'Prussia' || name === 'Holy Roman Empire' || name === 'Brandenburg' ||
+              name === 'Prussia' || name === 'German Confederation' || name === 'Brandenburg' ||
               name === 'Bavaria' || name === 'Saxony' || name === 'Hanover' ? 'germany' :
               name === 'Sweden' ? 'sweden' :
               name === 'France' ? 'france' :
@@ -353,9 +365,9 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
             </g>
           ))}
 
-          {/* One canonical silhouette for the Sich Empire.
-              The historical Commonwealth + Muscovy polygons and the whole of modern
-              Ukraine, including Crimea, are merged visually through one luminance mask.
+          {/* One canonical silhouette for the alternate 1848 Sich Empire.
+              Its territorial canon is kept separate from the real-world 1848 base,
+              so the surrounding European powers retain their historical geography. */
               No individual Sich polygon receives a stroke, so there are no internal seams. */}
           <g filter={`url(#sichMapOuterBorder-${mapId})`}>
             <rect
