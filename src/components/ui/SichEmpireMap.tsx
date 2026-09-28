@@ -36,17 +36,42 @@ const COUNTRY_LABELS = [
   { name: 'БЕЛЬГІЯ', lon: 4.5, lat: 50.8, size: 6 },
   { name: 'ШВЕЦІЯ', lon: 16.0, lat: 61.0, size: 8 },
   { name: 'ДАНІЯ', lon: 10.0, lat: 56.2, size: 6 },
-  { name: 'ПРУССІЯ', lon: 19.2, lat: 53.2, size: 8 },
+  { name: 'ПРУССІЯ', lon: 19.2, lat: 53.2, size: 8, power: 'germany' as const },
+  { name: 'НІМЕЧЧИНА', lon: 12.8, lat: 50.0, size: 8, power: 'germany' as const },
   { name: 'АВСТРІЯ', lon: 15.0, lat: 47.7, size: 8 },
   { name: 'ШВЕЙЦАРІЯ', lon: 8.2, lat: 46.8, size: 6 },
   { name: 'БАВАРІЯ', lon: 11.4, lat: 48.9, size: 6 },
   { name: 'САКСОНІЯ', lon: 13.3, lat: 51.0, size: 6 },
-  { name: 'ІТАЛІЯ', lon: 12.2, lat: 42.8, size: 7 },
+  { name: 'ІТАЛІЯ', lon: 12.2, lat: 42.8, size: 7, power: 'italy' as const },
   { name: 'ОСМАНСЬКА ІМПЕРІЯ', lon: 27.0, lat: 40.8, size: 7 },
   { name: 'ГРЕЦІЯ', lon: 22.4, lat: 39.2, size: 6 },
   { name: 'СЕРБІЯ', lon: 20.7, lat: 44.0, size: 6 },
   { name: 'МОЛДАВІЯ', lon: 27.7, lat: 47.0, size: 5 },
   { name: 'ВАЛАХІЯ', lon: 25.2, lat: 44.7, size: 5 },
+];
+
+const POWER_COLORS = {
+  sich: '#C9A55B',
+  ottoman: '#765039',
+  austria: '#D9D6CA',
+  germany: '#304A63',
+  sweden: '#5D9BB2',
+  france: '#5A7185',
+  england: '#7A5360',
+  italy: '#76664D',
+} as const;
+
+type PowerKey = keyof typeof POWER_COLORS;
+
+const POWER_LEGEND: { name: string; power: PowerKey }[] = [
+  { name: 'ІМПЕРІЯ СІЧ', power: 'sich' },
+  { name: 'ОСМАНИ', power: 'ottoman' },
+  { name: 'АВСТРІЯ', power: 'austria' },
+  { name: 'НІМЕЧЧИНА', power: 'germany' },
+  { name: 'ШВЕЦІЯ', power: 'sweden' },
+  { name: 'ФРАНЦІЯ', power: 'france' },
+  { name: 'АНГЛІЯ', power: 'england' },
+  { name: 'ІТАЛІЯ', power: 'italy' },
 ];
 
 const CITIES = [
@@ -249,16 +274,19 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
           {/* Real historical polygons from the 1700 historical-basemaps dataset.
               The viewport is deliberately European; the alternate-history union is clipped by the map frame. */}
           {contextPaths.flatMap(({ name, paths: featurePaths }) => featurePaths.map((d, index) => {
-            const fill = name === 'Ottoman Empire'
-              ? '#765039'
-              : name === 'Austrian Empire'
-                ? '#E8E5DC'
-                : name === 'Prussia'
-                  ? '#172E4B'
-                  : name === 'Sweden'
-                    ? '#5D9BB2'
-                    : '#273640';
-            const stroke = name === 'Austrian Empire' ? '#FFFFFF' : '#71818A';
+            const power: PowerKey | null =
+              name === 'Ottoman Empire' ? 'ottoman' :
+              name === 'Austrian Empire' ? 'austria' :
+              name === 'Prussia' || name === 'Holy Roman Empire' || name === 'Brandenburg' ||
+              name === 'Bavaria' || name === 'Saxony' || name === 'Hanover' ? 'germany' :
+              name === 'Sweden' ? 'sweden' :
+              name === 'France' ? 'france' :
+              name === 'England' ? 'england' :
+              name === 'Venice' || name === 'Papal States' || name === 'Sardinia-Piedmont' ||
+              name === 'Kingdom of Naples' || name === 'Tuscany' || name === 'Piedmont' ||
+              name === 'Two Sicilies' ? 'italy' : null;
+            const fill = power ? POWER_COLORS[power] : '#273640';
+            const stroke = power === 'austria' ? '#FFFFFF' : '#71818A';
 
             return (
               <g key={`context-${name}-${index}`}>
@@ -308,6 +336,15 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
           />
 
           {/* Political labels keep the map readable as an atlas rather than a technical GIS layer. */}
+          {POWER_LEGEND.map((item, index) => (
+            <g key={item.power} transform={'translate(' + (690 + (index % 2) * 125) + ' ' + (28 + Math.floor(index / 2) * 15) + ')'}>
+              <rect width="8" height="8" rx="1" fill={POWER_COLORS[item.power]} />
+              <text x="13" y="8" fill="#D9D6CA" fontSize="7.5" fontFamily="Georgia, serif" letterSpacing=".7">
+                {item.name}
+              </text>
+            </g>
+          ))}
+
           {COUNTRY_LABELS.map((label) => {
             const [x, y] = project(label.lon, label.lat, bounds);
             return (
@@ -316,7 +353,7 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
                 x={x}
                 y={y}
                 textAnchor="middle"
-                fill="#D0D4D0"
+                fill={label.power ? POWER_COLORS[label.power] : "#D0D4D0"}
                 opacity=".94"
                 fontSize={label.size}
                 fontFamily="Georgia, serif"
