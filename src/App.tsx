@@ -43,7 +43,7 @@ export default function App() {
         } else {
           const fresh = createInitialGameState('');
           setGameState(fresh);
-          await saveGame(fresh);
+          // Do not persist an unnamed ruler. The prologue is the save's first step.
           setShowPrologue(true);
         }
       } catch (err) {
