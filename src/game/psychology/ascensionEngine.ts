@@ -227,7 +227,7 @@ export function evaluateAscension(state: GameState): AscensionEvaluationResult {
       conditionMet = existingTransformations.length > 0;
     }
 
-    if (conditionMet && !alreadyExists && decisions.length >= 2) {
+    if (conditionMet && !alreadyExists && decisions.length >= 4) {
       const matchingDecisions = decisions.slice(0, 4).map((d) => d.id);
       const newRefl: Reflection = {
         id: item.id,
@@ -255,7 +255,7 @@ export function evaluateAscension(state: GameState): AscensionEvaluationResult {
     // or when at least 3 decisions and a contradiction exist
     const isTriggered =
       (relatedRefl && (relatedRefl.status === 'confirmed' || relatedRefl.status === 'partially_confirmed')) ||
-      (decisions.length >= 3 && contradictions.length > 0 && Boolean(relatedRefl));
+      (decisions.length >= 5 && contradictions.length > 0 && Boolean(relatedRefl));
 
     if (isTriggered && !alreadyExists) {
       insights.push({
@@ -366,7 +366,7 @@ export function evaluateAscension(state: GameState): AscensionEvaluationResult {
     ascensionStage = 'REFLECTION';
   } else if (contradictions.length > 0 || tensionRecords.some((t) => t.balanceState !== 'equipoise')) {
     ascensionStage = 'TENSION';
-  } else if (behaviorPatterns.length > 0) {
+  } else if (behaviorPatterns.length > 0 && decisions.length >= 4) {
     ascensionStage = 'PATTERN';
   }
 
@@ -416,7 +416,7 @@ export function evaluateAscension(state: GameState): AscensionEvaluationResult {
   let progressionNote = 'Ти починаєш часто обирати перші рішення. Внутрішній стрижень лише окреслюється у перших універсалах.';
   let compositeTitle = primaryDef.title;
 
-  if (decCount <= 1) {
+  if (decCount <= 3) {
     crystallizationStage = 'EMERGING';
     if ((summary.ORDER || 0) + (summary.CENTRALIZATION || 0) >= 1) {
       progressionNote = 'Ти починаєш часто обирати централізовані рішення та мілітарний порядок.';
@@ -428,7 +428,7 @@ export function evaluateAscension(state: GameState): AscensionEvaluationResult {
       progressionNote = 'Ти робиш перші зважені кроки, намацуючи баланс сил у Раді.';
     }
     compositeTitle = `Нарис: ${primaryDef.title} (зародження)`;
-  } else if (decCount === 2) {
+  } else if (decCount === 4 && state.identity.year < 1850) {
     crystallizationStage = 'FORMING';
     if ((summary.ORDER || 0) + (summary.POWER || 0) >= 2) {
       progressionNote = 'Твої рішення дедалі частіше будуються навколо контролю, дисципліни та сильної руки.';
@@ -440,7 +440,7 @@ export function evaluateAscension(state: GameState): AscensionEvaluationResult {
       progressionNote = 'Твої рішення дедалі частіше будуються навколо соборного миру та балансу інтересів станів.';
     }
     compositeTitle = `Визрівання: ${primaryDef.title}`;
-  } else if (decCount >= 3 && decCount <= 4 && transformations.length === 0 && state.identity.year < 1851) {
+  } else if (decCount >= 5 && state.identity.year < 1850 && transformations.length === 0) {
     crystallizationStage = 'CRYSTALLIZING';
     if ((summary.ORDER || 0) + (summary.POWER || 0) >= 3) {
       progressionNote = 'Ти створив державу, яка дедалі більше залежить від твоєї особистої волі та центрального нагляду.';
