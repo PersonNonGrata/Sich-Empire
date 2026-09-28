@@ -281,9 +281,9 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                         {choice.politicalCost && (
                           <div className="flex items-center gap-2">
                             <span className="text-[#8E2525] font-bold">Ціна ухвали:</span>
-                            {choice.politicalCost.capitalCost && (
+                            {(choice.politicalCost.politicalWillCost ?? choice.politicalCost.capitalCost) && (
                               <span className="bg-[#EADECA] text-[#4A3B2C] px-2 py-0.5 rounded border border-[#C5B396]">
-                                Капітал -{choice.politicalCost.capitalCost}
+                                Політична воля -{choice.politicalCost.politicalWillCost ?? choice.politicalCost.capitalCost}
                               </span>
                             )}
                             {choice.politicalCost.economicCost && (
