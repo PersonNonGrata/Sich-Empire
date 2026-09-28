@@ -20,6 +20,10 @@ const WORLD_1700_URL =
   'https://raw.githubusercontent.com/aourednik/historical-basemaps/da7a4b735ecef70aebdc9c73e409d8a2500d50f3/geojson/world_1700.geojson';
 const UKRAINE_URL =
   'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/ukraine.geojson';
+const BRITAIN_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/united kingdom.geojson';
+const ITALY_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/italy.geojson';
 
 const TARGET_NAMES = new Set([
   'Polish–Lithuanian Commonwealth',
@@ -115,6 +119,8 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
   const [features, setFeatures] = useState<GeoFeature[]>([]);
   const [contextFeatures, setContextFeatures] = useState<GeoFeature[]>([]);
   const [ukraineFeature, setUkraineFeature] = useState<GeoFeature | null>(null);
+  const [britainFeature, setBritainFeature] = useState<GeoFeature | null>(null);
+  const [italyFeature, setItalyFeature] = useState<GeoFeature | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -144,6 +150,30 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
       })
       .catch(() => {
         if (!cancelled) setError(true);
+      });
+
+    fetch(BRITAIN_URL)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Britain geometry request failed: ${response.status}`);
+        return response.json() as Promise<GeoFeature>;
+      })
+      .then((feature) => {
+        if (!cancelled) setBritainFeature(feature);
+      })
+      .catch(() => {
+        if (!cancelled) setBritainFeature(null);
+      });
+
+    fetch(ITALY_URL)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Italy geometry request failed: ${response.status}`);
+        return response.json() as Promise<GeoFeature>;
+      })
+      .then((feature) => {
+        if (!cancelled) setItalyFeature(feature);
+      })
+      .catch(() => {
+        if (!cancelled) setItalyFeature(null);
       });
 
     fetch(UKRAINE_URL)
@@ -187,6 +217,16 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
   const ukrainePaths = useMemo(
     () => ukraineFeature ? geometryToPaths(ukraineFeature.geometry, bounds) : [],
     [ukraineFeature, bounds]
+  );
+
+  const britainPaths = useMemo(
+    () => britainFeature ? geometryToPaths(britainFeature.geometry, bounds) : [],
+    [britainFeature, bounds]
+  );
+
+  const italyPaths = useMemo(
+    () => italyFeature ? geometryToPaths(italyFeature.geometry, bounds) : [],
+    [italyFeature, bounds]
   );
 
   // The Sich is rendered as one visual political silhouette. Historical polygons and
@@ -309,6 +349,21 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
               </g>
             );
           }))}
+
+          {/* Dedicated modern coastlines guarantee that Britain and Italy remain visibly present
+              even when the historical 1700 layer names/partitions differ from the alternate canon. */}
+          {britainPaths.map((d, index) => (
+            <g key={`britain-${index}`}>
+              <path d={d} fill={POWER_COLORS.england} fillOpacity=".9" />
+              <path d={d} fill="none" stroke="#A98A8F" strokeWidth="1.2" strokeOpacity=".72" />
+            </g>
+          ))}
+          {italyPaths.map((d, index) => (
+            <g key={`italy-${index}`}>
+              <path d={d} fill={POWER_COLORS.italy} fillOpacity=".9" />
+              <path d={d} fill="none" stroke="#A89A7B" strokeWidth="1.2" strokeOpacity=".72" />
+            </g>
+          ))}
 
           {/* One canonical silhouette for the Sich Empire.
               The historical Commonwealth + Muscovy polygons and the whole of modern
