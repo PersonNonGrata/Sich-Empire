@@ -434,10 +434,6 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
               </g>
             );
           })}
-
-        </g>
-            );
-          })()}
         </g>
       ) : (
         <g>
