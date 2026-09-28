@@ -40,14 +40,22 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
   onContinue,
 }) => {
   const [selectedChoice, setSelectedChoice] = useState<Choice | null>(null);
+  const [pendingChoice, setPendingChoice] = useState<Choice | null>(null);
 
   const speaker = scenario.speakerId
     ? characters.find((c) => c.id === scenario.speakerId)
     : null;
 
   const handleMakeChoice = (choice: Choice) => {
-    setSelectedChoice(choice);
-    onSelectChoice(choice.id);
+    // First tap only selects the universal. A second explicit action seals it.
+    setPendingChoice(choice);
+  };
+
+  const handleConfirmChoice = () => {
+    if (!pendingChoice) return;
+    setSelectedChoice(pendingChoice);
+    setPendingChoice(null);
+    onSelectChoice(pendingChoice.id);
   };
 
   // Helper to extract metric changes from choice consequences
@@ -107,6 +115,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
   const prevM = lastResolutionResult?.previousMetrics;
   const newM = lastResolutionResult?.newMetrics;
   const reactions = lastResolutionResult?.politicalReactionsSummary || [];
+  const delayed = lastResolutionResult?.state.consequences?.filter((c) => c.sourceDecisionId === lastResolutionResult?.state.decisions?.[0]?.id && !c.resolved) || [];
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -556,6 +565,26 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                 </div>
               </div>
             </div>
+
+            {/* Explicit seal confirmation: prevents accidental canonical choices on touch screens. */}
+            {pendingChoice && (
+              <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-3 sm:p-4">
+                <div className="w-full max-w-lg rounded-2xl bg-[#10141E] border-2 border-[#C9A96E] shadow-2xl p-5 sm:p-7 space-y-5 animate-in slide-in-from-bottom-4 duration-200">
+                  <div className="text-[10px] uppercase tracking-widest font-mono font-bold text-[#C9A96E]">Перед скріпленням печаткою</div>
+                  <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#F3EFE6] leading-tight">«{pendingChoice.text}»</h3>
+                  {pendingChoice.description && <p className="text-sm text-[#A8AFBD] leading-relaxed">{pendingChoice.description}</p>}
+                  <div className="flex flex-col gap-2 pt-2">
+                    <button onClick={handleConfirmChoice} className="w-full min-h-[52px] rounded-xl bg-[#C9A96E] text-[#0A0D14] font-serif font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.99]">
+                      <CheckCircle2 className="w-5 h-5" />
+                      СКРІПИТИ ПЕЧАТКОЮ
+                    </button>
+                    <button onClick={() => setPendingChoice(null)} className="w-full min-h-[48px] rounded-xl border border-[#3A4558] text-[#C8CDD8] font-serif font-bold text-sm hover:bg-[#18202E]">
+                      Повернутися до вибору
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           )}
         </div>
       </article>
