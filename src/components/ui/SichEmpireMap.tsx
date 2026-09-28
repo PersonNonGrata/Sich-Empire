@@ -47,7 +47,6 @@ const COUNTRY_LABELS = [
   { name: 'СЕРБІЯ', lon: 20.7, lat: 44.0, size: 6 },
   { name: 'МОЛДАВІЯ', lon: 27.7, lat: 47.0, size: 5 },
   { name: 'ВАЛАХІЯ', lon: 25.2, lat: 44.7, size: 5 },
-  { name: 'МОСКОВІЯ', lon: 39.0, lat: 58.8, size: 8 },
 ];
 
 const CITIES = [
@@ -97,6 +96,7 @@ function geometryToPaths(
 
 export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
   const compact = variant === 'prologue';
+  const mapId = compact ? 'prologue' : 'state';
   const [features, setFeatures] = useState<GeoFeature[]>([]);
   const [contextFeatures, setContextFeatures] = useState<GeoFeature[]>([]);
   const [ukraineFeature, setUkraineFeature] = useState<GeoFeature | null>(null);
@@ -126,8 +126,6 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
           'Kingdom of Naples', 'Tuscany', 'Piedmont', 'Two Sicilies', 'Greece'
         ]);
         setContextFeatures(data.features.filter((feature) => contextNames.has(feature.properties?.NAME ?? '')));
-        const ukraine = data.features.find((feature) => false);
-        void ukraine;
       })
       .catch(() => {
         if (!cancelled) setError(true);
@@ -150,17 +148,13 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
     };
   }, []);
 
-  const bounds = useMemo(() => {
-    const points = features.flatMap((feature) => collectPoints(feature.geometry.coordinates));
-    // Europe-first framing. The eastern edge stops around Moscow/European Russia;
-    // Siberia and the distant Asian extent are intentionally outside the composition.
-    const minLon = -12;
-    const maxLon = 62;
-    const minLat = 35;
-    const maxLat = 71;
-    if (!points.length) return { minLon, maxLon, minLat, maxLat };
-    return { minLon, maxLon, minLat, maxLat };
-  }, [features]);
+  const bounds = useMemo(() => ({
+    // Europe-first framing. Siberia and the distant Asian extent stay outside the composition.
+    minLon: -12,
+    maxLon: 62,
+    minLat: 35,
+    maxLat: 71,
+  }), []);
 
   const paths = useMemo(
     () => features.flatMap((feature) => geometryToPaths(feature.geometry, bounds)),
@@ -180,6 +174,14 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
     [ukraineFeature, bounds]
   );
 
+  // The Sich is rendered as one visual political silhouette. Historical polygons and
+  // modern Ukraine are united through a single luminance mask, so internal source
+  // boundaries can never become visible seams.
+  const sichPaths = useMemo(
+    () => [...paths, ...ukrainePaths],
+    [paths, ukrainePaths]
+  );
+
   return (
     <svg
       viewBox="0 0 1000 520"
@@ -189,22 +191,59 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
       preserveAspectRatio="xMidYMid meet"
     >
       <defs>
-        <linearGradient id="sichMapLand" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id={`sichMapLand-${mapId}`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#D8B76D" />
           <stop offset="0.55" stopColor="#B48B43" />
           <stop offset="1" stopColor="#806333" />
         </linearGradient>
-        <radialGradient id="sichMapSea" cx="42%" cy="42%">
+
+        <radialGradient id={`sichMapSea-${mapId}`} cx="42%" cy="42%">
           <stop offset="0" stopColor="#1D3441" />
           <stop offset="1" stopColor="#08131B" />
         </radialGradient>
-        <filter id="sichMapGlow">
+
+        <filter id={`sichMapGlow-${mapId}`} x="-40%" y="-40%" width="180%" height="180%">
           <feGaussianBlur stdDeviation="6" result="blur" />
-          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
         </filter>
+
+        <filter id={`sichMapSoftBorder-${mapId}`} x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="1.15" />
+        </filter>
+
+        <filter id={`sichMapOuterBorder-${mapId}`} x="-2%" y="-2%" width="104%" height="104%" colorInterpolationFilters="sRGB">
+          <feMorphology in="SourceAlpha" operator="dilate" radius="2.2" result="dilated" />
+          <feGaussianBlur in="dilated" stdDeviation="1.4" result="soft" />
+          <feFlood floodColor="#E6C477" floodOpacity=".42" result="haloColor" />
+          <feComposite in="haloColor" in2="soft" operator="in" result="halo" />
+          <feFlood floodColor="#F2D48F" floodOpacity=".78" result="coreColor" />
+          <feComposite in="coreColor" in2="dilated" operator="in" result="core" />
+          <feMerge>
+            <feMergeNode in="halo" />
+            <feMergeNode in="core" />
+          </feMerge>
+        </filter>
+
+        <mask
+          id={`sichMapMask-${mapId}`}
+          maskUnits="userSpaceOnUse"
+          maskContentUnits="userSpaceOnUse"
+          x="0"
+          y="0"
+          width="1000"
+          height="520"
+        >
+          <rect x="0" y="0" width="1000" height="520" fill="black" />
+          {sichPaths.map((d, index) => (
+            <path key={`mask-${index}`} d={d} fill="white" fillRule="evenodd" />
+          ))}
+        </mask>
       </defs>
 
-      <rect width="1000" height="520" fill="url(#sichMapSea)" />
+      <rect width="1000" height="520" fill={`url(#sichMapSea-${mapId})`} />
 
       {error ? (
         <g>
@@ -230,34 +269,53 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
                     ? '#5D9BB2'
                     : '#273640';
             const stroke = name === 'Austrian Empire' ? '#FFFFFF' : '#71818A';
+
             return (
-              <path
-                key={`context-${name}-${index}`}
-                d={d}
-                fill={fill}
-                stroke={stroke}
-                strokeWidth={name === 'Austrian Empire' ? 1.1 : 0.9}
-                opacity={name === 'Austrian Empire' ? '.94' : '.9'}
-              />
+              <g key={`context-${name}-${index}`}>
+                <path d={d} fill={fill} opacity={name === 'Austrian Empire' ? '.94' : '.9'} />
+                <path
+                  d={d}
+                  fill="none"
+                  stroke={stroke}
+                  strokeWidth="2.8"
+                  strokeOpacity=".24"
+                  filter={`url(#sichMapSoftBorder-${mapId})`}
+                />
+                <path
+                  d={d}
+                  fill="none"
+                  stroke={stroke}
+                  strokeWidth={name === 'Austrian Empire' ? 0.85 : 0.7}
+                  strokeOpacity={name === 'Austrian Empire' ? '.62' : '.46'}
+                />
+              </g>
             );
           }))}
 
-          {/* Game canon: the entire territory of modern Ukraine, including Crimea,
-              is part of the Sich Empire. This canonical overlay is intentionally
-              separate from the 1700 historical basemap. */}
-          {ukrainePaths.map((d, index) => (
-            <path
-              key={`ukraine-canon-${index}`}
-              d={d}
-              fill="url(#sichMapLand)"
-              stroke="#F7D993"
-              strokeWidth="2"
-              opacity=".98"
+          {/* One canonical silhouette for the Sich Empire.
+              The historical Commonwealth + Muscovy polygons and the whole of modern
+              Ukraine, including Crimea, are merged visually through one luminance mask.
+              No individual Sich polygon receives a stroke, so there are no internal seams. */}
+          <g filter={`url(#sichMapOuterBorder-${mapId})`}>
+            <rect
+              x="0"
+              y="0"
+              width="1000"
+              height="520"
+              fill="#E7C878"
+              opacity=".96"
+              mask={`url(#sichMapMask-${mapId})`}
             />
-          ))}
-          {paths.map((d, index) => (
-            <path key={index} d={d} fill="url(#sichMapLand)" stroke="#F0D18A" strokeWidth="1.8" />
-          ))}
+          </g>
+
+          <rect
+            x="0"
+            y="0"
+            width="1000"
+            height="520"
+            fill={`url(#sichMapLand-${mapId})`}
+            mask={`url(#sichMapMask-${mapId})`}
+          />
 
           {/* Political labels keep the map readable as an atlas rather than a technical GIS layer. */}
           {COUNTRY_LABELS.map((label) => {
@@ -290,7 +348,7 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
                   fill="#11161A"
                   stroke="#E2BE65"
                   strokeWidth={city.capital ? 2.5 : 1.4}
-                  filter={city.capital ? 'url(#sichMapGlow)' : undefined}
+                  filter={city.capital ? `url(#sichMapGlow-${mapId})` : undefined}
                 />
                 {city.capital && <path d={`M${x} ${y - 16} l-5 8 h10 Z`} fill="#E2BE65" />}
                 {!compact || ['ЛЬВІВ', 'ВІЛЬНО', 'КИЇВ', 'ВАРШАВА', 'МОСКВА'].includes(city.name) ? (
