@@ -29,6 +29,8 @@ export default function App() {
   const [lastResolutionResult, setLastResolutionResult] = useState<ChoiceResolutionResult | null>(null);
   const [bannerNotice, setBannerNotice] = useState<string | null>(null);
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState<boolean>(false);
+  const [showPrologue, setShowPrologue] = useState<boolean>(false);
+  const [rulerNameDraft, setRulerNameDraft] = useState<string>('');
 
   // Load existing save or initialize new state
   useEffect(() => {
@@ -39,9 +41,10 @@ export default function App() {
           setGameState(loaded);
           setBannerNotice('Кампанію 1848 року відновлено зі сховища.');
         } else {
-          const fresh = createInitialGameState('Богдан Островерхий');
+          const fresh = createInitialGameState('');
           setGameState(fresh);
           await saveGame(fresh);
+          setShowPrologue(true);
         }
       } catch (err) {
         console.error('Initialization error:', err);
@@ -180,6 +183,37 @@ export default function App() {
             Розгортання Кабінету Гетьмана 1848 року...
           </div>
         </div>
+      </div>
+    );
+  }
+
+  if (showPrologue) {
+    const beginCampaign = async () => {
+      const name = rulerNameDraft.trim() || 'Безіменний Гетьман';
+      const fresh = createInitialGameState(name);
+      setGameState(fresh);
+      setShowPrologue(false);
+      await saveGame(fresh);
+    };
+
+    return (
+      <div className="min-h-screen min-h-[100dvh] bg-[#080A0E] text-[#F3EFE6] flex items-center justify-center px-5 py-8">
+        <main className="w-full max-w-xl text-center space-y-7 animate-in fade-in duration-700">
+          <CoatOfArms size={72} className="mx-auto" />
+          <div className="space-y-3">
+            <p className="text-[#C9A96E] text-[10px] sm:text-xs font-mono tracking-[0.28em] uppercase">1848 · Весна Народів</p>
+            <h1 className="font-serif text-4xl sm:text-5xl font-bold tracking-tight">Імперія Січ</h1>
+            <p className="font-serif text-lg sm:text-xl text-[#C8CDD8] leading-relaxed">Ти Гетьман. Європа горить. Січ чекає на твоє перше слово.</p>
+          </div>
+          <div className="text-left bg-[#10141E] border border-[#2B3548] rounded-2xl p-5 sm:p-6 space-y-4 shadow-2xl">
+            <p className="text-sm text-[#A8AFBD] leading-relaxed">Перед тобою держава, де кожне рішення залишає слід. Рада пам'ятає. Люди відповідають. Деякі наслідки прийдуть через роки.</p>
+            <label className="block space-y-2">
+              <span className="text-[10px] uppercase tracking-widest font-mono text-[#C9A96E]">Ім'я Гетьмана</span>
+              <input value={rulerNameDraft} onChange={(e) => setRulerNameDraft(e.target.value)} placeholder="Як тебе запише Літопис?" autoFocus className="w-full min-h-[50px] rounded-xl bg-[#0A0D13] border border-[#3A4558] px-4 text-base font-serif text-[#F3EFE6] outline-none focus:border-[#C9A96E] focus:ring-1 focus:ring-[#C9A96E]" />
+            </label>
+            <button onClick={beginCampaign} className="w-full min-h-[54px] rounded-xl bg-[#C9A96E] text-[#0A0D14] font-serif font-bold text-sm tracking-wide flex items-center justify-center gap-2 active:scale-[0.99]">СКРІПИТИ ПРИСЯГУ <ArrowRight className="w-4 h-4" /></button>
+          </div>
+        </main>
       </div>
     );
   }
