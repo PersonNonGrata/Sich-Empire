@@ -70,7 +70,7 @@ export const CouncilView: React.FC<CouncilViewProps> = ({
     );
   }
 
-  const { identity, empire, politicalCapital = 55, crises = [] } = state;
+  const { identity, empire, politicalWill = 55, crises = [] } = state;
   const activeCrises = crises.filter((c) => c.active);
   const legitimacyResult = calculateLegitimacy(state);
   const agenda = getYearAgenda(state);
@@ -248,7 +248,7 @@ export const CouncilView: React.FC<CouncilViewProps> = ({
                 Політичний Капітал
               </div>
               <div className="font-serif text-lg font-bold text-[#38BDF8]">
-                {politicalCapital}%
+                {politicalWill}%
               </div>
             </div>
             <Sparkles className="w-5 h-5 text-[#38BDF8]" />
