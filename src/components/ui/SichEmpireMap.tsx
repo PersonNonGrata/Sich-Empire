@@ -25,6 +25,17 @@ const TARGET_NAMES = new Set([
   'Tsardom of Muscovy',
 ]);
 
+const COUNTRY_LABELS = [
+  { name: 'ФРАНЦІЯ', lon: 2.3, lat: 46.2, size: 10 },
+  { name: 'ІСПАНІЯ', lon: -3.5, lat: 40.2, size: 9 },
+  { name: 'АНГЛІЯ', lon: -1.5, lat: 52.0, size: 8 },
+  { name: 'СВЯЩЕННА РИМСЬКА ІМПЕРІЯ', lon: 10.5, lat: 50.2, size: 7 },
+  { name: 'АВСТРІЯ', lon: 15.4, lat: 48.4, size: 8 },
+  { name: 'ОСМАНСЬКА ІМПЕРІЯ', lon: 27.2, lat: 41.3, size: 7 },
+  { name: 'ШВЕЦІЯ', lon: 16.0, lat: 61.2, size: 8 },
+  { name: 'МОСКОВІЯ', lon: 39.0, lat: 58.8, size: 8 },
+];
+
 const CITIES = [
   { name: 'ЛЬВІВ', lon: 24.03, lat: 49.84, dx: -9, dy: -9, anchor: 'end' as const },
   { name: 'ВІЛЬНО', lon: 25.28, lat: 54.69, dx: 8, dy: -9, anchor: 'start' as const },
@@ -174,8 +185,28 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
             <path key={`context-${index}`} d={d} fill="#26333A" stroke="#56636A" strokeWidth="1" opacity=".72" />
           ))}
           {paths.map((d, index) => (
-            <path key={index} d={d} fill="url(#sichMapLand)" stroke="#D8AD58" strokeWidth="1.6" />
+            <path key={index} d={d} fill="url(#sichMapLand)" stroke="#E7C77A" strokeWidth="1.25" />
           ))}
+
+          {/* Political labels keep the map readable as an atlas rather than a technical GIS layer. */}
+          {COUNTRY_LABELS.map((label) => {
+            const [x, y] = project(label.lon, label.lat, bounds);
+            return (
+              <text
+                key={label.name}
+                x={x}
+                y={y}
+                textAnchor="middle"
+                fill="#AAB0AE"
+                opacity=".82"
+                fontSize={label.size}
+                fontFamily="Georgia, serif"
+                letterSpacing="1.5"
+              >
+                {label.name}
+              </text>
+            );
+          })}
 
           {CITIES.map((city) => {
             const [x, y] = project(city.lon, city.lat, bounds);
@@ -222,14 +253,10 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
         </g>
       )}
 
-      <text x="42" y="35" fill="#C9A96E" fontSize="10" fontFamily="monospace" letterSpacing="2">
-        ІСТОРИЧНА ОСНОВА · 1700
-      </text>
       <text x="48" y="486" fill="#78909A" fontSize="11" fontFamily="Georgia, serif">ЧОРНЕ МОРЕ</text>
       <text x="815" y="430" fill="#71818A" fontSize="10" fontFamily="Georgia, serif">КАСПІЙСЬКЕ МОРЕ</text>
-      <text x="500" y="42" textAnchor="middle" fill="#71818A" fontSize="10" fontFamily="monospace" letterSpacing="3">ЄВРОПА · 1700</text>
 
-      <g transform="translate(70 405)">
+      <g transform="translate(70 405)" opacity=".82">
         <circle r="24" fill="none" stroke="#B89A5B" strokeWidth="1" />
         <path d="M0 -18 L5 0 L0 18 L-5 0Z" fill="#B89A5B" />
         <text x="-3" y="-28" fill="#C9A96E" fontSize="8">N</text>
