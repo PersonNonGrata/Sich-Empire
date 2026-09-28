@@ -166,16 +166,22 @@ export function calculateLegitimacy(state: GameState): {
 /**
  * Requirement 10: Recalculate political capital based on performance, promises, and legitimacy
  */
-export function recalculatePoliticalCapital(
-  currentCapital: number,
+export function recalculatePoliticalWill(
+  currentPoliticalWill: number,
   delta: number,
   legitimacyAggregate: number
 ): number {
-  // Higher legitimacy grants a small positive buoyancy to capital
+  // Higher legitimacy grants a small positive buoyancy to political will.
   const legitimacyBonus = legitimacyAggregate >= 75 ? 2 : legitimacyAggregate < 40 ? -3 : 0;
-  const updated = currentCapital + delta + legitimacyBonus;
+  const updated = currentPoliticalWill + delta + legitimacyBonus;
   return clampRange(updated, 0, 100);
 }
+
+/**
+ * Legacy compatibility alias for older callers/saves.
+ * New code should use recalculatePoliticalWill.
+ */
+export const recalculatePoliticalCapital = recalculatePoliticalWill;
 
 /**
  * Requirement 20: Great Council Proposal Voting Mechanism
