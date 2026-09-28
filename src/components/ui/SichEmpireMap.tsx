@@ -32,26 +32,14 @@ const TARGET_NAMES = new Set([
 ]);
 
 const COUNTRY_LABELS = [
-  { name: 'ПОРТУГАЛІЯ', lon: -7.7, lat: 39.6, size: 7 },
-  { name: 'ІСПАНІЯ', lon: -3.2, lat: 40.2, size: 8 },
-  { name: 'АНГЛІЯ', lon: -0.7, lat: 52.7, size: 8, power: 'england' as const },
-  { name: 'ФРАНЦІЯ', lon: 2.2, lat: 46.4, size: 9, power: 'france' as const },
-  { name: 'НІДЕРЛАНДИ', lon: 5.3, lat: 52.2, size: 6 },
-  { name: 'БЕЛЬГІЯ', lon: 4.5, lat: 50.8, size: 6 },
-  { name: 'ШВЕЦІЯ', lon: 16.0, lat: 61.0, size: 8, power: 'sweden' as const },
-  { name: 'ДАНІЯ', lon: 10.0, lat: 56.2, size: 6 },
-  { name: 'ПРУССІЯ', lon: 19.2, lat: 53.2, size: 7, power: 'germany' as const },
-  { name: 'НІМЕЧЧИНА', lon: 10.5, lat: 50.5, size: 9, power: 'germany' as const },
-  { name: 'АВСТРІЯ', lon: 14.4, lat: 47.6, size: 8, power: 'austria' as const },
-  { name: 'ШВЕЙЦАРІЯ', lon: 8.2, lat: 46.8, size: 6 },
-  { name: 'БАВАРІЯ', lon: 11.4, lat: 48.9, size: 6 },
-  { name: 'САКСОНІЯ', lon: 13.3, lat: 51.0, size: 6 },
-  { name: 'ІТАЛІЯ', lon: 12.4, lat: 42.3, size: 9, power: 'italy' as const },
-  { name: 'ОСМАНСЬКА ІМПЕРІЯ', lon: 27.0, lat: 40.8, size: 7, power: 'ottoman' as const },
-  { name: 'ГРЕЦІЯ', lon: 22.4, lat: 39.2, size: 6 },
-  { name: 'СЕРБІЯ', lon: 20.7, lat: 44.0, size: 6 },
-  { name: 'МОЛДАВІЯ', lon: 27.7, lat: 47.0, size: 5 },
-  { name: 'ВАЛАХІЯ', lon: 25.2, lat: 44.7, size: 5 },
+  { name: 'ІМПЕРІЯ СІЧ', lon: 31.5, lat: 53.5, size: 24, power: 'sich' as const, weight: 700 },
+  { name: 'ОСМАНСЬКА ІМПЕРІЯ', lon: 27.0, lat: 40.8, size: 9, power: 'ottoman' as const, weight: 700 },
+  { name: 'АВСТРІЯ', lon: 14.4, lat: 47.6, size: 10, power: 'austria' as const, weight: 700 },
+  { name: 'НІМЕЧЧИНА', lon: 10.5, lat: 50.5, size: 10, power: 'germany' as const, weight: 700 },
+  { name: 'ШВЕЦІЯ', lon: 16.0, lat: 61.0, size: 10, power: 'sweden' as const, weight: 700 },
+  { name: 'ФРАНЦІЯ', lon: 2.2, lat: 46.4, size: 10, power: 'france' as const, weight: 700 },
+  { name: 'АНГЛІЯ', lon: -0.7, lat: 52.7, size: 9, power: 'england' as const, weight: 700 },
+  { name: 'ІТАЛІЯ', lon: 12.4, lat: 42.3, size: 10, power: 'italy' as const, weight: 700 },
 ];
 
 const POWER_COLORS = {
@@ -391,15 +379,6 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
           />
 
           {/* Political labels keep the map readable as an atlas rather than a technical GIS layer. */}
-          {POWER_LEGEND.map((item, index) => (
-            <g key={item.power} transform={'translate(' + (705 + (index % 2) * 118) + ' ' + (72 + Math.floor(index / 2) * 14) + ')'}>
-              <rect width="8" height="8" rx="1" fill={POWER_COLORS[item.power]} />
-              <text x="13" y="8" fill="#D9D6CA" fontSize="7.5" fontFamily="Georgia, serif" letterSpacing=".7">
-                {item.name}
-              </text>
-            </g>
-          ))}
-
           {COUNTRY_LABELS.map((label) => {
             const [x, y] = project(label.lon, label.lat, bounds);
             return (
@@ -413,7 +392,12 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
                 opacity=".94"
                 fontSize={label.size}
                 fontFamily="Georgia, serif"
-                letterSpacing="1.5"
+                fontWeight={label.weight}
+                letterSpacing={label.power === 'sich' ? "2.2" : "1.2"}
+                paintOrder="stroke"
+                stroke="#08131B"
+                strokeWidth={label.power === 'sich' ? 2.8 : 1.6}
+                strokeOpacity=".82"
               >
                 {label.name}
               </text>
@@ -451,18 +435,7 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
             );
           })}
 
-          {(() => {
-            const [lx, ly] = project(31.5, 53.5, bounds);
-            return (
-              <g transform={`translate(${lx} ${ly})`}>
-                <rect x="-82" y="-18" width="164" height="32" rx="3"
-                  fill="#8B672F" opacity=".58" stroke="#F0D18A" strokeWidth=".7" />
-                <text x="0" y="4" textAnchor="middle" fill="#FFF1C9"
-                  fontSize={compact ? 15 : 24} fontFamily="Georgia, serif"
-                  fontWeight="700" letterSpacing="2">
-                  ІМПЕРІЯ СІЧ
-                </text>
-              </g>
+        </g>
             );
           })()}
         </g>
