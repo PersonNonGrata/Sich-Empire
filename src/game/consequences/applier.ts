@@ -205,15 +205,16 @@ export function applySingleConsequence(
       break;
     }
 
-    case 'POLITICAL_CAPITAL_CHANGE': {
-      const currentCapital = state.politicalCapital ?? 55;
-      const newCapital = clamp(currentCapital + consequence.value, 0, 100);
+    case 'POLITICAL_CAPITAL_CHANGE':
+    case 'POLITICAL_WILL_CHANGE': {
+      const currentWill = state.politicalWill ?? state.politicalCapital ?? 55;
+      const newWill = clamp(currentWill + consequence.value, 0, 100);
       state = {
         ...state,
-        politicalCapital: newCapital,
+        politicalWill: newWill,
       };
       const sign = consequence.value >= 0 ? '+' : '';
-      logs.push(`Політичний капітал Гетьмана: ${sign}${consequence.value} (поточний рівень: ${newCapital}%)`);
+      logs.push(`Політична воля Гетьмана: ${sign}${consequence.value} (поточний рівень: ${newWill}%)`);
       break;
     }
 
@@ -382,12 +383,13 @@ export function applySingleConsequence(
 
     case 'POLITICAL_COST': {
       const cost = consequence.cost;
-      if (cost.capitalCost) {
+      const politicalWillCost = cost.politicalWillCost ?? cost.capitalCost;
+      if (politicalWillCost) {
         state = {
           ...state,
-          politicalCapital: clamp((state.politicalCapital ?? 55) - cost.capitalCost, 0, 100),
+          politicalWill: clamp((state.politicalWill ?? state.politicalCapital ?? 55) - politicalWillCost, 0, 100),
         };
-        logs.push(`Витрачено політичного капіталу: -${cost.capitalCost}`);
+        logs.push(`Витрачено політичної волі: -${politicalWillCost}`);
       }
       if (cost.economicCost) {
         state = {
