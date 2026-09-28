@@ -80,21 +80,22 @@ export default function App() {
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState<boolean>(false);
   const [showPrologue, setShowPrologue] = useState<boolean>(false);
   const [prologueScene, setPrologueScene] = useState<number>(0);
+  const [isPrologueMenuOpen, setIsPrologueMenuOpen] = useState<boolean>(false);
+  const [savedGameState, setSavedGameState] = useState<GameState | null>(null);
 
   // Load existing save or initialize new state
   useEffect(() => {
     async function init() {
       try {
         const loaded = await loadGame();
+        const fresh = createInitialGameState('Гетьман');
+        setGameState(fresh);
         if (loaded) {
-          setGameState(loaded);
-          setBannerNotice('Кампанію 1848 року відновлено.');
-        } else {
-          const fresh = createInitialGameState('Гетьман');
-          setGameState(fresh);
-          // Do not persist an unnamed ruler. The prologue is the save's first step.
-          setShowPrologue(true);
+          setSavedGameState(loaded);
         }
+        // The opening menu is always available so the player chooses whether to
+        // continue an existing campaign, enter the prologue, or skip it.
+        setShowPrologue(true);
       } catch (err) {
         console.error('Initialization error:', err);
         const fresh = createInitialGameState('Богдан Островерхий');
@@ -240,16 +241,33 @@ export default function App() {
     const scene = PROLOGUE_SCENES[prologueScene];
     const isLastScene = prologueScene === PROLOGUE_SCENES.length - 1;
 
+    const startNewGame = async (skipPrologue = false) => {
+      const fresh = createInitialGameState('Гетьман');
+      setGameState(fresh);
+      setSavedGameState(null);
+      setShowPrologue(false);
+      setIsPrologueMenuOpen(false);
+      if (skipPrologue) {
+        setPrologueScene(0);
+      }
+      await saveGame(fresh);
+    };
+
+    const loadSavedGame = async () => {
+      if (!savedGameState) return;
+      setGameState(savedGameState);
+      setShowPrologue(false);
+      setIsPrologueMenuOpen(false);
+      setBannerNotice('Збережену кампанію завантажено.');
+    };
+
     const continuePrologue = async () => {
       if (!isLastScene) {
         setPrologueScene((current) => current + 1);
         return;
       }
 
-      const fresh = createInitialGameState('Гетьман');
-      setGameState(fresh);
-      setShowPrologue(false);
-      await saveGame(fresh);
+      await startNewGame();
     };
 
     return (
@@ -259,8 +277,16 @@ export default function App() {
 
           <section className="relative flex-1 flex flex-col justify-center px-5 pt-8 pb-5 sm:px-8">
             <div className="w-full max-w-2xl mx-auto space-y-5 sm:space-y-7 text-center">
-              <div className="flex items-center justify-center gap-2">
-                {PROLOGUE_SCENES.map((item, index) => (
+              <div className="flex items-center justify-between gap-3">
+                <button
+                  onClick={() => setIsPrologueMenuOpen(true)}
+                  className="min-h-[42px] px-3 rounded-lg border border-[#3A4354] bg-[#0D121A]/90 text-[#C9A96E] font-mono text-[10px] tracking-[0.18em] uppercase hover:bg-[#151B25] active:scale-[0.98] transition"
+                  aria-label="Відкрити меню"
+                >
+                  МЕНЮ
+                </button>
+                <div className="flex items-center justify-center gap-2 flex-1">
+                  {PROLOGUE_SCENES.map((item, index) => (
                   <span
                     key={item.year}
                     className={index === prologueScene
@@ -271,6 +297,7 @@ export default function App() {
                     aria-hidden="true"
                   />
                 ))}
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -311,6 +338,63 @@ export default function App() {
               {isLastScene ? 'ПОЧАТИ ГРУ' : 'ДАЛІ'}
             </button>
           </div>
+
+          {isPrologueMenuOpen && (
+            <div
+              className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/75 backdrop-blur-sm p-4"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Меню прологу"
+            >
+              <div className="w-full max-w-md rounded-2xl border border-[#3A4354] bg-[#0D121A] p-5 sm:p-6 shadow-2xl">
+                <div className="flex items-center justify-between gap-4 mb-5">
+                  <div>
+                    <p className="text-[#C9A96E] text-[10px] font-mono tracking-[0.25em] uppercase">
+                      ІМПЕРІЯ СІЧ
+                    </p>
+                    <h2 className="font-serif text-2xl font-bold mt-1">Меню</h2>
+                  </div>
+                  <button
+                    onClick={() => setIsPrologueMenuOpen(false)}
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-[#8E93A0] hover:text-[#F3EFE6] hover:bg-[#1A2232]"
+                    aria-label="Закрити меню"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  <button
+                    onClick={() => startNewGame(false)}
+                    className="w-full min-h-[54px] rounded-xl bg-[#C9A96E] text-[#0A0D14] font-serif font-bold text-sm tracking-[0.06em] active:scale-[0.99] transition"
+                  >
+                    ПОЧАТИ ГРУ
+                  </button>
+
+                  <button
+                    onClick={() => startNewGame(true)}
+                    className="w-full min-h-[54px] rounded-xl border border-[#596273] bg-[#151B25] text-[#F3EFE6] font-serif font-bold text-sm tracking-[0.06em] hover:bg-[#1B2330] active:scale-[0.99] transition"
+                  >
+                    ПРОПУСТИТИ ПРОЛОГ
+                  </button>
+
+                  <button
+                    onClick={loadSavedGame}
+                    disabled={!savedGameState}
+                    className="w-full min-h-[54px] rounded-xl border border-[#3A4354] bg-transparent text-[#C9A96E] font-serif font-bold text-sm tracking-[0.06em] disabled:opacity-35 disabled:cursor-not-allowed hover:bg-[#151B25] active:scale-[0.99] transition"
+                  >
+                    ЗАВАНТАЖИТИ ЗБЕРЕЖЕНУ ГРУ
+                  </button>
+                </div>
+
+                <p className="mt-4 text-center text-[10px] font-mono tracking-[0.08em] text-[#777F8E]">
+                  {savedGameState
+                    ? 'Знайдено збережену кампанію.'
+                    : 'Збереженої кампанії поки немає.'}
+                </p>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     );
