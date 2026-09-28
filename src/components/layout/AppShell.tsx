@@ -65,13 +65,15 @@ export const AppShell: React.FC<AppShellProps> = ({
 
       {/* 2. Central Working Space */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-6 py-4 md:py-6 pb-28 md:pb-12">
-        {/* Hetman's Desk Workspace Switcher */}
-        <HetmanDesk
-          state={state}
-          activeTab={activeTab}
-          onSelectTab={setActiveTab}
-          onOpenCouncil={onOpenCouncil}
-        />
+        {/* Keep the active Council screen focused: the document desk is navigation, not part of the decision itself. */}
+        {activeTab !== 'rada' && (
+          <HetmanDesk
+            state={state}
+            activeTab={activeTab}
+            onSelectTab={setActiveTab}
+            onOpenCouncil={onOpenCouncil}
+          />
+        )}
 
         {/* Section View Content */}
         <div className="mt-2 md:mt-4">{children}</div>
