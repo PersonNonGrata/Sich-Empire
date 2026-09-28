@@ -104,7 +104,7 @@ export type Consequence =
       label?: string;
     }
   | {
-      type: 'POLITICAL_CAPITAL_CHANGE';
+      type: 'POLITICAL_CAPITAL_CHANGE' | 'POLITICAL_WILL_CHANGE';
       value: number; // e.g. +5, -10
       label?: string;
       reason?: string;
