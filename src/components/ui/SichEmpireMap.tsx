@@ -26,6 +26,12 @@ const BRITAIN_URL =
   'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/united kingdom.geojson';
 const ITALY_URL =
   'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/italy.geojson';
+const SWEDEN_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/sweden.geojson';
+const NORWAY_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/norway.geojson';
+const DENMARK_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/denmark.geojson';
 
 const TARGET_NAMES = new Set([
   'Polish–Lithuanian Commonwealth',
@@ -111,6 +117,9 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
   const [ukraineFeature, setUkraineFeature] = useState<GeoFeature | null>(null);
   const [britainFeature, setBritainFeature] = useState<GeoFeature | null>(null);
   const [italyFeature, setItalyFeature] = useState<GeoFeature | null>(null);
+  const [swedenFeature, setSwedenFeature] = useState<GeoFeature | null>(null);
+  const [norwayFeature, setNorwayFeature] = useState<GeoFeature | null>(null);
+  const [denmarkFeature, setDenmarkFeature] = useState<GeoFeature | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -124,7 +133,7 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
       .then((data) => {
         if (cancelled) return;
         const contextNames = new Set([
-          'Sweden', 'Prussia', 'Austrian Empire', 'German Confederation',
+          'Sweden', 'Norway', 'Denmark', 'Denmark-Norway', 'Prussia', 'Austrian Empire', 'German Confederation',
           'Ottoman Empire', 'Denmark-Norway', 'France', 'Spain', 'Portugal',
           'England', 'Scotland', 'Ireland', 'Dutch Republic', 'Belgium', 'Switzerland',
           'Kingdom of Hungary', 'Transylvania', 'Moldavia', 'Wallachia', 'Bavaria',
@@ -174,6 +183,42 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
       })
       .catch(() => {
         if (!cancelled) setItalyFeature(null);
+      });
+
+    fetch(SWEDEN_URL)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Sweden geometry request failed: ${response.status}`);
+        return response.json() as Promise<GeoFeature>;
+      })
+      .then((feature) => {
+        if (!cancelled) setSwedenFeature(feature);
+      })
+      .catch(() => {
+        if (!cancelled) setSwedenFeature(null);
+      });
+
+    fetch(NORWAY_URL)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Norway geometry request failed: ${response.status}`);
+        return response.json() as Promise<GeoFeature>;
+      })
+      .then((feature) => {
+        if (!cancelled) setNorwayFeature(feature);
+      })
+      .catch(() => {
+        if (!cancelled) setNorwayFeature(null);
+      });
+
+    fetch(DENMARK_URL)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Denmark geometry request failed: ${response.status}`);
+        return response.json() as Promise<GeoFeature>;
+      })
+      .then((feature) => {
+        if (!cancelled) setDenmarkFeature(feature);
+      })
+      .catch(() => {
+        if (!cancelled) setDenmarkFeature(null);
       });
 
     fetch(UKRAINE_URL)
@@ -227,6 +272,18 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
   const italyPaths = useMemo(
     () => italyFeature ? geometryToPaths(italyFeature.geometry, bounds) : [],
     [italyFeature, bounds]
+  );
+  const swedenPaths = useMemo(
+    () => swedenFeature ? geometryToPaths(swedenFeature.geometry, bounds) : [],
+    [swedenFeature, bounds]
+  );
+  const norwayPaths = useMemo(
+    () => norwayFeature ? geometryToPaths(norwayFeature.geometry, bounds) : [],
+    [norwayFeature, bounds]
+  );
+  const denmarkPaths = useMemo(
+    () => denmarkFeature ? geometryToPaths(denmarkFeature.geometry, bounds) : [],
+    [denmarkFeature, bounds]
   );
 
   // The Sich is rendered as one visual political silhouette. Historical polygons and
@@ -365,6 +422,19 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
             </g>
           ))}
 
+          {/* Scandinavia is rendered explicitly because the 1848 base dataset can
+              omit or rename the Scandinavian polygons between historical snapshots. */}
+          {[
+            ...swedenPaths.map((d, index) => ({ d, key: `sweden-${index}` })),
+            ...norwayPaths.map((d, index) => ({ d, key: `norway-${index}` })),
+            ...denmarkPaths.map((d, index) => ({ d, key: `denmark-${index}` })),
+          ].map(({ d, key }) => (
+            <g key={key}>
+              <path d={d} fill={POWER_COLORS.sweden} fillOpacity=".88" />
+              <path d={d} fill="none" stroke="#8FBBC8" strokeWidth="1.15" strokeOpacity=".7" />
+            </g>
+          ))}
+
           {/* One canonical silhouette for the alternate 1848 Sich Empire.
               Its territorial canon is kept separate from the real-world 1848 base,
               so the surrounding European powers retain their historical geography.
@@ -455,10 +525,29 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
         </g>
       )}
 
-      <text x="52" y="96" fill="#71818A" fontSize="9" fontFamily="Georgia, serif" letterSpacing="1.5">ПІВНІЧНЕ МОРЕ</text>
-      <text x="52" y="486" fill="#8A9AA0" fontSize="11" fontFamily="Georgia, serif" letterSpacing="1">ЧОРНЕ МОРЕ</text>
-      <text x="745" y="450" fill="#71818A" fontSize="9" fontFamily="Georgia, serif" letterSpacing="1">КАСПІЙСЬКЕ МОРЕ</text>
-      <text x="470" y="500" fill="#71818A" fontSize="9" fontFamily="Georgia, serif" letterSpacing="2">СЕРЕДЗЕМНЕ МОРЕ</text>
+      {[
+        { name: 'ПІВНІЧНЕ МОРЕ', lon: 3.5, lat: 55.0, size: 9 },
+        { name: 'ЧОРНЕ МОРЕ', lon: 35.0, lat: 43.2, size: 10 },
+        { name: 'КАСПІЙСЬКЕ МОРЕ', lon: 50.5, lat: 41.5, size: 9 },
+        { name: 'СЕРЕДЗЕМНЕ МОРЕ', lon: 17.5, lat: 37.0, size: 9 },
+      ].map((sea) => {
+        const [x, y] = project(sea.lon, sea.lat, bounds);
+        return (
+          <text
+            key={sea.name}
+            x={x}
+            y={y}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fill="#71818A"
+            fontSize={sea.size}
+            fontFamily="Georgia, serif"
+            letterSpacing="1.4"
+          >
+            {sea.name}
+          </text>
+        );
+      })}
 
       <g transform="translate(70 405)" opacity=".82">
         <circle r="24" fill="none" stroke="#B89A5B" strokeWidth="1" />
