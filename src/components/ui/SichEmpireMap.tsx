@@ -59,16 +59,6 @@ const CITIES = [
   { name: 'БЕРЛІН', lon: 13.40, lat: 52.52, dx: -8, dy: -8, anchor: 'end' as const },
 ];
 
-function collectPoints(coordinates: unknown, out: number[][] = []) {
-  if (!Array.isArray(coordinates)) return out;
-  if (coordinates.length >= 2 && typeof coordinates[0] === 'number' && typeof coordinates[1] === 'number') {
-    out.push([coordinates[0] as number, coordinates[1] as number]);
-    return out;
-  }
-  for (const child of coordinates) collectPoints(child, out);
-  return out;
-}
-
 function project(lon: number, lat: number, bounds: { minLon: number; maxLon: number; minLat: number; maxLat: number }) {
   const x = ((lon - bounds.minLon) / (bounds.maxLon - bounds.minLon)) * 1000;
   const y = ((bounds.maxLat - lat) / (bounds.maxLat - bounds.minLat)) * 520;
