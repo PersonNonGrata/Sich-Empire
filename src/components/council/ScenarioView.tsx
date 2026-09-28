@@ -494,6 +494,22 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                   </div>
                 )}
 
+                {/* 4.5. ВІДКЛАДЕНИЙ НАСЛІДОК */}
+                {delayed.length > 0 && (
+                  <div className="space-y-1.5 p-3.5 rounded-xl bg-[#1A1620] border border-[#5B4868]">
+                    <div className="text-[10px] uppercase font-mono tracking-widest text-[#C9A96E] font-bold flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> ВІДКЛАДЕНО</div>
+                    <p className="text-xs sm:text-sm text-[#D3DAE8]">Це рішення ще озветься у <strong>{delayed[0].triggerYear} році</strong>: {delayed[0].title}.</p>
+                  </div>
+                )}
+
+                {/* 4.6. Голос людини */}
+                {speaker && scenario.speakerQuote && (
+                  <div className="p-3.5 rounded-xl bg-[#141B28] border border-[#27354D]">
+                    <div className="text-[10px] uppercase font-mono tracking-widest text-[#8E93A0] mb-1">ПІСЛЯ УХВАЛИ</div>
+                    <p className="font-serif text-sm italic text-[#E3D8C5]">«{speaker.name} ще пам'ятатиме цей день.»</p>
+                  </div>
+                )}
+
                 {/* 5. РІШЕННЯ ЗАПАМ'ЯТОВАНЕ */}
                 <div className="space-y-1.5 p-3.5 rounded-xl bg-[#141B28] border border-[#27354D]">
                   <div className="text-[10px] uppercase font-mono tracking-widest text-[#34D399] font-bold flex items-center gap-1.5">
