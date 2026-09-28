@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Scenario, Choice } from '../../game/scenarios/types.ts';
+import { GameState } from '../../game/state/types.ts';
 import { Character } from '../../types/index.ts';
 import { ChoiceResolutionResult } from '../../game/engine/scenarioEngine.ts';
 import { WaxSeal } from '../ui/WaxSeal.tsx';
@@ -24,6 +25,7 @@ import {
 
 interface ScenarioViewProps {
   scenario: Scenario;
+  state: GameState;
   characters: Character[];
   onSelectChoice: (choiceId: string) => void;
   lastExecutionLogs: string[] | null;
@@ -33,6 +35,7 @@ interface ScenarioViewProps {
 
 export const ScenarioView: React.FC<ScenarioViewProps> = ({
   scenario,
+  state,
   characters,
   onSelectChoice,
   lastExecutionLogs,
@@ -267,29 +270,31 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                       </button>
                     </div>
 
-                    {/* Consistent decision preview: every universal exposes the same class of direct effects. */}
-                    <div className="pl-0 md:pl-8 pt-2 border-t border-[#E5D7BE] space-y-2 text-xs font-mono">
-                      <div className="flex items-center gap-2 text-[#6E6354] uppercase tracking-wider font-bold text-[10px]">
-                        <span>ЩО ЗМІНИТЬСЯ ОДРАЗУ</span>
-                        <span className="font-normal normal-case tracking-normal">· однаково для всіх ухвал</span>
+                    {/* First-year onboarding: show only the state levers this choice moves. */}
+                    {scenario.year === 1848 && (
+                      <div className="pl-0 md:pl-8 pt-2 border-t border-[#E5D7BE] space-y-2">
+                        <div className="text-[10px] uppercase tracking-widest font-mono font-bold text-[#6E6354]">ЦІНА РІШЕННЯ</div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
+                          {(() => {
+                            const treasuryDelta = choice.consequences.filter((c: any) => c.type === 'STATE_CHANGE' && c.metric === 'treasury').reduce((sum: number, c: any) => sum + (c.value || 0), 0);
+                            const militaryDelta = choice.consequences.filter((c: any) => c.type === 'STATE_CHANGE' && c.metric === 'militaryStrength').reduce((sum: number, c: any) => sum + (c.value || 0), 0);
+                            const politicalWillDelta = -(choice.politicalCost?.politicalWillCost ?? choice.politicalCost?.capitalCost ?? 0);
+                            const items = [
+                              treasuryDelta ? { label: 'СКАРБНИЦЯ', from: state.empire.treasury, to: state.empire.treasury + treasuryDelta, suffix: ' млн' } : null,
+                              politicalWillDelta ? { label: 'ПОЛІТИЧНА ВОЛЯ', from: state.politicalWill ?? 55, to: Math.max(0, (state.politicalWill ?? 55) + politicalWillDelta), suffix: '' } : null,
+                              militaryDelta ? { label: 'ВІЙСЬКОВА МІЦЬ', from: state.empire.militaryStrength, to: Math.max(0, state.empire.militaryStrength + militaryDelta), suffix: '' } : null,
+                            ].filter(Boolean) as Array<{label: string; from: number; to: number; suffix: string}>;
+                            return items.map((item) => (
+                              <div key={item.label} className="flex items-center justify-between gap-2 bg-[#FAF3E3] border border-[#D8C6A5] rounded-md px-2.5 py-2">
+                                <span className="text-[#6E6354]">{item.label}</span>
+                                <span className="font-bold text-[#1C1815] whitespace-nowrap">{item.from}{item.suffix} <span className="text-[#8E2525]">→</span> {item.to}{item.suffix}</span>
+                              </div>
+                            ));
+                          })()}
+                        </div>
+                        <p className="text-[11px] text-[#7A6F60] leading-snug">Перший рік показує, які державні важелі ти змінюєш. Інші наслідки відкриються після ухвали.</p>
                       </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {choice.consequences.filter((c: any) => c.type === 'STATE_CHANGE' || c.type === 'EMPIRE_METRIC_CHANGE').slice(0, 3).map((c: any, i: number) => (
-                          <span key={i} className="px-2 py-1 rounded bg-[#EADECA] text-[#4A3B2C] border border-[#C5B396]">{c.label || c.metric}: {c.value > 0 ? '+' : ''}{c.value}</span>
-                        ))}
-                        {choice.politicalCost && (choice.politicalCost.politicalWillCost ?? choice.politicalCost.capitalCost) ? (
-                          <span className="px-2 py-1 rounded bg-[#F0E3C8] text-[#6B4D16] border border-[#C9A96E]">Політична воля −{choice.politicalCost.politicalWillCost ?? choice.politicalCost.capitalCost}</span>
-                        ) : null}
-                        {choice.politicalCost?.economicCost ? (
-                          <span className="px-2 py-1 rounded bg-[#F0E3C8] text-[#6B4D16] border border-[#C9A96E]">Скарбниця −{choice.politicalCost.economicCost} млн</span>
-                        ) : null}
-                        {choice.politicalReactions?.length ? (
-                          <span className="px-2 py-1 rounded bg-[#F1E8D8] text-[#544D45] border border-[#C5B396]">Реакції станів: {choice.politicalReactions.length}</span>
-                        ) : (
-                          <span className="px-2 py-1 rounded bg-[#F1E8D8] text-[#6E6354] border border-[#C5B396]">Реакція світу: після ухвали</span>
-                        )}
-                      </div>
-                    </div>
+                    )}
                   </div>
                 ))}
               </div>
