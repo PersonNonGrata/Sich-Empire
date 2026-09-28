@@ -30,20 +30,20 @@ const TARGET_NAMES = new Set([
 const COUNTRY_LABELS = [
   { name: 'ПОРТУГАЛІЯ', lon: -7.7, lat: 39.6, size: 7 },
   { name: 'ІСПАНІЯ', lon: -3.2, lat: 40.2, size: 8 },
-  { name: 'АНГЛІЯ', lon: -1.7, lat: 52.2, size: 8 },
-  { name: 'ФРАНЦІЯ', lon: 2.2, lat: 46.4, size: 9 },
+  { name: 'АНГЛІЯ', lon: -0.7, lat: 52.7, size: 8, power: 'england' as const },
+  { name: 'ФРАНЦІЯ', lon: 2.2, lat: 46.4, size: 9, power: 'france' as const },
   { name: 'НІДЕРЛАНДИ', lon: 5.3, lat: 52.2, size: 6 },
   { name: 'БЕЛЬГІЯ', lon: 4.5, lat: 50.8, size: 6 },
-  { name: 'ШВЕЦІЯ', lon: 16.0, lat: 61.0, size: 8 },
+  { name: 'ШВЕЦІЯ', lon: 16.0, lat: 61.0, size: 8, power: 'sweden' as const },
   { name: 'ДАНІЯ', lon: 10.0, lat: 56.2, size: 6 },
-  { name: 'ПРУССІЯ', lon: 19.2, lat: 53.2, size: 8, power: 'germany' as const },
-  { name: 'НІМЕЧЧИНА', lon: 12.8, lat: 50.0, size: 8, power: 'germany' as const },
-  { name: 'АВСТРІЯ', lon: 15.0, lat: 47.7, size: 8 },
+  { name: 'ПРУССІЯ', lon: 19.2, lat: 53.2, size: 7, power: 'germany' as const },
+  { name: 'НІМЕЧЧИНА', lon: 10.5, lat: 50.5, size: 9, power: 'germany' as const },
+  { name: 'АВСТРІЯ', lon: 14.4, lat: 47.6, size: 8, power: 'austria' as const },
   { name: 'ШВЕЙЦАРІЯ', lon: 8.2, lat: 46.8, size: 6 },
   { name: 'БАВАРІЯ', lon: 11.4, lat: 48.9, size: 6 },
   { name: 'САКСОНІЯ', lon: 13.3, lat: 51.0, size: 6 },
-  { name: 'ІТАЛІЯ', lon: 12.2, lat: 42.8, size: 7, power: 'italy' as const },
-  { name: 'ОСМАНСЬКА ІМПЕРІЯ', lon: 27.0, lat: 40.8, size: 7 },
+  { name: 'ІТАЛІЯ', lon: 12.4, lat: 42.3, size: 9, power: 'italy' as const },
+  { name: 'ОСМАНСЬКА ІМПЕРІЯ', lon: 27.0, lat: 40.8, size: 7, power: 'ottoman' as const },
   { name: 'ГРЕЦІЯ', lon: 22.4, lat: 39.2, size: 6 },
   { name: 'СЕРБІЯ', lon: 20.7, lat: 44.0, size: 6 },
   { name: 'МОЛДАВІЯ', lon: 27.7, lat: 47.0, size: 5 },
@@ -337,7 +337,7 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
 
           {/* Political labels keep the map readable as an atlas rather than a technical GIS layer. */}
           {POWER_LEGEND.map((item, index) => (
-            <g key={item.power} transform={'translate(' + (690 + (index % 2) * 125) + ' ' + (28 + Math.floor(index / 2) * 15) + ')'}>
+            <g key={item.power} transform={'translate(' + (705 + (index % 2) * 118) + ' ' + (72 + Math.floor(index / 2) * 14) + ')'}>
               <rect width="8" height="8" rx="1" fill={POWER_COLORS[item.power]} />
               <text x="13" y="8" fill="#D9D6CA" fontSize="7.5" fontFamily="Georgia, serif" letterSpacing=".7">
                 {item.name}
@@ -353,6 +353,7 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
                 x={x}
                 y={y}
                 textAnchor="middle"
+                dominantBaseline="middle"
                 fill={label.power ? POWER_COLORS[label.power] : "#D0D4D0"}
                 opacity=".94"
                 fontSize={label.size}
