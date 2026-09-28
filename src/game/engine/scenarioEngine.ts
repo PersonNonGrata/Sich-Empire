@@ -27,6 +27,8 @@ export interface ChoiceResolutionResult {
   logs: string[];
   previousMetrics: EmpireMetrics;
   newMetrics: EmpireMetrics;
+  previousPoliticalWill: number;
+  newPoliticalWill: number;
   resolvedScheduledEvents: ScheduledConsequence[];
   newEvents?: ImperialEvent[];
   politicalReactionsSummary: Array<{ entity: string; reaction: string; note: string }>;
@@ -654,6 +656,8 @@ export function resolveChoice(
     logs: allLogs,
     previousMetrics,
     newMetrics: { ...finalState.empire },
+    previousPoliticalWill: currentState.politicalWill ?? 55,
+    newPoliticalWill: finalState.politicalWill ?? 55,
     resolvedScheduledEvents: scheduledResult.resolved,
     newEvents: [...crisisEvents, ...scheduledResult.newEvents],
     politicalReactionsSummary,
