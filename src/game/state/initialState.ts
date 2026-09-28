@@ -6,7 +6,7 @@ import { PoliticalRelationship } from '../politics/types.ts';
 import { EconomyState } from '../economy/types.ts';
 import { MilitaryState } from '../military/types.ts';
 
-export const CURRENT_STATE_VERSION = 7;
+export const CURRENT_STATE_VERSION = 8;
 
 export function createInitialGameState(rulerName = 'Ярослав Нескорений'): GameState {
   const gameId = 'sich_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
@@ -160,7 +160,7 @@ export function createInitialGameState(rulerName = 'Ярослав Нескор�
     },
 
     // Stage 4 Political Machine additions
-    politicalCapital: 55,
+    politicalWill: 55,
     legitimacy: {
       tradition: 70,
       law: 60,
