@@ -18,6 +18,8 @@ type GeoJSONCollection = {
 
 const WORLD_1700_URL =
   'https://raw.githubusercontent.com/aourednik/historical-basemaps/da7a4b735ecef70aebdc9c73e409d8a2500d50f3/geojson/world_1700.geojson';
+const UKRAINE_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/ukraine.geojson';
 
 const TARGET_NAMES = new Set([
   'Polish–Lithuanian Commonwealth',
@@ -97,6 +99,7 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
   const compact = variant === 'prologue';
   const [features, setFeatures] = useState<GeoFeature[]>([]);
   const [contextFeatures, setContextFeatures] = useState<GeoFeature[]>([]);
+  const [ukraineFeature, setUkraineFeature] = useState<GeoFeature | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -117,14 +120,29 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
         const contextNames = new Set([
           'Sweden', 'Prussia', 'Austrian Empire', 'Holy Roman Empire',
           'Ottoman Empire', 'Denmark-Norway', 'France', 'Spain', 'Portugal',
-          'England', 'Scotland', 'Dutch Republic', 'Venice', 'Papal States',
-          'Kingdom of Hungary', 'Transylvania', 'Crimean Khanate', 'Moldavia',
-          'Wallachia', 'Brandenburg'
+          'England', 'Scotland', 'Ireland', 'Dutch Republic', 'Venice', 'Papal States',
+          'Kingdom of Hungary', 'Transylvania', 'Moldavia', 'Wallachia', 'Brandenburg',
+          'Bavaria', 'Saxony', 'Hanover', 'Switzerland', 'Sardinia-Piedmont',
+          'Kingdom of Naples', 'Tuscany', 'Piedmont', 'Two Sicilies', 'Greece'
         ]);
         setContextFeatures(data.features.filter((feature) => contextNames.has(feature.properties?.NAME ?? '')));
+        const ukraine = data.features.find((feature) => false);
+        void ukraine;
       })
       .catch(() => {
         if (!cancelled) setError(true);
+      });
+
+    fetch(UKRAINE_URL)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Ukraine geometry request failed: ${response.status}`);
+        return response.json() as Promise<GeoFeature>;
+      })
+      .then((feature) => {
+        if (!cancelled) setUkraineFeature(feature);
+      })
+      .catch(() => {
+        if (!cancelled) setUkraineFeature(null);
       });
 
     return () => {
@@ -150,8 +168,16 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
   );
 
   const contextPaths = useMemo(
-    () => contextFeatures.flatMap((feature) => geometryToPaths(feature.geometry, bounds)),
+    () => contextFeatures.map((feature) => ({
+      name: feature.properties?.NAME ?? '',
+      paths: geometryToPaths(feature.geometry, bounds),
+    })),
     [contextFeatures, bounds]
+  );
+
+  const ukrainePaths = useMemo(
+    () => ukraineFeature ? geometryToPaths(ukraineFeature.geometry, bounds) : [],
+    [ukraineFeature, bounds]
   );
 
   return (
@@ -193,8 +219,41 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
         <g>
           {/* Real historical polygons from the 1700 historical-basemaps dataset.
               The viewport is deliberately European; the alternate-history union is clipped by the map frame. */}
-          {contextPaths.map((d, index) => (
-            <path key={`context-${index}`} d={d} fill="#273640" stroke="#687982" strokeWidth="0.9" opacity=".92" />
+          {contextPaths.flatMap(({ name, paths: featurePaths }) => featurePaths.map((d, index) => {
+            const fill = name === 'Ottoman Empire'
+              ? '#765039'
+              : name === 'Austrian Empire'
+                ? '#E8E5DC'
+                : name === 'Prussia'
+                  ? '#172E4B'
+                  : name === 'Sweden'
+                    ? '#5D9BB2'
+                    : '#273640';
+            const stroke = name === 'Austrian Empire' ? '#FFFFFF' : '#71818A';
+            return (
+              <path
+                key={`context-${name}-${index}`}
+                d={d}
+                fill={fill}
+                stroke={stroke}
+                strokeWidth={name === 'Austrian Empire' ? 1.1 : 0.9}
+                opacity={name === 'Austrian Empire' ? '.94' : '.9'}
+              />
+            );
+          }))}
+
+          {/* Game canon: the entire territory of modern Ukraine, including Crimea,
+              is part of the Sich Empire. This canonical overlay is intentionally
+              separate from the 1700 historical basemap. */}
+          {ukrainePaths.map((d, index) => (
+            <path
+              key={`ukraine-canon-${index}`}
+              d={d}
+              fill="url(#sichMapLand)"
+              stroke="#F7D993"
+              strokeWidth="2"
+              opacity=".98"
+            />
           ))}
           {paths.map((d, index) => (
             <path key={index} d={d} fill="url(#sichMapLand)" stroke="#F0D18A" strokeWidth="1.8" />
