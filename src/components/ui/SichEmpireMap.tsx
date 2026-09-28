@@ -26,13 +26,25 @@ const TARGET_NAMES = new Set([
 ]);
 
 const COUNTRY_LABELS = [
-  { name: 'ФРАНЦІЯ', lon: 2.3, lat: 46.2, size: 10 },
-  { name: 'ІСПАНІЯ', lon: -3.5, lat: 40.2, size: 9 },
-  { name: 'АНГЛІЯ', lon: -1.5, lat: 52.0, size: 8 },
-  { name: 'СВЯЩЕННА РИМСЬКА ІМПЕРІЯ', lon: 10.5, lat: 50.2, size: 7 },
-  { name: 'АВСТРІЯ', lon: 15.4, lat: 48.4, size: 8 },
-  { name: 'ОСМАНСЬКА ІМПЕРІЯ', lon: 27.2, lat: 41.3, size: 7 },
-  { name: 'ШВЕЦІЯ', lon: 16.0, lat: 61.2, size: 8 },
+  { name: 'ПОРТУГАЛІЯ', lon: -7.7, lat: 39.6, size: 7 },
+  { name: 'ІСПАНІЯ', lon: -3.2, lat: 40.2, size: 8 },
+  { name: 'АНГЛІЯ', lon: -1.7, lat: 52.2, size: 8 },
+  { name: 'ФРАНЦІЯ', lon: 2.2, lat: 46.4, size: 9 },
+  { name: 'НІДЕРЛАНДИ', lon: 5.3, lat: 52.2, size: 6 },
+  { name: 'БЕЛЬГІЯ', lon: 4.5, lat: 50.8, size: 6 },
+  { name: 'ШВЕЦІЯ', lon: 16.0, lat: 61.0, size: 8 },
+  { name: 'ДАНІЯ', lon: 10.0, lat: 56.2, size: 6 },
+  { name: 'ПРУССІЯ', lon: 19.2, lat: 53.2, size: 8 },
+  { name: 'АВСТРІЯ', lon: 15.0, lat: 47.7, size: 8 },
+  { name: 'ШВЕЙЦАРІЯ', lon: 8.2, lat: 46.8, size: 6 },
+  { name: 'БАВАРІЯ', lon: 11.4, lat: 48.9, size: 6 },
+  { name: 'САКСОНІЯ', lon: 13.3, lat: 51.0, size: 6 },
+  { name: 'ІТАЛІЯ', lon: 12.2, lat: 42.8, size: 7 },
+  { name: 'ОСМАНСЬКА ІМПЕРІЯ', lon: 27.0, lat: 40.8, size: 7 },
+  { name: 'ГРЕЦІЯ', lon: 22.4, lat: 39.2, size: 6 },
+  { name: 'СЕРБІЯ', lon: 20.7, lat: 44.0, size: 6 },
+  { name: 'МОЛДАВІЯ', lon: 27.7, lat: 47.0, size: 5 },
+  { name: 'ВАЛАХІЯ', lon: 25.2, lat: 44.7, size: 5 },
   { name: 'МОСКОВІЯ', lon: 39.0, lat: 58.8, size: 8 },
 ];
 
@@ -182,10 +194,10 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
           {/* Real historical polygons from the 1700 historical-basemaps dataset.
               The viewport is deliberately European; the alternate-history union is clipped by the map frame. */}
           {contextPaths.map((d, index) => (
-            <path key={`context-${index}`} d={d} fill="#26333A" stroke="#56636A" strokeWidth="1" opacity=".72" />
+            <path key={`context-${index}`} d={d} fill="#273640" stroke="#687982" strokeWidth="0.9" opacity=".92" />
           ))}
           {paths.map((d, index) => (
-            <path key={index} d={d} fill="url(#sichMapLand)" stroke="#E7C77A" strokeWidth="1.25" />
+            <path key={index} d={d} fill="url(#sichMapLand)" stroke="#F0D18A" strokeWidth="1.8" />
           ))}
 
           {/* Political labels keep the map readable as an atlas rather than a technical GIS layer. */}
@@ -197,8 +209,8 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
                 x={x}
                 y={y}
                 textAnchor="middle"
-                fill="#AAB0AE"
-                opacity=".82"
+                fill="#D0D4D0"
+                opacity=".94"
                 fontSize={label.size}
                 fontFamily="Georgia, serif"
                 letterSpacing="1.5"
@@ -239,11 +251,20 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
             );
           })}
 
-          <text x="500" y="330" textAnchor="middle" fill="#2A2116"
-            fontSize={compact ? 21 : 30} fontFamily="Georgia, serif"
-            fontWeight="700" letterSpacing="3">
-            ІМПЕРІЯ СІЧ
-          </text>
+          {(() => {
+            const [lx, ly] = project(31.5, 53.5, bounds);
+            return (
+              <g transform={`translate(${lx} ${ly})`}>
+                <rect x="-82" y="-18" width="164" height="32" rx="3"
+                  fill="#8B672F" opacity=".58" stroke="#F0D18A" strokeWidth=".7" />
+                <text x="0" y="4" textAnchor="middle" fill="#FFF1C9"
+                  fontSize={compact ? 15 : 24} fontFamily="Georgia, serif"
+                  fontWeight="700" letterSpacing="2">
+                  ІМПЕРІЯ СІЧ
+                </text>
+              </g>
+            );
+          })()}
         </g>
       ) : (
         <g>
@@ -253,8 +274,10 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
         </g>
       )}
 
-      <text x="48" y="486" fill="#78909A" fontSize="11" fontFamily="Georgia, serif">ЧОРНЕ МОРЕ</text>
-      <text x="815" y="430" fill="#71818A" fontSize="10" fontFamily="Georgia, serif">КАСПІЙСЬКЕ МОРЕ</text>
+      <text x="52" y="96" fill="#71818A" fontSize="9" fontFamily="Georgia, serif" letterSpacing="1.5">ПІВНІЧНЕ МОРЕ</text>
+      <text x="52" y="486" fill="#8A9AA0" fontSize="11" fontFamily="Georgia, serif" letterSpacing="1">ЧОРНЕ МОРЕ</text>
+      <text x="745" y="450" fill="#71818A" fontSize="9" fontFamily="Georgia, serif" letterSpacing="1">КАСПІЙСЬКЕ МОРЕ</text>
+      <text x="470" y="500" fill="#71818A" fontSize="9" fontFamily="Georgia, serif" letterSpacing="2">СЕРЕДЗЕМНЕ МОРЕ</text>
 
       <g transform="translate(70 405)" opacity=".82">
         <circle r="24" fill="none" stroke="#B89A5B" strokeWidth="1" />
