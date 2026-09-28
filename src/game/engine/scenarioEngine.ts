@@ -11,7 +11,7 @@ import {
   detectPoliticalCrises,
   evaluatePromises,
   calculateLegitimacy,
-  recalculatePoliticalCapital,
+  recalculatePoliticalWill,
 } from '../politics/evaluator.ts';
 import { advanceEconomicYear } from '../economy/economyEngine.ts';
 import {
@@ -141,7 +141,7 @@ export function recalculateDerivedState(currentState: GameState): GameState {
         }
       : state.military,
     legitimacy: leg.components,
-    politicalCapital: recalculatePoliticalCapital(state.politicalCapital ?? 55, 0, leg.aggregate),
+    politicalWill: recalculatePoliticalWill(state.politicalWill ?? 55, 0, leg.aggregate),
   };
 
   return state;
@@ -713,7 +713,7 @@ export function advanceYear(
         ? { ...f, loyalty: Math.max(0, f.loyalty - 15), tension: Math.min(100, (f.tension ?? 25) + 15) }
         : f
     );
-    state.politicalCapital = Math.max(0, (state.politicalCapital ?? 55) - 12);
+    state.politicalWill = Math.max(0, (state.politicalWill ?? 55) - 12);
     state.history = [
       {
         id: 'hist_broken_' + Date.now() + '_' + broken.id,
@@ -741,7 +741,7 @@ export function advanceYear(
 
   for (const fulfilled of promiseEvaluation.fulfilledList) {
     advanceLogs.push(`Обітницю Гетьмана виконано: «${fulfilled.text}»!`);
-    state.politicalCapital = Math.min(100, (state.politicalCapital ?? 55) + 8);
+    state.politicalWill = Math.min(100, (state.politicalWill ?? 55) + 8);
     state.history = [
       {
         id: 'hist_fulfilled_' + Date.now() + '_' + fulfilled.id,
