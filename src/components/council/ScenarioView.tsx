@@ -267,68 +267,29 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                       </button>
                     </div>
 
-                    {/* Political Cost & Reactions Strip */}
-                    {(choice.politicalCost || choice.politicalReactions || choice.proposalVoting || (choice.memoryTags && choice.memoryTags.length > 0)) && (
-                      <div className="flex pl-0 md:pl-8 pt-2 border-t border-[#E5D7BE] flex-wrap items-center gap-3 text-xs font-mono">
-                        {choice.memoryTags && choice.memoryTags.length > 0 && (
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-[#8E2525] font-bold flex items-center gap-1">
-                              <Bookmark className="w-3 h-3 text-[#8E2525]" />
-                              <span>Карбує пам'ять:</span>
-                            </span>
-                            {choice.memoryTags.map((mt, mIdx) => (
-                              <span
-                                key={mIdx}
-                                className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#F4E9D5] text-[#7A2A2A] border border-[#CDB58E]"
-                              >
-                                «{mt}»
-                              </span>
-                            ))}
-                          </div>
-                        )}
-
-                        {choice.politicalCost && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-[#8E2525] font-bold">Ціна ухвали:</span>
-                            {(choice.politicalCost.politicalWillCost ?? choice.politicalCost.capitalCost) && (
-                              <span className="bg-[#EADECA] text-[#4A3B2C] px-2 py-0.5 rounded border border-[#C5B396]">
-                                Політична воля -{choice.politicalCost.politicalWillCost ?? choice.politicalCost.capitalCost}
-                              </span>
-                            )}
-                            {choice.politicalCost.economicCost && (
-                              <span className="bg-[#EADECA] text-[#7A3E1D] px-2 py-0.5 rounded border border-[#C5B396]">
-                                Скарбниця -{choice.politicalCost.economicCost} млн
-                              </span>
-                            )}
-                          </div>
-                        )}
-
-                        {choice.politicalReactions && (
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-[#6E6354]">Реакція станів:</span>
-                            {choice.politicalReactions.map((pr, pIdx) => {
-                              const isPositive = pr.reaction === 'support';
-                              const isNegative = pr.reaction === 'opposition' || pr.reaction === 'crisis';
-                              return (
-                                <span
-                                  key={pIdx}
-                                  className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                                    isPositive
-                                      ? 'bg-[#E1EFE6] text-[#047857] border border-[#10B981]/40'
-                                      : isNegative
-                                      ? 'bg-[#FBEAEB] text-[#B91C1C] border border-[#EF4444]/40'
-                                      : 'bg-[#EADECA] text-[#544D45] border border-[#C5B396]'
-                                  }`}
-                                  title={pr.note}
-                                >
-                                  {pr.note}
-                                </span>
-                              );
-                            })}
-                          </div>
+                    {/* Consistent decision preview: every universal exposes the same class of direct effects. */}
+                    <div className="pl-0 md:pl-8 pt-2 border-t border-[#E5D7BE] space-y-2 text-xs font-mono">
+                      <div className="flex items-center gap-2 text-[#6E6354] uppercase tracking-wider font-bold text-[10px]">
+                        <span>ЩО ЗМІНИТЬСЯ ОДРАЗУ</span>
+                        <span className="font-normal normal-case tracking-normal">· однаково для всіх ухвал</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {choice.consequences.filter((c: any) => c.type === 'STATE_CHANGE' || c.type === 'EMPIRE_METRIC_CHANGE').slice(0, 3).map((c: any, i: number) => (
+                          <span key={i} className="px-2 py-1 rounded bg-[#EADECA] text-[#4A3B2C] border border-[#C5B396]">{c.label || c.metric}: {c.value > 0 ? '+' : ''}{c.value}</span>
+                        ))}
+                        {choice.politicalCost && (choice.politicalCost.politicalWillCost ?? choice.politicalCost.capitalCost) ? (
+                          <span className="px-2 py-1 rounded bg-[#F0E3C8] text-[#6B4D16] border border-[#C9A96E]">Політична воля −{choice.politicalCost.politicalWillCost ?? choice.politicalCost.capitalCost}</span>
+                        ) : null}
+                        {choice.politicalCost?.economicCost ? (
+                          <span className="px-2 py-1 rounded bg-[#F0E3C8] text-[#6B4D16] border border-[#C9A96E]">Скарбниця −{choice.politicalCost.economicCost} млн</span>
+                        ) : null}
+                        {choice.politicalReactions?.length ? (
+                          <span className="px-2 py-1 rounded bg-[#F1E8D8] text-[#544D45] border border-[#C5B396]">Реакції станів: {choice.politicalReactions.length{'}'}</span>
+                        ) : (
+                          <span className="px-2 py-1 rounded bg-[#F1E8D8] text-[#6E6354] border border-[#C5B396]">Реакція світу: після ухвали</span>
                         )}
                       </div>
-                    )}
+                    </div>
                   </div>
                 ))}
               </div>
