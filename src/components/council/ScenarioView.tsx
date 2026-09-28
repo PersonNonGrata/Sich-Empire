@@ -284,7 +284,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                           <span className="px-2 py-1 rounded bg-[#F0E3C8] text-[#6B4D16] border border-[#C9A96E]">Скарбниця −{choice.politicalCost.economicCost} млн</span>
                         ) : null}
                         {choice.politicalReactions?.length ? (
-                          <span className="px-2 py-1 rounded bg-[#F1E8D8] text-[#544D45] border border-[#C5B396]">Реакції станів: {choice.politicalReactions.length{'}'}</span>
+                          <span className="px-2 py-1 rounded bg-[#F1E8D8] text-[#544D45] border border-[#C5B396]">Реакції станів: {choice.politicalReactions.length}</span>
                         ) : (
                           <span className="px-2 py-1 rounded bg-[#F1E8D8] text-[#6E6354] border border-[#C5B396]">Реакція світу: після ухвали</span>
                         )}
