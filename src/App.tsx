@@ -23,6 +23,53 @@ import { CoatOfArms } from './components/ui/CoatOfArms.tsx';
 import { SichEmpireMap } from './components/ui/SichEmpireMap.tsx';
 import { X } from 'lucide-react';
 
+
+type PrologueScene = {
+  year: string;
+  eyebrow: string;
+  title: string;
+  body: string;
+  accent: string;
+};
+
+const PROLOGUE_SCENES: PrologueScene[] = [
+  {
+    year: '1648',
+    eyebrow: 'ПОВСТАННЯ ХМЕЛЬНИЦЬКОГО',
+    title: 'Народжується Січ',
+    body: 'Повстання Хмельницького перетворюється на війну за новий порядок у Східній Європі. Січ виходить із боротьби сильнішою та починає будувати власну державу.',
+    accent: 'Початок',
+  },
+  {
+    year: '1654',
+    eyebrow: 'ПЕРЕМОГА ХМЕЛЬНИЦЬКОГО',
+    title: 'Протекторат Січі',
+    body: 'Хмельницький перемагає. Польща та Литва переходять під протекторат Січі. Київ стає центром нової політичної системи.',
+    accent: 'Новий порядок',
+  },
+  {
+    year: '1700',
+    eyebrow: 'ПАДІННЯ МОСКОВІЇ',
+    title: 'Схід відкритий',
+    body: 'Січ вступає у вирішальну війну з Московським царством. Москва зазнає поразки, а її землі переходять під владу Січі.',
+    accent: 'Імперія',
+  },
+  {
+    year: '1805–1815',
+    eyebrow: 'НАПОЛЕОНІВСЬКІ ВІЙНИ',
+    title: 'Велика війна',
+    body: 'Наполеон кидає виклик Січі. Французька армія зазнає поразки, але перемога коштує дорого обом сторонам. Європа виходить із війни зміненою.',
+    accent: 'Випробування',
+  },
+  {
+    year: '1848',
+    eyebrow: 'ВЕСНА НАРОДІВ',
+    title: 'Тепер твоя черга',
+    body: 'Минуло два століття від початку повстання. Січ стала однією з головних сил Європи. Але старий порядок знову тріщить, і нова епоха починається саме зараз.',
+    accent: 'Початок гри',
+  },
+];
+
 export default function App() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [activeTab, setActiveTab] = useState<string>('rada');
@@ -32,6 +79,7 @@ export default function App() {
   const [bannerNotice, setBannerNotice] = useState<string | null>(null);
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState<boolean>(false);
   const [showPrologue, setShowPrologue] = useState<boolean>(false);
+  const [prologueScene, setPrologueScene] = useState<number>(0);
 
   // Load existing save or initialize new state
   useEffect(() => {
@@ -40,7 +88,7 @@ export default function App() {
         const loaded = await loadGame();
         if (loaded) {
           setGameState(loaded);
-          setBannerNotice('Кампанію 1848 року відновлено зі сховища.');
+          setBannerNotice('Кампанію 1848 року відновлено.');
         } else {
           const fresh = createInitialGameState('Гетьман');
           setGameState(fresh);
@@ -145,7 +193,7 @@ export default function App() {
     setActiveTab('rada');
     setIsDiagnosticsOpen(false);
     persistState(fresh);
-    setBannerNotice(`Створено нову гру. Володар: ${fresh.identity.rulerName}. 1848 рік.`);
+    setBannerNotice(`Створено нову гру. Володар: ${fresh.identity.rulerName}.`);
   };
 
   // 7. Force reload from disk
@@ -169,7 +217,7 @@ export default function App() {
     setGameState(fresh);
     setLastExecutionLogs(null);
     setIsDiagnosticsOpen(false);
-    setBannerNotice('Сховище повністю очищено. Розпочато нову кампанію 1848 року.');
+    setBannerNotice('Сховище повністю очищено. Розпочато нову кампанію.');
   };
 
   if (!gameState) {
@@ -181,7 +229,7 @@ export default function App() {
             Імперія Січ
           </div>
           <div className="text-xs text-[#8E93A0] font-mono">
-            Розгортання Кабінету Гетьмана 1848 року...
+            Розгортання Кабінету Гетьмана...
           </div>
         </div>
       </div>
@@ -189,7 +237,15 @@ export default function App() {
   }
 
   if (showPrologue) {
-    const beginCampaign = async () => {
+    const scene = PROLOGUE_SCENES[prologueScene];
+    const isLastScene = prologueScene === PROLOGUE_SCENES.length - 1;
+
+    const continuePrologue = async () => {
+      if (!isLastScene) {
+        setPrologueScene((current) => current + 1);
+        return;
+      }
+
       const fresh = createInitialGameState('Гетьман');
       setGameState(fresh);
       setShowPrologue(false);
@@ -201,15 +257,32 @@ export default function App() {
         <main className="relative min-h-[100dvh] flex flex-col">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(201,169,110,0.12),transparent_42%)] pointer-events-none" />
 
-          <section className="relative flex-1 flex flex-col justify-center px-5 pt-10 pb-6 sm:px-8">
-            <div className="w-full max-w-2xl mx-auto space-y-7 text-center">
+          <section className="relative flex-1 flex flex-col justify-center px-5 pt-8 pb-5 sm:px-8">
+            <div className="w-full max-w-2xl mx-auto space-y-5 sm:space-y-7 text-center">
+              <div className="flex items-center justify-center gap-2">
+                {PROLOGUE_SCENES.map((item, index) => (
+                  <span
+                    key={item.year}
+                    className={index === prologueScene
+                      ? "h-1.5 w-8 rounded-full bg-[#C9A96E]"
+                      : index < prologueScene
+                        ? "h-1.5 w-4 rounded-full bg-[#6F6043]"
+                        : "h-1.5 w-4 rounded-full bg-[#2B3038]"}
+                    aria-hidden="true"
+                  />
+                ))}
+              </div>
+
               <div className="space-y-2">
                 <p className="text-[#C9A96E] text-[10px] sm:text-xs font-mono tracking-[0.3em] uppercase">
-                  1848 · ВЕСНА НАРОДІВ
+                  {scene.year} · {scene.eyebrow}
                 </p>
-                <h1 className="font-serif text-4xl sm:text-6xl font-bold tracking-tight">
-                  ІМПЕРІЯ СІЧ
+                <h1 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight">
+                  {scene.title}
                 </h1>
+                <p className="text-[#777F8E] text-[10px] font-mono tracking-[0.22em] uppercase">
+                  {scene.accent}
+                </p>
               </div>
 
               <div className="relative mx-auto w-full max-w-xl aspect-[1.35/1] rounded-2xl overflow-hidden border border-[#3A4354] bg-[#0D121A] shadow-[0_20px_80px_rgba(0,0,0,0.5)]">
@@ -218,25 +291,24 @@ export default function App() {
               </div>
 
               <div className="max-w-xl mx-auto space-y-4">
-                <p className="font-serif text-lg sm:text-2xl leading-relaxed text-[#E5E0D7]">
-                  Європа входить у вогонь революцій. Імперії хитаються. Старі порядки тріщать.
+                <p className="font-serif text-base sm:text-xl leading-relaxed text-[#E5E0D7]">
+                  {scene.body}
                 </p>
-                <p className="font-serif text-base sm:text-lg leading-relaxed text-[#A8AFBD]">
-                  На Хортиці постає держава, яка вирішила сама визначати свою долю. Ти отримуєш булаву в момент, коли кожне слово Ради може змінити шлях країни на десятиліття.
-                </p>
-                <p className="text-[#C9A96E] font-serif italic text-sm sm:text-base">
-                  Перший рік твого правління починається зараз.
-                </p>
+                {isLastScene && (
+                  <p className="text-[#C9A96E] font-serif italic text-sm sm:text-base">
+                    Твоя Рада збирається вперше.
+                  </p>
+                )}
               </div>
             </div>
           </section>
 
           <div className="relative px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:pb-8">
             <button
-              onClick={beginCampaign}
+              onClick={continuePrologue}
               className="w-full max-w-xl mx-auto min-h-[58px] rounded-xl bg-[#C9A96E] text-[#0A0D14] font-serif font-bold text-sm sm:text-base tracking-[0.08em] flex items-center justify-center gap-2 shadow-lg active:scale-[0.99] transition-transform"
             >
-              ПОЧАТИ ГРУ
+              {isLastScene ? 'ПОЧАТИ ГРУ' : 'ДАЛІ'}
             </button>
           </div>
         </main>
