@@ -440,7 +440,7 @@ export function evaluateAscension(state: GameState): AscensionEvaluationResult {
       progressionNote = 'Твої рішення дедалі частіше будуються навколо соборного миру та балансу інтересів станів.';
     }
     compositeTitle = `Визрівання: ${primaryDef.title}`;
-  } else if (decCount >= 5 && state.identity.year < 1850 && transformations.length === 0) {
+  } else if (decCount >= 4 && transformations.length === 0 && state.identity.year < 1850) {
     crystallizationStage = 'CRYSTALLIZING';
     if ((summary.ORDER || 0) + (summary.POWER || 0) >= 3) {
       progressionNote = 'Ти створив державу, яка дедалі більше залежить від твоєї особистої волі та центрального нагляду.';
@@ -450,8 +450,12 @@ export function evaluateAscension(state: GameState): AscensionEvaluationResult {
       progressionNote = 'Ти створив інституційний баланс, який вимагає від тебе щоденного гармонізування протилежних сил.';
     }
     compositeTitle = `Переддень перелому: ${primaryDef.title}`;
-  } else {
+  } else if (decCount >= 5 && state.identity.year >= 1850) {
     crystallizationStage = 'REVEALED';
+    progressionNote = 'Твій архетип правління пройшов крізь перші випробування і починає кристалізуватися в історію Імперії Січ.';
+    compositeTitle = primaryDef.title;
+  } else {
+    crystallizationStage = 'CRYSTALLIZING';
     progressionNote = 'Твій архетип правління пройшов крізь вогонь криз і кристалізувався в історію Імперії Січ.';
     compositeTitle =
       secondaryDef && sortedArchetypes[0][1] - sortedArchetypes[1][1] <= 2 && sortedArchetypes[0][1] >= 2
