@@ -61,6 +61,7 @@ export const CouncilView: React.FC<CouncilViewProps> = ({
     return (
       <ScenarioView
         scenario={currentScenario}
+        state={state}
         characters={charactersWithExpectations}
         onSelectChoice={onSelectChoice}
         lastExecutionLogs={lastExecutionLogs}
