@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { GameState } from './game/state/types.ts';
 import { createInitialGameState } from './game/state/initialState.ts';
 import { ChoiceResolutionResult } from './game/engine/scenarioEngine.ts';
@@ -19,7 +20,7 @@ import { HetmanView } from './components/hetman/HetmanView.tsx';
 import { EngineDiagnostics } from './components/EngineDiagnosticsModal.tsx';
 import { EventRevealModal } from './components/ui/EventRevealModal.tsx';
 import { CoatOfArms } from './components/ui/CoatOfArms.tsx';
-import { X } from 'lucide-react';
+import { X, ArrowRight } from 'lucide-react';
 
 export default function App() {
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -313,6 +314,7 @@ export default function App() {
           </div>
         </div>
       )}
+      <Analytics />
     </AppShell>
   );
 }
