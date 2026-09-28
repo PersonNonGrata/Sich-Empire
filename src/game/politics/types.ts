@@ -75,7 +75,9 @@ export interface PoliticalCost {
   politicalCost?: Record<string, number>; // factionId -> loyalty change
   socialCost?: number;
   institutionalCost?: number;
-  capitalCost?: number; // political capital spent
+  politicalWillCost?: number; // political will spent
+  /** @deprecated Legacy save/scenario compatibility. */
+  capitalCost?: number;
 }
 
 export interface Promise {
