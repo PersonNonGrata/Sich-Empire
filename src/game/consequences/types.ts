@@ -1,5 +1,5 @@
 import { HistoryEventType } from '../history/types.ts';
-import { PsychologicalDimension } from '../psychology/types.ts';
+import { PsychologicalDimension, DecisionContext } from '../psychology/types.ts';
 import { Importance } from '../../types/index.ts';
 import type { Condition } from '../conditions/types.ts';
 import type { TaxPolicy, StateProject, Investment, EconomicCrisis } from '../economy/types.ts';
@@ -33,6 +33,7 @@ export type Consequence =
       type: 'PSYCHOLOGICAL_SIGNAL';
       dimension: PsychologicalDimension;
       value: number;
+      context?: DecisionContext;
       contextNote?: string;
     }
   | {
@@ -74,6 +75,12 @@ export type Consequence =
       type: 'ADD_DISCOVERY';
       discoveryId: string;
       label: string;
+    }
+  | {
+      type: 'ADD_MEMORY_TAG' | 'MEMORY_TAG';
+      tag: string;
+      characterId?: string;
+      label?: string;
     }
   | {
       type: 'REGION_CHANGE';

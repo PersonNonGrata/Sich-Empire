@@ -7,8 +7,15 @@ export const galiciaPetitionScenario: Scenario = {
   location: 'Палата Сеймикових Послів, Хортиця',
   tags: ['петиція', 'земля', 'галичина', 'шляхта', 'політика'],
   priority: 92,
+  sequenceOrder: 10,
+  required: true,
   importance: 'standard',
   conditions: [
+    {
+      type: 'YEAR',
+      operator: '==',
+      value: 1849,
+    },
     {
       type: 'SCENARIO_NOT_COMPLETED',
       scenarioId: 'scenario_petition_galicia_land',

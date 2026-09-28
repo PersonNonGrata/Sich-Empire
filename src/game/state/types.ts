@@ -2,7 +2,18 @@ import { Character, DecisionRecord, Faction, Region, Tension, ImperialEvent } fr
 import { ArchetypeProfile } from '../archetypes/types.ts';
 import { ScheduledConsequence } from '../consequences/types.ts';
 import { HistoryEvent } from '../history/types.ts';
-import { PsychologicalSignal } from '../psychology/types.ts';
+import {
+  PsychologicalSignal,
+  BehaviorPattern,
+  Contradiction,
+  Reflection,
+  Insight,
+  StressTest,
+  TransformationEvent,
+  AscensionStage,
+  PsychologicalTensionRecord,
+} from '../psychology/types.ts';
+import { NarrativeMirror, MemoryTag, HistoricalReputationSignal } from '../narrative/types.ts';
 import {
   LegitimacyBreakdown,
   Institution,
@@ -27,6 +38,26 @@ export interface EmpireMetrics {
   militaryStrength: number;// 0 - 100
   unity: number;           // 0 - 100
   prosperity: number;      // 0 - 100
+}
+
+export interface YearProgress {
+  year: number;
+  completedScenarioIds: string[];
+  resolvedScenarioCount: number;
+  totalRequiredScenarios: number;
+  yearStartMetrics?: EmpireMetrics;
+}
+
+export interface YearSummaryData {
+  year: number;
+  startMetrics: EmpireMetrics;
+  endMetrics: EmpireMetrics;
+  decisionsCount: number;
+  decisionsTitles: string[];
+  importantEventsCount: number;
+  delayedConsequencesCount: number;
+  politicalHighlights: string[];
+  economicHighlights: string[];
 }
 
 export interface GameState {
@@ -62,6 +93,10 @@ export interface GameState {
   tensionRecords?: Tension[]; // Rich dual-pole tension systems
   discoveries: string[];
   flags: Record<string, boolean | string | number>; // Persistent world flags
+  reputationTags?: string[]; // Historical Reputation & Memory Tags (Stage 7 - legacy string list)
+  memoryTags?: MemoryTag[]; // Structured Memory Tags (Stage 7)
+  reputationSignals?: HistoricalReputationSignal[]; // Historical Reputation Signals perceived across the realm (Stage 7)
+  narrativeMirrors?: NarrativeMirror[]; // Triggered historical reflection mirrors (Stage 7)
 
   eventQueue?: ImperialEvent[]; // Sequential event queue for reveals
 
@@ -69,10 +104,23 @@ export interface GameState {
   completedScenarioIds: string[];
   availableScenarioIds: string[];
 
+  yearProgress?: YearProgress;
+  yearSummary?: YearSummaryData | null;
+
   unlockedScenarioIds: string[]; // Explicitly unlocked by choices
   lockedScenarioIds: string[];   // Explicitly locked by choices
 
   archetypeProfile: ArchetypeProfile;
+
+  // Stage 6 Psychological Ascension Core (Requirements 5, 7, 8, 9, 11, 12, 13, 14)
+  behaviorPatterns: BehaviorPattern[];
+  contradictions: Contradiction[];
+  psychologicalTensions?: PsychologicalTensionRecord[];
+  reflections: Reflection[];
+  insights: Insight[];
+  stressTests: StressTest[];
+  transformations: TransformationEvent[];
+  ascensionStage: AscensionStage;
 
   lastSavedTimestamp?: number;
 }

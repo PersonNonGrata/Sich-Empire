@@ -28,11 +28,99 @@ export const railwayCredit1850Scenario: Scenario = {
     'Початок нового десятиліття — 1850 рік. Технічна Колегія підготувала сміливий креслярський план: побудувати першу залізничну магістраль «Київ — Одеса». Чорноморські купці готові надати позику, проте це збільшить державний борг.',
   situation:
     'Вирішіть долю великого інфраструктурного прориву: взяти кредит у купецьких гільдій та запустити чотирирічний державний проєкт, профінансувати будівництво лише з власних резервів скарбниці, або відкласти залізницю заради негайної безпеки.',
+  narrativePressures: [
+    {
+      id: 'pressure_railway_order_dilemma',
+      sourcePatternOrTag: 'Встановив столичний нагляд',
+      condition: {
+        type: 'HAS_MEMORY_TAG',
+        memoryTag: 'Встановив столичний нагляд',
+      },
+      impactDescription: 'Ти роками зміцнював столичний центр і залізну дисципліну. Тепер ти стикаєшся з наслідком власного стилю: купці остерігаються вкладати кошти у залізницю, бо бояться, що столичні чиновники конфіскують вантажі. Найпростіший для тебе шлях — підпорядкувати все військовому наказу, але це загострить напругу між Свободою та Порядком.',
+      speakerModifier: {
+        speakerQuote:
+          '«Ясновельможний Гетьмане! Ми знаємо вашу схильність до центрального контролю. Але чавунна дорога вимагає вільного обігу капіталу. Ти вже знаєш, куди веде твій вибір на користь диктату. Тепер вирішуй, чи продовжиш його, чи довіришся вільній комерції!»',
+      },
+      additionalChoices: [
+        {
+          id: 'choice_militarize_railway',
+          text: 'Підпорядкувати будівництво залізниці виключно військовому відомству.',
+          description: 'Повна відмова від купецьких компромісів: звести сталеву магістраль силами саперних полків та військової повинності як суто оборонну артерію.',
+          memoryTags: ['Посилив воєнний диктат'],
+          politicalCost: {
+            economicCost: 10,
+            militaryCost: 0,
+            politicalCost: {
+              faction_military_command: 20,
+              faction_merchants: -20,
+              faction_communities: -15,
+            },
+            capitalCost: 8,
+          },
+          politicalReactions: [
+            { factionId: 'faction_military_command', reaction: 'support', note: 'Повний контроль армії над магістраллю' },
+            { factionId: 'faction_merchants', reaction: 'crisis', note: 'Витіснення цивільного капіталу' },
+            { factionId: 'faction_communities', reaction: 'opposition', note: 'Трудова повинність викликає страх' },
+          ],
+          consequences: [
+            {
+              type: 'TENSION',
+              key: 'tension_freedom_order',
+              value: 20,
+              label: 'СВОБОДА ↔ ПОРЯДОК (крайній ступінь мілітаризації)',
+            },
+            {
+              type: 'TENSION',
+              key: 'tension_autonomy_centralization',
+              value: 20,
+              label: 'АВТОНОМІЯ ↔ ЦЕНТРАЛІЗАЦІЯ (абсолютний диктат центру)',
+            },
+            {
+              type: 'PSYCHOLOGICAL_SIGNAL',
+              dimension: 'ORDER',
+              value: 3,
+              context: 'economic',
+              contextNote: 'Поглиблення моделі тотального контролю у відповідь на кризу',
+            },
+            {
+              type: 'PSYCHOLOGICAL_SIGNAL',
+              dimension: 'DOMINANCE',
+              value: 2,
+              context: 'economic',
+              contextNote: 'Військова монополія на транспортну мережу',
+            },
+            {
+              type: 'HISTORY_EVENT',
+              eventType: 'MILITARY_ACT',
+              title: 'Мілітаризація Залізничного Будівництва 1850 року',
+              description: 'Гетьман продовжив курс на тотальний контроль, перетворивши будівництво магістралі на стратегічну військову операцію саперних корпусів.',
+              importance: 'critical',
+              tags: ['залізниця', 'мілітаризм', 'контроль', '1850'],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'pressure_railway_civic_freedom',
+      sourcePatternOrTag: 'Заступився за громади',
+      condition: {
+        type: 'HAS_MEMORY_TAG',
+        memoryTag: 'Заступився за громади',
+      },
+      impactDescription: 'Захист самоврядування громад створив міцну довіру: купецтво та магістрати готові щедро кредитувати залізницю.',
+      speakerModifier: {
+        speakerQuote:
+          '«Ясновельможний Гетьмане! Оскільки ви захистили міське самоврядування, купецтво довіряє вашому слову! Ми вкладемо золото у державні облігації з найвищою відданістю!»',
+      },
+    },
+  ],
   choices: [
     {
       id: 'choice_take_loan_railway',
       text: 'Взяти позику у купецтва та запустити будівництво магістралі.',
       description: 'Збільшити державний борг на +15 млн карбованців під 5% річних. Розпочати проєкт «Залізниця Київ — Одеса» з терміном завершення у 1853 році.',
+      memoryTags: ['Залучив купецькі кредити'],
       politicalCost: {
         economicCost: 0,
         politicalCost: {
@@ -156,6 +244,7 @@ export const railwayCredit1850Scenario: Scenario = {
       id: 'choice_pay_cash_railway',
       text: 'Будувати залізницю виключно за готівку з казни, не беручи боргів.',
       description: 'Виплатити негайно 15 млн карбованців зі скарбниці. Боргу не буде, але золоті резерви держави впадуть до небезпечної межі.',
+      memoryTags: ['Побудував залізницю без боргів'],
       politicalCost: {
         economicCost: 15,
         politicalCost: {
@@ -222,6 +311,7 @@ export const railwayCredit1850Scenario: Scenario = {
       id: 'choice_reject_railway',
       text: 'Відхилити проєкт залізниці: кошти потрібні на передові фортеці.',
       description: 'Зберегти капітали в скарбниці. Генерали підтримають ощадливість, але реформатори сприймуть це як зраду технологічного майбутнього.',
+      memoryTags: ['Зберіг військові ресурси'],
       politicalCost: {
         economicCost: 0,
         politicalCost: {

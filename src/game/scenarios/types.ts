@@ -4,6 +4,7 @@ import { Consequence } from '../consequences/types.ts';
 import { HistoryEventType } from '../history/types.ts';
 import { PsychologicalSignal } from '../psychology/types.ts';
 import { PoliticalCost, PoliticalReactionType, PoliticalInterests } from '../politics/types.ts';
+import { NarrativeCondition, NarrativePressure } from '../narrative/types.ts';
 
 export interface Choice {
   id: string;
@@ -12,6 +13,7 @@ export interface Choice {
   consequences: Consequence[];
   psychologicalSignals?: Array<Omit<PsychologicalSignal, 'id' | 'timestamp'>>;
   relationshipChanges?: Array<{ characterId: string; delta: number; label?: string }>;
+  memoryTags?: string[]; // Reputational memory tags awarded by this choice
   historyEvent?: {
     type: HistoryEventType;
     title: string;
@@ -56,6 +58,8 @@ export interface Scenario {
   location: string;
   tags: string[];
   priority?: number; // Higher priority scenarios surface first
+  sequenceOrder?: number; // Order within the year (e.g. 10, 20, 30)
+  required?: boolean; // If true, must be resolved before the year can conclude
   importance?: Importance;
   conditions: Condition[];
   characters: string[]; // characterIds
@@ -67,6 +71,12 @@ export interface Scenario {
   choices: Choice[];
   reflection?: string;
   followUp?: string;
+  // Stage 7 Narrative Ascension extensions:
+  narrativeConditions?: NarrativeCondition[];
+  blockedNarrativeConditions?: NarrativeCondition[];
+  narrativePressures?: NarrativePressure[];
+  narrativeEcho?: string;
+  narrativeMirrorId?: string;
   // Stage 4 Political Machine extensions:
   politicalActors?: string[];
   requiredFaction?: string;

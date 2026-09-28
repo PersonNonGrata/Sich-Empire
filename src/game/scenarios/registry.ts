@@ -1,6 +1,7 @@
 import { Scenario } from './types.ts';
 import { councilMeetingScenario } from './data/councilMeeting.ts';
 import { voicesOfCouncilScenario } from './data/voicesOfCouncil.ts';
+import { militaryTreasury1848Scenario } from './data/militaryTreasury1848.ts';
 import { costOfDecisionScenario } from './data/costOfDecision.ts';
 import { borderEchoesScenario } from './data/borderEchoes.ts';
 import { newCouncilScenario } from './data/newCouncil.ts';
@@ -20,8 +21,9 @@ import { budgetCrisisScenario, tradeCollapseScenario } from './data/economicCris
  */
 export const allScenarios: Scenario[] = [
   councilMeetingScenario,
-  galiciaPetitionScenario,
   voicesOfCouncilScenario,
+  militaryTreasury1848Scenario,
+  galiciaPetitionScenario,
   costOfDecisionScenario,
   oldSichCrisisScenario,
   borderEchoesScenario,

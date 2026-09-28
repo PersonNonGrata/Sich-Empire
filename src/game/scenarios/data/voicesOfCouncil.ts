@@ -3,12 +3,19 @@ import { Scenario } from '../types.ts';
 export const voicesOfCouncilScenario: Scenario = {
   id: 'scenario_voices_of_the_council',
   title: 'Голоси Ради: Баланс Сил',
-  year: 1849,
+  year: 1848,
   location: 'Палата Земських Послів, Хортиця',
-  tags: ['рада', 'фракції', 'політика', 'баланс_сил', '1849'],
+  tags: ['рада', 'фракції', 'політика', 'баланс_сил', '1848'],
   priority: 95,
+  sequenceOrder: 20,
+  required: true,
   importance: 'major',
   conditions: [
+    {
+      type: 'YEAR',
+      operator: '==',
+      value: 1848,
+    },
     {
       type: 'SCENARIO_COMPLETED',
       scenarioId: 'scenario_first_council',
@@ -24,14 +31,56 @@ export const voicesOfCouncilScenario: Scenario = {
   speakerQuote:
     '«Ясновельможний Гетьмане! Ваше перше рішення сколихнуло всі стани держави. Одні відчули силу, інші — тривогу. Тепер час показати, що держава належить не одній лише шаблі чи одному золоту, а всьому козацькому народу!»',
   introduction:
-    'Рік по тому після доленосного першого засідання. До Хортиці прибули земські посли з Поділля, шляхта з Галичини та делегати міських цехів. Кожен прагне зрозуміти, чиї інтереси Гетьман поставить наріжним каменем.',
+    'Після доленосного першого засідання до Хортиці прибули земські посли з Поділля, шляхта з Галичини та делегати міських цехів. Кожен прагне зрозуміти, чиї інтереси Гетьман поставить наріжним каменем у цей перший рік правління.',
   situation:
     'Напруження між центральною владою та регіонами наростає. Після попередніх кроків у Раді викристалізувалися три шляхи: надати голос місцевим громадам, задобрити аграрну шляхту компромісом чи підпорядкувати всі воєводства суворій гетьманській ревізії.',
+  narrativePressures: [
+    {
+      id: 'pressure_first_council_military',
+      sourcePatternOrTag: 'Спирався на зброю генералітету',
+      condition: {
+        type: 'HAS_MEMORY_TAG',
+        memoryTag: 'Спирався на зброю генералітету',
+      },
+      impactDescription: 'Військовий пріоритет першого засідання насторожив цивільні стани: громади вимагають противаги мілітаризму.',
+      speakerModifier: {
+        speakerQuote:
+          '«Ясновельможний Гетьмане! Ви вже віддали перше золото генералам — тепер козацький люд і міські громади чекають, чи згадає Гетьман про народні школи та хліб, чи вся держава перетвориться на казарму!»',
+      },
+    },
+    {
+      id: 'pressure_first_council_economy',
+      sourcePatternOrTag: 'Зберіг скарбницю',
+      condition: {
+        type: 'HAS_MEMORY_TAG',
+        memoryTag: 'Зберіг скарбницю',
+      },
+      impactDescription: 'Ощадливість першого засідання зберегла ресурси: цивільні посли наполягають на спрямуванні коштів у міста.',
+      speakerModifier: {
+        speakerQuote:
+          '«Ясновельможний Гетьмане! Ви встояли перед ультиматумом Чайки та зберегли скарбницю. Тепер час інвестувати ці збережені резерви у самоврядування та просвіту народу!»',
+      },
+    },
+    {
+      id: 'pressure_first_council_reform',
+      sourcePatternOrTag: 'Провів реформу попри опір',
+      condition: {
+        type: 'HAS_MEMORY_TAG',
+        memoryTag: 'Провів реформу попри опір',
+      },
+      impactDescription: 'Вибір на користь інженерів надихнув модернізаторів: посли очікують реформ і для цивільних магістратів.',
+      speakerModifier: {
+        speakerQuote:
+          '«Ясновельможний Гетьмане! Ваш вибір на користь інженерів та модернізації надихнув освічені верстви. Тепер настав час дати такі ж сучасні інституції нашим містам і громадам!»',
+      },
+    },
+  ],
   choices: [
     {
       id: 'choice_support_communities',
       text: 'Підтримати громади: надати міським радам широкі права та субсидії на школи.',
       description: 'Спрямувати 3 мільйони карбованців на розвиток цехового самоврядування, освітніх товариств та місцевих шпиталів.',
+      memoryTags: ['Заступився за громади'],
       consequences: [
         {
           type: 'STATE_CHANGE',
@@ -101,14 +150,23 @@ export const voicesOfCouncilScenario: Scenario = {
         {
           type: 'PSYCHOLOGICAL_SIGNAL',
           dimension: 'FREEDOM',
-          value: 1,
-          contextNote: 'Довіра до децентралізованих народних сил',
+          value: 2,
+          context: 'peace',
+          contextNote: 'Довіра до децентралізованих народних сил та міського самоврядування',
         },
         {
           type: 'PSYCHOLOGICAL_SIGNAL',
           dimension: 'KNOWLEDGE',
           value: 1,
+          context: 'peace',
           contextNote: 'Інвестиції в народну просвіту та школи',
+        },
+        {
+          type: 'PSYCHOLOGICAL_SIGNAL',
+          dimension: 'COMPASSION',
+          value: 1,
+          context: 'moral',
+          contextNote: 'Турбота про розвиток громад і простий люд',
         },
         {
           type: 'HISTORY_EVENT',
@@ -131,6 +189,7 @@ export const voicesOfCouncilScenario: Scenario = {
       id: 'choice_pact_with_landowners',
       text: 'Укласти договір із землевласниками: захист маєтків у обмін на продовольчий податок.',
       description: 'Гарантувати недоторканність прав шляхти Яна Корчака в обмін на гарантовані поставки хліба для армії та експортні мита.',
+      memoryTags: ['Уклав пакт із землевласниками'],
       consequences: [
         {
           type: 'STATE_CHANGE',
@@ -193,15 +252,24 @@ export const voicesOfCouncilScenario: Scenario = {
         },
         {
           type: 'PSYCHOLOGICAL_SIGNAL',
-          dimension: 'ECONOMY',
-          value: 1,
-          contextNote: 'Прагматичний союз з великим капіталом і землею',
+          dimension: 'TRADITION',
+          value: 2,
+          context: 'economic',
+          contextNote: 'Повага до звичаєвого маєткового права та станового миру',
         },
         {
           type: 'PSYCHOLOGICAL_SIGNAL',
-          dimension: 'TRADITION',
+          dimension: 'RESPONSIBILITY',
           value: 1,
-          contextNote: 'Повага до звичаєвого маєткового права',
+          context: 'economic',
+          contextNote: 'Забезпечення хлібного постачання держави',
+        },
+        {
+          type: 'PSYCHOLOGICAL_SIGNAL',
+          dimension: 'ECONOMY',
+          value: 1,
+          context: 'economic',
+          contextNote: 'Прагматичний союз з великим капіталом і землею',
         },
         {
           type: 'HISTORY_EVENT',
@@ -224,6 +292,7 @@ export const voicesOfCouncilScenario: Scenario = {
       id: 'choice_centralize_vertical',
       text: 'Зміцнити гетьманську вертикаль: запровадити інспекторів та прямий нагляд столиці.',
       description: 'Призначити у всі п’ять воєводств гетьманських генеральних наглядачів із правом вето на рішення місцевих рад.',
+      memoryTags: ['Встановив столичний нагляд'],
       consequences: [
         {
           type: 'STATE_CHANGE',
@@ -290,15 +359,24 @@ export const voicesOfCouncilScenario: Scenario = {
         },
         {
           type: 'PSYCHOLOGICAL_SIGNAL',
-          dimension: 'CENTRALIZATION',
+          dimension: 'ORDER',
+          value: 2,
+          context: 'political',
+          contextNote: 'Встановлення суворого загальноімперського порядку',
+        },
+        {
+          type: 'PSYCHOLOGICAL_SIGNAL',
+          dimension: 'DOMINANCE',
           value: 1,
-          contextNote: 'Жорстка концентрація влади у руках центру',
+          context: 'political',
+          contextNote: 'Прямий контроль столиці над землями',
         },
         {
           type: 'PSYCHOLOGICAL_SIGNAL',
           dimension: 'POWER',
           value: 1,
-          contextNote: 'Встановлення безальтернативного порядку',
+          context: 'political',
+          contextNote: 'Встановлення безальтернативної гетьманської вертикалі',
         },
         {
           type: 'HISTORY_EVENT',

@@ -7,6 +7,8 @@ export const councilMeetingScenario: Scenario = {
   location: 'Золота Палата Гетьманського Палацу, Хортиця',
   tags: ['рада', 'армія', 'бюджет', 'старшина', '1848'],
   priority: 100,
+  sequenceOrder: 10,
+  required: true,
   importance: 'major',
   conditions: [
     {
@@ -33,6 +35,7 @@ export const councilMeetingScenario: Scenario = {
       id: 'choice_fund_army',
       text: 'Збільшити фінансування армії на першу вимогу генерала.',
       description: 'Виділити 10 мільйонів карбованців з резервів на негайне посилення кордонів, закупівлю коней та виплату козацької платні.',
+      memoryTags: ['Спирався на зброю генералітету'],
       politicalCost: {
         economicCost: 10,
         militaryCost: 0,
@@ -123,14 +126,23 @@ export const councilMeetingScenario: Scenario = {
         {
           type: 'PSYCHOLOGICAL_SIGNAL',
           dimension: 'ORDER',
-          value: 1,
-          contextNote: 'Пріоритет мілітарного порядку та оборони',
+          value: 2,
+          context: 'crisis',
+          contextNote: 'Пріоритет мілітарного порядку та оборони в час зовнішньої загрози',
         },
         {
           type: 'PSYCHOLOGICAL_SIGNAL',
           dimension: 'POWER',
           value: 1,
+          context: 'crisis',
           contextNote: 'Спирання на силовий важіль держави',
+        },
+        {
+          type: 'PSYCHOLOGICAL_SIGNAL',
+          dimension: 'DOMINANCE',
+          value: 1,
+          context: 'crisis',
+          contextNote: 'Утвердження верховенства військової сили',
         },
         {
           type: 'HISTORY_EVENT',
@@ -182,6 +194,7 @@ export const councilMeetingScenario: Scenario = {
       id: 'choice_refuse_funding',
       text: 'Відмовити у додаткових коштах та зберегти скарбницю.',
       description: 'Суворо заявити генералу, що державі потрібні ресурси для мануфактур і доріг, а полки мають навчитися жити за наявними коштами.',
+      memoryTags: ['Зберіг скарбницю'],
       consequences: [
         {
           type: 'STATE_CHANGE',
@@ -248,15 +261,24 @@ export const councilMeetingScenario: Scenario = {
         },
         {
           type: 'PSYCHOLOGICAL_SIGNAL',
-          dimension: 'ECONOMY',
-          value: 1,
-          contextNote: 'Ощадливість та захист державних резервів',
+          dimension: 'RESPONSIBILITY',
+          value: 2,
+          context: 'political',
+          contextNote: 'Твереза відповідальність за скарбницю та непіддатливість на силовий тиск',
         },
         {
           type: 'PSYCHOLOGICAL_SIGNAL',
-          dimension: 'RESPONSIBILITY',
+          dimension: 'FREEDOM',
           value: 1,
-          contextNote: 'Непіддатливість на силовий шантаж генералітету',
+          context: 'political',
+          contextNote: 'Збереження ресурсу для цивільного самоврядування',
+        },
+        {
+          type: 'PSYCHOLOGICAL_SIGNAL',
+          dimension: 'ECONOMY',
+          value: 1,
+          context: 'economic',
+          contextNote: 'Ощадливість та захист державних резервів',
         },
         {
           type: 'HISTORY_EVENT',
@@ -308,6 +330,7 @@ export const councilMeetingScenario: Scenario = {
       id: 'choice_reform_army',
       text: 'Запропонувати глибоку реформу війська замість простого збільшення витрат.',
       description: 'Спрямувати помірні 4 мільйони карбованців на залучення молодих інженерів Миколи Береста, розробку нарізної артилерії та перехід полків на новий вишкіл.',
+      memoryTags: ['Провів реформу попри опір'],
       politicalCost: {
         economicCost: 4,
         militaryCost: 0,
@@ -407,14 +430,23 @@ export const councilMeetingScenario: Scenario = {
         {
           type: 'PSYCHOLOGICAL_SIGNAL',
           dimension: 'CREATION',
-          value: 1,
-          contextNote: 'Конструктивна модернізація та стратегічне творення',
+          value: 2,
+          context: 'peace',
+          contextNote: 'Конструктивна модернізація та стратегічне творення нового ладу',
         },
         {
           type: 'PSYCHOLOGICAL_SIGNAL',
           dimension: 'KNOWLEDGE',
+          value: 2,
+          context: 'peace',
+          contextNote: 'Залучення науки та інженерії до розбудови оборони',
+        },
+        {
+          type: 'PSYCHOLOGICAL_SIGNAL',
+          dimension: 'RESPONSIBILITY',
           value: 1,
-          contextNote: 'Залучення науки та інженерії до оборони',
+          context: 'peace',
+          contextNote: 'Збалансоване використання ресурсів',
         },
         {
           type: 'HISTORY_EVENT',

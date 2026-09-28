@@ -373,7 +373,7 @@ export const ChronicleView: React.FC<ChronicleViewProps> = ({ events, scheduledC
                   >
                     <div className="flex items-center justify-between text-xs font-mono">
                       <span className="px-2 py-0.5 rounded bg-[#2B2312] text-[#FBBF24] border border-[#FBBF24]/30 font-bold">
-                        ● {sc.triggerYear} РІК
+                        ● Запланована перевірка: {sc.triggerYear} рік
                       </span>
                       <span className="text-[#8E93A0]">
                         Джерело: {sc.sourceScenarioTitle || 'Рада'} ({sc.sourceYear || 1848} р.)
@@ -381,11 +381,11 @@ export const ChronicleView: React.FC<ChronicleViewProps> = ({ events, scheduledC
                     </div>
 
                     <h4 className="font-serif text-base font-bold text-[#EAE6DD]">
-                      «{sc.title}»
+                      «Відлуння рішення {sc.sourceYear || 1848} року»
                     </h4>
 
                     <p className="text-xs text-[#8E93A0] italic">
-                      «Приховані сили дозрівають у тиші. Наслідок проявиться у повному обсязі, коли настане призначений рік.»
+                      «Деякі рішення ще не сказали останнього слова. Приховані сили дозрівають у тиші — наслідки проявляться у повному обсязі, коли настане призначений рік.»
                     </p>
                   </div>
                 ))}

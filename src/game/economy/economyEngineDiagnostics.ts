@@ -236,8 +236,8 @@ export function runEconomyEngineTests(): { success: boolean; results: string[] }
   };
   const migrated = migrateSave(oldSave);
   assert(
-    migrated.version === 5 && Boolean(migrated.economy && migrated.military),
-    '13. Persistence: Legacy save seamlessly migrated to v5 with Economy and Military states'
+    migrated.version >= 5 && Boolean(migrated.economy && migrated.military),
+    '13. Persistence: Legacy save seamlessly migrated with Economy and Military states'
   );
 
   return { success: allPassed, results };

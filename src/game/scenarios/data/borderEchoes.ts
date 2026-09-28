@@ -7,11 +7,13 @@ export const borderEchoesScenario: Scenario = {
   location: 'Прикордонна Фортеця Кодак та Степовий Рубіж',
   tags: ['кордон', 'відлуння', 'армія', 'криза', '1851'],
   priority: 85,
+  sequenceOrder: 10,
+  required: true,
   importance: 'critical',
   conditions: [
     {
       type: 'YEAR',
-      operator: '>=',
+      operator: '==',
       value: 1851,
     },
     {

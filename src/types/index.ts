@@ -79,6 +79,8 @@ export interface Character {
   fear: number; // 0 to 20
   loyalty: number; // -20 to +20
   tags?: string[];
+  memoryTags?: string[]; // Reputational memory tags this character holds about the Hetman
+  expectation?: string;  // Current expectation from the Hetman (e.g. "Очікує захисту традицій")
   avatarSeed?: string;
   bio: string;
   interests?: string[];

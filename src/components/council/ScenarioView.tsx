@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Scenario, Choice } from '../../game/scenarios/types.ts';
 import { Character } from '../../types/index.ts';
+import { ChoiceResolutionResult } from '../../game/engine/scenarioEngine.ts';
 import { WaxSeal } from '../ui/WaxSeal.tsx';
-import { CoatOfArms } from '../ui/CoatOfArms.tsx';
 import {
   MapPin,
   Calendar,
@@ -11,13 +11,15 @@ import {
   TrendingUp,
   TrendingDown,
   Brain,
-  BookOpen,
   UserCheck,
   Sparkles,
   Shield,
   Coins,
   Landmark,
+  Crown,
+  HeartHandshake,
   CheckCircle2,
+  Bookmark,
 } from 'lucide-react';
 
 interface ScenarioViewProps {
@@ -25,6 +27,7 @@ interface ScenarioViewProps {
   characters: Character[];
   onSelectChoice: (choiceId: string) => void;
   lastExecutionLogs: string[] | null;
+  lastResolutionResult?: ChoiceResolutionResult | null;
   onContinue: () => void;
 }
 
@@ -33,6 +36,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
   characters,
   onSelectChoice,
   lastExecutionLogs,
+  lastResolutionResult,
   onContinue,
 }) => {
   const [selectedChoice, setSelectedChoice] = useState<Choice | null>(null);
@@ -48,7 +52,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
 
   // Helper to extract metric changes from choice consequences
   const metricChanges = selectedChoice?.consequences
-    .filter((c) => c.type === 'EMPIRE_METRIC_CHANGE')
+    .filter((c) => c.type === 'EMPIRE_METRIC_CHANGE' || c.type === 'STATE_CHANGE')
     .map((c: any) => ({
       metric: c.metric,
       value: c.value,
@@ -71,14 +75,14 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
       const char = characters.find((ch) => ch.id === c.characterId);
       return {
         name: char ? char.name : 'Старшина',
-        value: c.value,
+        value: c.value ?? c.trustChange ?? 0,
         label: c.label,
       };
     }) || [];
 
   // Helper to extract history event
   const historyEvent = selectedChoice?.consequences.find(
-    (c) => c.type === 'ADD_HISTORY_EVENT'
+    (c) => c.type === 'ADD_HISTORY_EVENT' || c.type === 'HISTORY_EVENT'
   ) as any;
 
   // Render Metric change icon
@@ -90,10 +94,19 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
         return <Shield className="w-3.5 h-3.5 text-[#EF4444]" />;
       case 'stability':
         return <Landmark className="w-3.5 h-3.5 text-[#60A5FA]" />;
+      case 'unity':
+        return <Crown className="w-3.5 h-3.5 text-[#A855F7]" />;
+      case 'prosperity':
+        return <Sparkles className="w-3.5 h-3.5 text-[#34D399]" />;
       default:
         return <Sparkles className="w-3.5 h-3.5 text-[#C9A96E]" />;
     }
   };
+
+  const isResolved = Boolean(lastExecutionLogs || lastResolutionResult);
+  const prevM = lastResolutionResult?.previousMetrics;
+  const newM = lastResolutionResult?.newMetrics;
+  const reactions = lastResolutionResult?.politicalReactionsSummary || [];
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -135,6 +148,19 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
               {scenario.introduction}
             </p>
 
+            {/* Stage 7: Narrative Echo of past ruler behavior */}
+            {scenario.narrativeEcho && (
+              <div className="bg-[#DFD0B1]/90 border-l-4 border-[#8E2525] p-3 sm:p-3.5 rounded-r-lg shadow-sm space-y-1 my-2">
+                <div className="text-[10px] font-mono uppercase font-bold tracking-widest text-[#8E2525] flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#8E2525]" />
+                  <span>ВІДГОМІН МИНУЛИХ РІШЕНЬ ГЕТЬМАНА</span>
+                </div>
+                <p className="font-serif text-xs sm:text-sm text-[#2E2822] italic leading-snug">
+                  {scenario.narrativeEcho}
+                </p>
+              </div>
+            )}
+
             <div className="pt-2">
               <div className="text-[11px] uppercase font-mono font-bold tracking-widest text-[#6E6354] mb-1">
                 СИТУАЦІЯ
@@ -154,8 +180,15 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                   {speaker?.name ? speaker.name.charAt(0) : 'Г'}
                 </div>
                 <div className="space-y-1 min-w-0">
-                  <div className="text-xs font-mono font-bold uppercase tracking-wider text-[#8E2525] truncate">
-                    {speaker?.name || 'Представник Військової Ради'}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#8E2525] truncate">
+                      {speaker?.name || 'Представник Військової Ради'}
+                    </span>
+                    {speaker?.expectation && (
+                      <span className="text-[10px] font-mono bg-[#E2D2B0] text-[#544D45] px-2 py-0.5 rounded border border-[#C8B289] truncate">
+                        {speaker.expectation}
+                      </span>
+                    )}
                   </div>
                   <div className="text-xs text-[#544D45] font-serif truncate">
                     {scenario.speakerRole || speaker?.role}
@@ -168,8 +201,8 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
             </div>
           )}
 
-          {/* SECTION: Choices OR Consequence Resolution Flow */}
-          {!lastExecutionLogs ? (
+          {/* SECTION: Choices OR Immediate Consequence Resolution Flow (Section 10) */}
+          {!isResolved ? (
             <div className="pt-6 border-t border-[#CBB48B] space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-serif text-lg md:text-xl font-bold uppercase tracking-wider text-[#8E2525]">
@@ -214,7 +247,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                       </button>
                     </div>
 
-                    {/* Mobile Action Button (Full width, min-h 48px) */}
+                    {/* Mobile Action Button */}
                     <div className="block md:hidden pt-1">
                       <button
                         onClick={() => handleMakeChoice(choice)}
@@ -225,12 +258,29 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                       </button>
                     </div>
 
-                    {/* Desktop-only Political Cost & Reactions Strip (Kept clean on mobile per Section 11) */}
-                    {(choice.politicalCost || choice.politicalReactions || choice.proposalVoting) && (
-                      <div className="hidden md:flex pl-8 pt-2 border-t border-[#E5D7BE] flex-wrap items-center gap-3 text-xs font-mono">
+                    {/* Political Cost & Reactions Strip */}
+                    {(choice.politicalCost || choice.politicalReactions || choice.proposalVoting || (choice.memoryTags && choice.memoryTags.length > 0)) && (
+                      <div className="flex pl-0 md:pl-8 pt-2 border-t border-[#E5D7BE] flex-wrap items-center gap-3 text-xs font-mono">
+                        {choice.memoryTags && choice.memoryTags.length > 0 && (
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-[#8E2525] font-bold flex items-center gap-1">
+                              <Bookmark className="w-3 h-3 text-[#8E2525]" />
+                              <span>Карбує пам'ять:</span>
+                            </span>
+                            {choice.memoryTags.map((mt, mIdx) => (
+                              <span
+                                key={mIdx}
+                                className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#F4E9D5] text-[#7A2A2A] border border-[#CDB58E]"
+                              >
+                                «{mt}»
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
                         {choice.politicalCost && (
                           <div className="flex items-center gap-2">
-                            <span className="text-[#8E2525] font-bold">Політична ціна:</span>
+                            <span className="text-[#8E2525] font-bold">Ціна ухвали:</span>
                             {choice.politicalCost.capitalCost && (
                               <span className="bg-[#EADECA] text-[#4A3B2C] px-2 py-0.5 rounded border border-[#C5B396]">
                                 Капітал -{choice.politicalCost.capitalCost}
@@ -268,23 +318,17 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                             })}
                           </div>
                         )}
-
-                        {choice.proposalVoting && (
-                          <div className="text-[#1D4ED8] bg-[#EFF6FF] px-2 py-0.5 rounded border border-[#BFDBFE] text-[10px] font-bold">
-                            Потребує схвалення Великої Ради
-                          </div>
-                        )}
                       </div>
                     )}
                   </div>
                 ))}
               </div>
-
             </div>
           ) : (
             /* ============================================================== */
-            /* RESOLUTION STAGE: Section 11 Specification                     */
-            /* ЩО ВИ ЗРОБИЛИ -> ЩО СТАЛОСЯ -> ЩО ЗМІНИЛОСЯ -> ЩО ЦЕ МОЖЕ ОЗНАЧАТИ */
+            /* SECTION 10: НЕГАЙНИЙ UI ПІСЛЯ РІШЕННЯ                          */
+            /* ВИ ПРИЙНЯЛИ РІШЕННЯ -> НАСЛІДКИ -> ДЕРЖАВА ВІДПОВІЛА           */
+            /* -> СТАН ДЕРЖАВИ (до → після) -> РІШЕННЯ ЗАПАМ'ЯТОВАНЕ          */
             /* ============================================================== */
             <div className="pt-6 border-t-2 border-[#8E2525] space-y-6 animate-in fade-in duration-300">
               <div className="bg-[#10141E] text-[#F3EFE6] rounded-xl p-4 sm:p-6 md:p-7 border-2 border-[#C9A96E]/60 space-y-5 md:space-y-6 shadow-2xl relative overflow-hidden">
@@ -292,43 +336,32 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                 <div className="flex items-center justify-between border-b border-[#212A3A] pb-3">
                   <span className="text-xs font-mono text-[#C9A96E] font-bold uppercase tracking-widest flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-[#C9A96E] animate-pulse" />
-                    <span>ДЕРЖАВНА ВІДПОВІДЬ</span>
+                    <span>ВИ УХВАЛИЛИ РІШЕННЯ</span>
                   </span>
                   <span className="text-[11px] font-mono text-[#34D399]">
                     Універсал набрав чинності
                   </span>
                 </div>
 
-                {/* 1. ЩО ВИ ЗРОБИЛИ */}
+                {/* 1. ВИ ПРИЙНЯЛИ РІШЕННЯ */}
                 <div className="space-y-1.5 border-b border-[#212A3A] pb-4">
-                  <div className="text-[10px] uppercase font-mono tracking-widest text-[#C9A96E] font-bold flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#C9A96E]" />
-                    <span>ЩО ВИ ЗРОБИЛИ:</span>
-                  </div>
                   <p className="font-serif text-lg md:text-xl font-bold text-[#F3EFE6]">
                     «{selectedChoice?.text || 'Рішення ухвалено'}»
                   </p>
+                  {selectedChoice?.description && (
+                    <p className="text-xs sm:text-sm text-[#A8AFBD]">
+                      {selectedChoice.description}
+                    </p>
+                  )}
                 </div>
 
-                {/* 2. ЩО СТАЛОСЯ */}
-                <div className="space-y-1.5 border-b border-[#212A3A] pb-4">
-                  <div className="text-[10px] uppercase font-mono tracking-widest text-[#38BDF8] font-bold flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF8]" />
-                    <span>ЩО СТАЛОСЯ:</span>
-                  </div>
-                  <p className="text-sm md:text-base text-[#D4D8E2] leading-relaxed">
-                    {historyEvent?.description || 'Рішення передано до полків та воєводств. Розпочато виконання наказів володаря.'}
-                  </p>
-                </div>
-
-                {/* 3. ЩО ЗМІНИЛОСЯ */}
+                {/* 2. НАСЛІДКИ (Immediate Deltas) */}
                 <div className="space-y-3 border-b border-[#212A3A] pb-4">
-                  <div className="text-[10px] uppercase font-mono tracking-widest text-[#60A5FA] font-bold flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#60A5FA]" />
-                    <span>ЩО ЗМІНИЛОСЯ (НАСЛІДКИ ТА ВІДНОСИНИ):</span>
+                  <div className="text-[10px] uppercase font-mono tracking-widest text-[#FBBF24] font-bold flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#FBBF24]" />
+                    <span>НАСЛІДКИ РІШЕННЯ:</span>
                   </div>
 
-                  {/* Metrics Badges */}
                   {metricChanges.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {metricChanges.map((mc, i) => {
@@ -356,7 +389,6 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                     </div>
                   )}
 
-                  {/* Character & Faction Reactions */}
                   {relChanges.length > 0 && (
                     <div className="space-y-1.5 pt-1 text-xs text-[#E0E4ED]">
                       {relChanges.map((rc, idx) => (
@@ -370,50 +402,156 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                     </div>
                   )}
 
-                  {/* Psychological Signals */}
-                  {psychoSignals.length > 0 && (
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      {psychoSignals.map((ps, i) => (
-                        <div
-                          key={i}
-                          className="px-2.5 py-1 rounded bg-[#1C182A] border border-[#4C3882] text-xs font-mono text-[#D8B4FE] flex items-center gap-1.5"
-                        >
-                          <Brain className="w-3 h-3 text-[#A78BFA] shrink-0" />
-                          <span>{ps.dimension}</span>
-                          <span className="font-bold">+{ps.value}</span>
-                          {ps.contextNote && (
-                            <span className="text-[10px] text-[#A78BFA]/80 hidden sm:inline">
-                              ({ps.contextNote})
-                            </span>
-                          )}
+                  {/* Section 25: Психологічне сходження без числових балів */}
+                  {selectedChoice && (
+                    <div className="pt-1 space-y-2">
+                      {selectedChoice.memoryTags && selectedChoice.memoryTags.length > 0 && (
+                        <div className="p-3 rounded-lg bg-[#18202F] border border-[#2B3A54] text-xs font-mono text-[#E8D7B8] flex items-center gap-2">
+                          <Bookmark className="w-4 h-4 text-[#C9A96E] shrink-0" />
+                          <span>
+                            Історична пам'ять зафіксувала: <strong className="text-[#F3EFE6]">{selectedChoice.memoryTags.map((t) => `«${t}»`).join(', ')}</strong>. Світ зважатиме на це в майбутніх сценаріях.
+                          </span>
                         </div>
-                      ))}
+                      )}
+
+                      {lastResolutionResult?.state.transformations && lastResolutionResult.state.transformations.length > 0 && lastResolutionResult.state.transformations[0].catalystDecisionId === lastResolutionResult.state.decisions[0]?.id ? (
+                        <div className="p-3 rounded-lg bg-[#1F192C] border border-[#C9A96E]/60 text-xs font-mono text-[#E8D7B8] flex items-center gap-2">
+                          <Brain className="w-4 h-4 text-[#C9A96E] shrink-0" />
+                          <span>Психологічний перелом: зафіксовано якісну трансформацію стилю правління.</span>
+                        </div>
+                      ) : lastResolutionResult?.state.reflections && lastResolutionResult.state.reflections.some((r) => r.status === 'pending') ? (
+                        <div className="p-3 rounded-lg bg-[#141A26] border border-[#384868] text-xs font-serif text-[#C8D1DF] flex items-center gap-2">
+                          <Brain className="w-4 h-4 text-[#60A5FA] shrink-0" />
+                          <span>Дзеркало Володаря: відкрилося нове спостереження у кабінеті Гетьмана.</span>
+                        </div>
+                      ) : null}
                     </div>
                   )}
                 </div>
 
-                {/* 4. ЩО ЦЕ МОЖЕ ОЗНАЧАТИ */}
-                <div className="space-y-2 p-3.5 sm:p-4 rounded-xl bg-[#141B28] border border-[#27354D]">
-                  <div className="text-[10px] uppercase font-mono tracking-widest text-[#FBBF24] font-bold flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#FBBF24] animate-pulse" />
-                    <span>ЩО ЦЕ МОЖЕ ОЗНАЧАТИ (ВІДЛУННЯ):</span>
+                {/* 3. ДЕРЖАВА ВІДПОВІЛА (Political & Institutional Reactions) */}
+                <div className="space-y-2.5 border-b border-[#212A3A] pb-4">
+                  <div className="text-[10px] uppercase font-mono tracking-widest text-[#38BDF8] font-bold flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF8]" />
+                    <span>ДЕРЖАВА ВІДПОВІЛА:</span>
                   </div>
-                  <p className="text-xs sm:text-sm text-[#D3DAE8] leading-relaxed">
-                    {scenario.reflection || 'Державні механізми приведено в рух. Люди та воєводства запам’ятали ваш вибір.'}
-                  </p>
-                  <div className="text-[11px] font-mono text-[#C9A96E] italic pt-1">
-                    «Наслідки можуть проявитися пізніше. Деякі рішення ще не сказали останнього слова.»
-                  </div>
+
+                  {reactions.length > 0 ? (
+                    <div className="space-y-1.5 text-xs">
+                      {reactions.map((r, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between p-2.5 rounded bg-[#131926] border border-[#232F47]"
+                        >
+                          <span className="font-serif font-bold text-[#F3EFE6]">
+                            {r.entity}
+                          </span>
+                          <span
+                            className={`font-mono text-[11px] font-semibold ${
+                              r.reaction === 'support'
+                                ? 'text-[#34D399]'
+                                : r.reaction === 'opposition' || r.reaction === 'crisis'
+                                ? 'text-[#F87171]'
+                                : 'text-[#C9A96E]'
+                            }`}
+                          >
+                            {r.note}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs sm:text-sm text-[#D4D8E2]">
+                      {historyEvent?.description || 'Політичне керівництво та полки прийняли волю Гетьмана.'}
+                    </p>
+                  )}
                 </div>
 
-                {/* Action button */}
+                {/* 4. СТАН ДЕРЖАВИ (до → після) */}
+                {prevM && newM && (
+                  <div className="space-y-2.5 border-b border-[#212A3A] pb-4">
+                    <div className="text-[10px] uppercase font-mono tracking-widest text-[#60A5FA] font-bold flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#60A5FA]" />
+                      <span>СТАН ДЕРЖАВИ (ПЕРЕРАХУНОК ДО → ПІСЛЯ):</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-xs">
+                      <div className="p-2.5 rounded bg-[#131926] border border-[#232F47]">
+                        <span className="text-[#8E93A0] block text-[10px]">СКАРБНИЦЯ</span>
+                        <div className="flex items-center gap-1.5 font-bold text-[#FBBF24] mt-0.5">
+                          <span>{prevM.treasury}M</span>
+                          <span>→</span>
+                          <span>{newM.treasury}M</span>
+                        </div>
+                      </div>
+
+                      <div className="p-2.5 rounded bg-[#131926] border border-[#232F47]">
+                        <span className="text-[#8E93A0] block text-[10px]">ВІЙСЬКО</span>
+                        <div className="flex items-center gap-1.5 font-bold text-[#EF4444] mt-0.5">
+                          <span>{prevM.militaryStrength}%</span>
+                          <span>→</span>
+                          <span>{newM.militaryStrength}%</span>
+                        </div>
+                      </div>
+
+                      <div className="p-2.5 rounded bg-[#131926] border border-[#232F47]">
+                        <span className="text-[#8E93A0] block text-[10px]">СТАБІЛЬНІСТЬ</span>
+                        <div className="flex items-center gap-1.5 font-bold text-[#60A5FA] mt-0.5">
+                          <span>{prevM.stability}%</span>
+                          <span>→</span>
+                          <span>{newM.stability}%</span>
+                        </div>
+                      </div>
+
+                      <div className="p-2.5 rounded bg-[#131926] border border-[#232F47]">
+                        <span className="text-[#8E93A0] block text-[10px]">ЄДНІСТЬ</span>
+                        <div className="flex items-center gap-1.5 font-bold text-[#A855F7] mt-0.5">
+                          <span>{prevM.unity}%</span>
+                          <span>→</span>
+                          <span>{newM.unity}%</span>
+                        </div>
+                      </div>
+
+                      <div className="p-2.5 rounded bg-[#131926] border border-[#232F47] col-span-2 sm:col-span-1">
+                        <span className="text-[#8E93A0] block text-[10px]">ДОБРОБУТ</span>
+                        <div className="flex items-center gap-1.5 font-bold text-[#34D399] mt-0.5">
+                          <span>{prevM.prosperity}%</span>
+                          <span>→</span>
+                          <span>{newM.prosperity}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. РІШЕННЯ ЗАПАМ'ЯТОВАНЕ */}
+                <div className="space-y-1.5 p-3.5 rounded-xl bg-[#141B28] border border-[#27354D]">
+                  <div className="text-[10px] uppercase font-mono tracking-widest text-[#34D399] font-bold flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#34D399]" />
+                    <span>РІШЕННЯ ЗАПАМ'ЯТОВАНЕ В ЛІТОПИСІ:</span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-[#D3DAE8] leading-relaxed">
+                    {scenario.reflection || 'Державні механізми приведено в рух. Люди та воєводства зафіксували волю володаря.'}
+                  </p>
+                </div>
+
+                {/* Primary Action Button */}
                 <div className="pt-2">
                   <button
                     onClick={onContinue}
-                    className="w-full md:w-auto min-h-[48px] px-6 py-3.5 rounded-lg bg-[#C9A96E] hover:bg-[#DCBE84] text-[#0A0D14] font-serif font-bold text-sm tracking-wide transition-all shadow-lg hover:shadow-[#C9A96E]/20 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+                    className="w-full min-h-[50px] px-6 py-3.5 rounded-lg bg-[#C9A96E] hover:bg-[#DCBE84] text-[#0A0D14] font-serif font-bold text-sm tracking-wide transition-all shadow-lg hover:shadow-[#C9A96E]/20 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
                   >
-                    <span>Повернутися до Ради</span>
-                    <ArrowRight className="w-4 h-4" />
+                    {lastResolutionResult?.isYearAgendaComplete ? (
+                      <>
+                        <Crown className="w-4 h-4 text-[#0A0D14]" />
+                        <span>ЗАВЕРШИТИ {scenario.year || 1848} РІК · ПІДСУМОК</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>НАСТУПНА СПРАВА РАДИ</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
                   </button>
                 </div>
               </div>

@@ -5,6 +5,7 @@ import { evaluateArchetypeProfile } from '../archetypes/evaluator.ts';
 import { HistoryEvent } from '../history/types.ts';
 import { calculateLegitimacy } from '../politics/evaluator.ts';
 import { Promise as PoliticalPromise, PoliticalCrisis } from '../politics/types.ts';
+import { deriveCharacterExpectation } from '../narrative/narrativeEngine.ts';
 
 function clamp(val: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, val));
@@ -98,13 +99,18 @@ export function applySingleConsequence(
             note: consequence.label || consequence.reason || (tDelta >= 0 ? 'Схвалив рішення' : 'Засудив рішення'),
           };
 
-          return {
+          const updatedChar = {
             ...c,
             trust: updatedTrust,
             respect: updatedRespect,
             fear: updatedFear,
             loyalty: updatedLoyalty,
             interactionHistory: [histEntry, ...(c.interactionHistory || [])],
+          };
+
+          return {
+            ...updatedChar,
+            expectation: deriveCharacterExpectation(updatedChar, state),
           };
         }),
       };
@@ -489,6 +495,7 @@ export function applySingleConsequence(
         id: signalId,
         dimension: consequence.dimension,
         value: consequence.value,
+        context: consequence.context,
         sourceDecisionId: context?.sourceDecisionId,
         timestamp: Date.now(),
         contextNote: consequence.contextNote,
@@ -499,7 +506,9 @@ export function applySingleConsequence(
         psychology: [...state.psychology, newSignal],
       };
 
-      logs.push(`Психологічний вектор [${consequence.dimension}]: ${consequence.value > 0 ? '+' : ''}${consequence.value}`);
+      if (consequence.contextNote) {
+        logs.push(`Сходження Гетьмана: ${consequence.contextNote}`);
+      }
       break;
     }
 
@@ -585,6 +594,49 @@ export function applySingleConsequence(
         };
         logs.push(`Відкрито державне знання: «${consequence.label}»`);
       }
+      break;
+    }
+
+    case 'ADD_MEMORY_TAG':
+    case 'MEMORY_TAG': {
+      const currentTags = state.reputationTags || [];
+      if (!currentTags.includes(consequence.tag)) {
+        const nextTags = [...currentTags, consequence.tag];
+        state = {
+          ...state,
+          reputationTags: nextTags,
+        };
+      }
+
+      // Also update character memory tags if characterId provided, or if character was involved
+      if (consequence.characterId) {
+        state = {
+          ...state,
+          characters: state.characters.map((ch) => {
+            if (ch.id !== consequence.characterId) return ch;
+            const chMem = ch.memoryTags || [];
+            const updatedCh = {
+              ...ch,
+              memoryTags: chMem.includes(consequence.tag) ? chMem : [...chMem, consequence.tag],
+            };
+            return {
+              ...updatedCh,
+              expectation: deriveCharacterExpectation(updatedCh, state),
+            };
+          }),
+        };
+      } else {
+        // Update all character expectations based on newly earned reputation
+        state = {
+          ...state,
+          characters: state.characters.map((ch) => ({
+            ...ch,
+            expectation: deriveCharacterExpectation(ch, state),
+          })),
+        };
+      }
+
+      logs.push(`Історична пам'ять Січі: «${consequence.tag}»`);
       break;
     }
 

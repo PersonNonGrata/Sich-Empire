@@ -2,6 +2,7 @@ import { GameState } from '../game/state/types.ts';
 import { CURRENT_STATE_VERSION, createInitialGameState } from '../game/state/initialState.ts';
 import { evaluateArchetypeProfile } from '../game/archetypes/evaluator.ts';
 import { determineAvailableScenarios } from '../game/engine/scenarioEngine.ts';
+import { getScenarioById } from '../game/scenarios/registry.ts';
 
 /**
  * Migration engine for stored GameState saves across schema revisions.
@@ -142,18 +143,71 @@ export function migrateSave(raw: any): GameState {
   if (!Array.isArray(state.lockedScenarioIds)) {
     state.lockedScenarioIds = [];
   }
-  if (!Array.isArray(state.availableScenarioIds)) {
-    state.availableScenarioIds = determineAvailableScenarios(state);
+  // Requirement 38: Never trust stale availableScenarioIds from old saves with mixed years.
+  // Always recalculate availableScenarioIds for the CURRENT YEAR via determineAvailableScenarios.
+  state.availableScenarioIds = determineAvailableScenarios(state);
+
+  if (!state.yearProgress) {
+    state.yearProgress = {
+      year: state.identity.year,
+      completedScenarioIds: (state.completedScenarioIds || []).filter((id) => {
+        const s = getScenarioById(id);
+        return (s?.year ?? state.identity.year) === state.identity.year;
+      }),
+      resolvedScenarioCount: (state.completedScenarioIds || []).length,
+      totalRequiredScenarios: 3,
+      yearStartMetrics: { ...state.empire },
+    };
   }
-  if (!state.archetypeProfile) {
-    state.archetypeProfile = evaluateArchetypeProfile(state);
+
+  if (state.yearSummary === undefined) {
+    state.yearSummary = null;
   }
+
   if (!state.flags) {
     state.flags = fresh.flags;
   }
   if (!state.eventQueue) {
     state.eventQueue = [];
   }
+
+  // Stage 6 Psychological Ascension Core Migration
+  if (!Array.isArray(state.behaviorPatterns)) {
+    state.behaviorPatterns = [];
+  }
+  if (!Array.isArray(state.contradictions)) {
+    state.contradictions = [];
+  }
+  if (!Array.isArray(state.reflections)) {
+    state.reflections = [];
+  }
+  if (!Array.isArray(state.insights)) {
+    state.insights = [];
+  }
+  if (!Array.isArray(state.stressTests)) {
+    state.stressTests = [];
+  }
+  if (!Array.isArray(state.transformations)) {
+    state.transformations = [];
+  }
+  if (!state.ascensionStage) {
+    state.ascensionStage = 'EXPERIENCE';
+  }
+
+  // Stage 7 Narrative Ascension Migration
+  if (!Array.isArray(state.reputationTags)) {
+    state.reputationTags = [];
+  }
+  if (!Array.isArray(state.narrativeMirrors)) {
+    state.narrativeMirrors = [];
+  }
+  state.characters = state.characters.map((ch) => ({
+    ...ch,
+    memoryTags: Array.isArray(ch.memoryTags) ? ch.memoryTags : [],
+  }));
+
+  // Ensure archetype profile and psychological ascension structures are fully computed
+  state.archetypeProfile = evaluateArchetypeProfile(state);
 
   state.version = CURRENT_STATE_VERSION;
   return state;

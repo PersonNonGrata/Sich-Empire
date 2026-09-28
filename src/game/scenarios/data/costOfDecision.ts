@@ -7,8 +7,15 @@ export const costOfDecisionScenario: Scenario = {
   location: 'Таємна Рада Клейнодів, Хортицька Цитадель',
   tags: ['економіка', 'напруження', 'випробування', '1850'],
   priority: 90,
+  sequenceOrder: 10,
+  required: true,
   importance: 'major',
   conditions: [
+    {
+      type: 'YEAR',
+      operator: '==',
+      value: 1850,
+    },
     {
       type: 'SCENARIO_COMPLETED',
       scenarioId: 'scenario_voices_of_the_council',

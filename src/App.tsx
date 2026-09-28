@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { GameState } from './game/state/types.ts';
 import { createInitialGameState } from './game/state/initialState.ts';
+import { ChoiceResolutionResult } from './game/engine/scenarioEngine.ts';
 import {
   startScenario,
   makeChoice,
-  advanceTime,
+  advanceYear,
   resetGame,
   dismissEvent,
+  respondToReflection,
 } from './game/state/gameOperations.ts';
 import { saveGame, loadGame, deleteSave } from './persistence/storage.ts';
 import { AppShell } from './components/layout/AppShell.tsx';
@@ -24,6 +26,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<string>('rada');
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [lastExecutionLogs, setLastExecutionLogs] = useState<string[] | null>(null);
+  const [lastResolutionResult, setLastResolutionResult] = useState<ChoiceResolutionResult | null>(null);
   const [bannerNotice, setBannerNotice] = useState<string | null>(null);
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState<boolean>(false);
 
@@ -67,6 +70,7 @@ export default function App() {
     try {
       const nextState = startScenario(gameState, scenarioId);
       setLastExecutionLogs(null);
+      setLastResolutionResult(null);
       setGameState(nextState);
       persistState(nextState);
       setActiveTab('rada');
@@ -84,10 +88,11 @@ export default function App() {
       const result = makeChoice(gameState, gameState.currentScenarioId, choiceId);
       setGameState(result.state);
       setLastExecutionLogs(result.logs);
+      setLastResolutionResult(result);
       persistState(result.state);
 
-      if (result.resolvedScheduled && result.resolvedScheduled.length > 0) {
-        setBannerNotice(`Увага: Справдився відкладений наслідок: «${result.resolvedScheduled[0].title}»!`);
+      if (result.resolvedScheduledEvents && result.resolvedScheduledEvents.length > 0) {
+        setBannerNotice(`Увага: Справдився відкладений наслідок: «${result.resolvedScheduledEvents[0].title}»!`);
       }
     } catch (err: any) {
       console.error(err);
@@ -98,14 +103,17 @@ export default function App() {
   // 3. Continue after resolving scenario
   const handleContinueScenario = () => {
     setLastExecutionLogs(null);
+    setLastResolutionResult(null);
     setActiveTab('rada');
   };
 
   // 4. Advance Time (+1 year or more)
   const handleAdvanceYear = (years = 1) => {
     if (!gameState) return;
-    const result = advanceTime(gameState, years);
+    const result = advanceYear(gameState, years);
     setGameState(result.state);
+    setLastExecutionLogs(null);
+    setLastResolutionResult(null);
     persistState(result.state);
 
     if (result.resolved.length > 0) {
@@ -198,6 +206,7 @@ export default function App() {
           onStartScenario={handleStartScenario}
           onSelectChoice={handleSelectChoice}
           lastExecutionLogs={lastExecutionLogs}
+          lastResolutionResult={lastResolutionResult}
           onContinue={handleContinueScenario}
           onAdvanceYear={() => handleAdvanceYear(1)}
         />
@@ -218,7 +227,21 @@ export default function App() {
 
       {/* Tab 4: ГЕТЬМАН (Ruler Profile & Psychology) */}
       {activeTab === 'hetman' && (
-        <HetmanView state={gameState} />
+        <HetmanView
+          state={gameState}
+          onRespondToReflection={(reflId, resp, note) => {
+            const nextState = respondToReflection(gameState, reflId, resp, note);
+            setGameState(nextState);
+            persistState(nextState);
+            setBannerNotice(
+              resp === 'AGREE'
+                ? 'Спостереження підтверджено Гетьманом.'
+                : resp === 'PARTIAL'
+                ? 'Спостереження частково підтверджено.'
+                : 'Особисту незгоду Гетьмана зафіксовано в профілі володаря.'
+            );
+          }}
+        />
       )}
 
       {/* Imperial Event Modal */}

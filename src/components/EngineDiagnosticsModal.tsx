@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { GameState } from '../game/state/types.ts';
 import { Terminal, RefreshCw, Trash2, Download, Upload, PlusCircle, CheckCircle, Clock, Play, ShieldCheck } from 'lucide-react';
-import { runPoliticalEngineTests } from '../game/politics/politicsEngine.test.ts';
-import { runEconomyEngineTests } from '../game/economy/economyEngine.test.ts';
+import { runPoliticalEngineTests } from '../game/politics/politicsEngineDiagnostics.ts';
+import { runEconomyEngineTests } from '../game/economy/economyEngineDiagnostics.ts';
+import { runPsychologyEngineTests } from '../game/psychology/psychologyEngineDiagnostics.ts';
 
 interface EngineDiagnosticsProps {
   state: GameState;
@@ -26,13 +27,16 @@ export const EngineDiagnostics: React.FC<EngineDiagnosticsProps> = ({
   const handleRunTests = () => {
     const polRes = runPoliticalEngineTests();
     const ecoRes = runEconomyEngineTests();
+    const psychoRes = runPsychologyEngineTests();
     setTestResults({
-      success: polRes.success && ecoRes.success,
+      success: polRes.success && ecoRes.success && psychoRes.success,
       results: [
         '=== ЕТАП 4: ПОЛІТИЧНА МАШИНА ===',
         ...polRes.results,
         '=== ЕТАП 5: МАТЕРІАЛЬНА МАШИНА (ЕКОНОМІКА ТА ВІЙСЬКО) ===',
         ...ecoRes.results,
+        '=== ЕТАП 6: ПСИХОЛОГІЧНЕ СХОДЖЕННЯ ГЕТЬМАНА ===',
+        ...psychoRes.results,
       ],
     });
   };

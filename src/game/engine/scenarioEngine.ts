@@ -1,18 +1,38 @@
-import { GameState } from '../state/types.ts';
+import { GameState, EmpireMetrics, YearSummaryData } from '../state/types.ts';
 import { allScenarios, getScenarioById } from '../scenarios/registry.ts';
+import { Scenario } from '../scenarios/types.ts';
 import { evaluateAllConditions } from '../conditions/evaluator.ts';
 import { applyConsequences } from '../consequences/applier.ts';
 import { Consequence, ScheduledConsequence } from '../consequences/types.ts';
 import { DecisionRecord, ImperialEvent } from '../../types/index.ts';
 import { evaluateArchetypeProfile } from '../archetypes/evaluator.ts';
+import { evaluateAscension } from '../psychology/ascensionEngine.ts';
 import {
   detectPoliticalCrises,
   evaluatePromises,
   calculateLegitimacy,
   recalculatePoliticalCapital,
 } from '../politics/evaluator.ts';
-import { PoliticalCrisis } from '../politics/types.ts';
 import { advanceEconomicYear } from '../economy/economyEngine.ts';
+import {
+  evaluateNarrativeCondition,
+  evaluateAllNarrativeConditions,
+  adaptScenarioToRuler,
+  checkAndTriggerNarrativeMirrors,
+  recordDecisionMemoryTags,
+} from '../narrative/narrativeEngine.ts';
+
+export interface ChoiceResolutionResult {
+  state: GameState;
+  logs: string[];
+  previousMetrics: EmpireMetrics;
+  newMetrics: EmpireMetrics;
+  resolvedScheduledEvents: ScheduledConsequence[];
+  newEvents?: ImperialEvent[];
+  politicalReactionsSummary: Array<{ entity: string; reaction: string; note: string }>;
+  isYearAgendaComplete: boolean;
+  yearSummary?: YearSummaryData | null;
+}
 
 export interface ChoiceExecutionResult {
   state: GameState;
@@ -21,13 +41,128 @@ export interface ChoiceExecutionResult {
   newEvents?: ImperialEvent[];
 }
 
+export interface YearAgenda {
+  year: number;
+  allScenarios: Scenario[];
+  availableScenarios: Scenario[];
+  completedScenarios: Scenario[];
+  requiredScenarios: Scenario[];
+  requiredPendingCount: number;
+  isYearComplete: boolean;
+}
 
 /**
- * Determines which scenarios are eligible given the current empire state.
+ * Recalculates derived state indicators across politics, economy, military and legitimacy.
+ * Rule: Derived indicators must not be independent floating numbers.
+ */
+export function recalculateDerivedState(currentState: GameState): GameState {
+  let state = { ...currentState };
+
+  // 1. Sync & Recalculate Treasury
+  const currentTreasury = state.economy?.treasury ?? state.empire.treasury;
+
+  // 2. Military Readiness & Strength
+  let militaryReadiness = state.military?.readiness ?? 70;
+  if (state.military) {
+    const equipFactor = (state.military.equipment - 50) * 0.1;
+    const logisticsFactor = (state.military.logistics - 50) * 0.1;
+    militaryReadiness = Math.max(10, Math.min(100, Math.round(militaryReadiness + equipFactor + logisticsFactor)));
+  }
+  const militaryStrength = state.military?.strength ?? state.empire.militaryStrength;
+
+  // 3. Prosperity
+  let publicProsperity = state.economy?.publicProsperity ?? state.empire.prosperity;
+  if (state.economy) {
+    const taxImpact =
+      state.economy.taxBurden > 45
+        ? -((state.economy.taxBurden - 45) * 0.2)
+        : ((40 - state.economy.taxBurden) * 0.15);
+    publicProsperity = Math.max(10, Math.min(100, Math.round(publicProsperity + taxImpact)));
+  }
+
+  // 4. Regional Unity
+  const regionCount = state.regions.length;
+  let avgRegionalLoyalty = 58;
+  let avgRegionalUnrest = 20;
+  if (regionCount > 0) {
+    const totalLoyalty = state.regions.reduce((acc, r) => acc + (r.loyalty ?? 50), 0);
+    const totalUnrest = state.regions.reduce((acc, r) => acc + (r.unrest ?? 20), 0);
+    avgRegionalLoyalty = totalLoyalty / regionCount;
+    avgRegionalUnrest = totalUnrest / regionCount;
+  }
+  const unity = Math.max(10, Math.min(100, Math.round(avgRegionalLoyalty * 0.7 + (100 - avgRegionalUnrest) * 0.3)));
+
+  // 5. Political Stability
+  const factionCount = state.factions.length;
+  let avgFactionLoyalty = 55;
+  if (factionCount > 0) {
+    const totalFactionLoyalty = state.factions.reduce((acc, f) => acc + (f.loyalty ?? 50), 0);
+    avgFactionLoyalty = totalFactionLoyalty / factionCount;
+  }
+  const activeCrisesCount = (state.crises || []).filter((c) => c.active).length;
+  const crisisPenalty = activeCrisesCount * 8;
+  const leg = calculateLegitimacy(state);
+  const stability = Math.max(
+    10,
+    Math.min(
+      100,
+      Math.round(
+        avgFactionLoyalty * 0.35 +
+        leg.aggregate * 0.35 +
+        unity * 0.3 -
+        crisisPenalty
+      )
+    )
+  );
+
+  // 6. Update empire metrics & sub-systems
+  state = {
+    ...state,
+    empire: {
+      ...state.empire,
+      treasury: currentTreasury,
+      militaryStrength,
+      prosperity: publicProsperity,
+      unity,
+      stability,
+    },
+    economy: state.economy
+      ? {
+          ...state.economy,
+          treasury: currentTreasury,
+          publicProsperity,
+        }
+      : state.economy,
+    military: state.military
+      ? {
+          ...state.military,
+          readiness: militaryReadiness,
+          strength: militaryStrength,
+        }
+      : state.military,
+    legitimacy: leg.components,
+    politicalCapital: recalculatePoliticalCapital(state.politicalCapital ?? 55, 0, leg.aggregate),
+  };
+
+  return state;
+}
+
+/**
+ * Determines which scenarios are eligible given the current imperial year and empire state.
+ * CRITICAL ENGINE RULE: Future scenarios (scenario.year > state.identity.year) are 100% hidden.
  */
 export function determineAvailableScenarios(state: GameState): string[] {
+  const currentYear = state.identity.year;
+
   return allScenarios
     .filter((scenario) => {
+      // 1. CHRONOLOGICAL FILTER (Core Engine Rule):
+      // Only scenarios of the current imperial year are allowed.
+      const scenarioYear = scenario.year ?? currentYear;
+      if (scenarioYear !== currentYear) {
+        return false;
+      }
+
       // Cannot repeat completed scenarios
       if (state.completedScenarioIds.includes(scenario.id)) {
         return false;
@@ -44,11 +179,75 @@ export function determineAvailableScenarios(state: GameState): string[] {
         return true;
       }
 
-      // Evaluate conditions
+      // Stage 7: Blocked narrative conditions check
+      if (scenario.blockedNarrativeConditions && scenario.blockedNarrativeConditions.some((c) => evaluateNarrativeCondition(c, state))) {
+        return false;
+      }
+
+      // Stage 7: Required narrative conditions check
+      if (scenario.narrativeConditions && !evaluateAllNarrativeConditions(scenario.narrativeConditions, state)) {
+        return false;
+      }
+
+      // Evaluate standard conditions
       return evaluateAllConditions(scenario.conditions, state);
     })
-    .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
+    .sort((a, b) => {
+      // Primary: sequenceOrder ascending (e.g. 10 before 20 before 30)
+      const seqA = a.sequenceOrder ?? 50;
+      const seqB = b.sequenceOrder ?? 50;
+      if (seqA !== seqB) {
+        return seqA - seqB;
+      }
+      // Secondary: priority descending (higher priority surfaces first)
+      return (b.priority ?? 0) - (a.priority ?? 0);
+    })
     .map((s) => s.id);
+}
+
+/**
+ * Returns structured agenda information for the current imperial year.
+ */
+export function getYearAgenda(state: GameState): YearAgenda {
+  const currentYear = state.identity.year;
+  const allYearScenarios = allScenarios.filter((s) => (s.year ?? currentYear) === currentYear);
+  const completedScenarios = allYearScenarios.filter((s) => state.completedScenarioIds.includes(s.id));
+  const availableScenarioIds = determineAvailableScenarios(state);
+  const availableScenarios = availableScenarioIds
+    .map((id) => getAdaptedScenarioById(id, state))
+    .filter((s): s is Scenario => Boolean(s));
+
+  const requiredScenarios = allYearScenarios.filter((s) => s.required);
+  const requiredPendingCount = requiredScenarios.filter((s) => !state.completedScenarioIds.includes(s.id)).length;
+
+  const isYearComplete = requiredPendingCount === 0 && availableScenarios.length === 0;
+
+  return {
+    year: currentYear,
+    allScenarios: allYearScenarios,
+    availableScenarios,
+    completedScenarios,
+    requiredScenarios,
+    requiredPendingCount,
+    isYearComplete,
+  };
+}
+
+/**
+ * Returns scenario adapted to the current ruler's past choices and reputation.
+ */
+export function getAdaptedScenarioById(id: string, state: GameState): Scenario | undefined {
+  const raw = getScenarioById(id);
+  return raw ? adaptScenarioToRuler(raw, state) : undefined;
+}
+
+/**
+ * Gets the next scenario in line for the current imperial year, adapted to the ruler.
+ */
+export function getNextScenario(state: GameState): Scenario | null {
+  const availableIds = determineAvailableScenarios(state);
+  if (availableIds.length === 0) return null;
+  return getAdaptedScenarioById(availableIds[0], state) || null;
 }
 
 /**
@@ -120,7 +319,9 @@ export function checkAndResolveScheduledConsequences(
           year: state.identity.year,
           title: sc.title,
           description: sc.description,
-          source: sc.sourceYear ? `Наслідок рішення ${sc.sourceYear} року («${sc.sourceScenarioTitle || 'Рада'}»)` : 'Державний наслідок',
+          source: sc.sourceYear
+            ? `Наслідок рішення ${sc.sourceYear} року («${sc.sourceScenarioTitle || 'Рада'}»)`
+            : 'Державний наслідок',
           relatedDecisionId: sc.sourceDecisionId,
           relatedScenarioId: sc.sourceScenarioId,
           consequencesSummary: appResult.logs,
@@ -150,17 +351,22 @@ export function checkAndResolveScheduledConsequences(
 }
 
 /**
- * Executes a choice inside an active scenario.
+ * State Transaction: resolveChoice executes the complete, atomic decision cycle.
+ * Choice -> Immediate Consequences -> Political Reactions -> Derived State Recalculation
+ * -> History -> Scheduled Consequences -> Year Agenda Evaluation -> Autosave State.
  */
-export function executeChoice(
+export function resolveChoice(
   currentState: GameState,
   scenarioId: string,
   choiceId: string
-): ChoiceExecutionResult {
-  const scenario = getScenarioById(scenarioId);
-  if (!scenario) {
+): ChoiceResolutionResult {
+  const previousMetrics: EmpireMetrics = { ...currentState.empire };
+
+  const rawScenario = getScenarioById(scenarioId);
+  if (!rawScenario) {
     throw new Error(`Scenario not found: ${scenarioId}`);
   }
+  const scenario = adaptScenarioToRuler(rawScenario, currentState);
 
   const choice = scenario.choices.find((c) => c.id === choiceId);
   if (!choice) {
@@ -172,6 +378,16 @@ export function executeChoice(
   // Build full consequences list from choice attributes
   const allConsequences: Consequence[] = [...choice.consequences];
 
+  // Stage 7: Memory tags from choice
+  if (choice.memoryTags) {
+    for (const tag of choice.memoryTags) {
+      allConsequences.push({
+        type: 'ADD_MEMORY_TAG',
+        tag,
+      });
+    }
+  }
+
   // Psychological signals
   if (choice.psychologicalSignals) {
     for (const sig of choice.psychologicalSignals) {
@@ -179,6 +395,7 @@ export function executeChoice(
         type: 'PSYCHOLOGICAL_SIGNAL',
         dimension: sig.dimension,
         value: sig.value,
+        context: sig.context,
         contextNote: sig.contextNote,
       });
     }
@@ -248,15 +465,26 @@ export function executeChoice(
   });
 
   // Extract involved actors, regions, factions for Empire Memory
-  const actorsInvolved = Array.from(new Set([
-    ...(scenario.characters || []),
-    ...(scenario.speakerId ? [scenario.speakerId] : []),
-  ]));
-  const factionsInvolved = Array.from(new Set(
-    actorsInvolved
-      .map((aid) => updatedState.characters.find((c) => c.id === aid)?.factionId)
-      .filter((fid): fid is string => Boolean(fid))
-  ));
+  const actorsInvolved = Array.from(
+    new Set([...(scenario.characters || []), ...(scenario.speakerId ? [scenario.speakerId] : [])])
+  );
+  const factionsInvolved = Array.from(
+    new Set(
+      actorsInvolved
+        .map((aid) => updatedState.characters.find((c) => c.id === aid)?.factionId)
+        .filter((fid): fid is string => Boolean(fid))
+    )
+  );
+
+  // Extract structured political reactions summary
+  const politicalReactionsSummary = (choice.politicalReactions || []).map((pr) => {
+    const faction = updatedState.factions.find((f) => f.id === pr.factionId);
+    return {
+      entity: faction ? faction.name : pr.factionId,
+      reaction: pr.reaction,
+      note: pr.note,
+    };
+  });
 
   // Check for newly triggered political crises
   const newCrises = detectPoliticalCrises(updatedState, updatedState.crises || []);
@@ -301,14 +529,8 @@ export function executeChoice(
     logs.push(`УВАГА! СПАЛАХНУЛА ПОЛІТИЧНА КРИЗА: ${crisis.title}!`);
   }
 
-  // Recalculate legitimacy and political capital
-  const legResult = calculateLegitimacy(postCrisisState);
-  postCrisisState.legitimacy = legResult.components;
-  postCrisisState.politicalCapital = recalculatePoliticalCapital(
-    postCrisisState.politicalCapital ?? 55,
-    choice.id.includes('refuse') ? -2 : 3,
-    legResult.aggregate
-  );
+  // Derived state recalculation (Section 9)
+  let finalState = recalculateDerivedState(postCrisisState);
 
   const decisionRecord: DecisionRecord = {
     id: decisionId,
@@ -330,42 +552,145 @@ export function executeChoice(
   };
 
   // Complete scenario and record decision
-  let finalState: GameState = {
-    ...postCrisisState,
-    decisions: [decisionRecord, ...postCrisisState.decisions],
-    completedScenarioIds: [...postCrisisState.completedScenarioIds, scenarioId],
-    currentScenarioId: null, // Scenario closed
-    eventQueue: [...(postCrisisState.eventQueue || []), ...crisisEvents],
-  };
-
-  // Re-evaluate available scenarios
   finalState = {
     ...finalState,
-    availableScenarioIds: determineAvailableScenarios(finalState),
-    archetypeProfile: evaluateArchetypeProfile(finalState),
+    decisions: [decisionRecord, ...finalState.decisions],
+    completedScenarioIds: [...finalState.completedScenarioIds, scenarioId],
+    currentScenarioId: null, // Scenario closed
+    eventQueue: [...(finalState.eventQueue || []), ...crisisEvents],
   };
 
-  // Check if any scheduled consequences can fire
+  // Stage 7: Automatically record Memory Tags & Historical Reputation Signals
+  finalState = recordDecisionMemoryTags(finalState, scenario, choice, decisionId);
+
+  // Check if any scheduled consequences can fire for the current year
   const scheduledResult = checkAndResolveScheduledConsequences(finalState);
   finalState = scheduledResult.state;
   const allLogs = [...logs, ...scheduledResult.logs];
 
+  // Stage 6: Evaluate Psychological Ascension Engine
+  const ascensionResult = evaluateAscension(finalState);
+  finalState = {
+    ...finalState,
+    behaviorPatterns: ascensionResult.behaviorPatterns,
+    contradictions: ascensionResult.contradictions,
+    reflections: ascensionResult.reflections,
+    insights: ascensionResult.insights,
+    stressTests: ascensionResult.stressTests,
+    transformations: ascensionResult.transformations,
+    ascensionStage: ascensionResult.ascensionStage,
+    archetypeProfile: ascensionResult.archetypeProfile,
+    availableScenarioIds: determineAvailableScenarios(finalState),
+  };
+
+  // If a transformation occurred, record historical chronicle entry
+  if (ascensionResult.newTransformations.length > 0) {
+    for (const trans of ascensionResult.newTransformations) {
+      finalState.history = [
+        {
+          id: 'hist_trans_' + Date.now() + '_' + trans.id,
+          year: finalState.identity.year,
+          timestamp: Date.now(),
+          type: 'REFORM',
+          title: `Трансформація Правління: ${trans.title}`,
+          description: `${trans.description} (Було: «${trans.fromState}» → Стало: «${trans.toState}»).`,
+          sourceDecisionId: decisionId,
+          importance: 'critical',
+          tags: ['трансформація', 'сходження', `${finalState.identity.year}`],
+          category: 'decision',
+        },
+        ...finalState.history,
+      ];
+      allLogs.push(`ПСИХОЛОГІЧНИЙ ПЕРЕЛОМ: «${trans.title}»`);
+    }
+  }
+
+  // Year Agenda Evaluation
+  const agenda = getYearAgenda(finalState);
+  const completedThisYear = finalState.completedScenarioIds.filter((id) => {
+    const sc = getScenarioById(id);
+    return (sc?.year ?? finalState.identity.year) === finalState.identity.year;
+  });
+  const totalRequiredThisYear = agenda.allScenarios.filter((s) => s.required).length;
+
+  finalState.yearProgress = {
+    year: finalState.identity.year,
+    completedScenarioIds: completedThisYear,
+    resolvedScenarioCount: completedThisYear.length,
+    totalRequiredScenarios: totalRequiredThisYear,
+    yearStartMetrics: finalState.yearProgress?.yearStartMetrics || previousMetrics,
+  };
+
+  // If year agenda is complete, prepare the YearSummary
+  let yearSummaryData: YearSummaryData | null = null;
+  if (agenda.isYearComplete) {
+    const yearStartMetrics = finalState.yearProgress.yearStartMetrics || previousMetrics;
+    const yearDecisions = finalState.decisions.filter((d) => d.year === finalState.identity.year);
+    const yearEvents = finalState.history.filter((h) => h.year === finalState.identity.year);
+    const pendingConsequences = (finalState.consequences || []).filter((c) => !c.resolved);
+
+    yearSummaryData = {
+      year: finalState.identity.year,
+      startMetrics: yearStartMetrics,
+      endMetrics: { ...finalState.empire },
+      decisionsCount: yearDecisions.length,
+      decisionsTitles: yearDecisions.map((d) => d.choiceText),
+      importantEventsCount: yearEvents.length,
+      delayedConsequencesCount: pendingConsequences.length,
+      politicalHighlights: yearDecisions.slice(0, 3).map((d) => `«${d.title}»: ${d.choiceText}`),
+      economicHighlights: [
+        `Скарбниця: ${yearStartMetrics.treasury}M → ${finalState.empire.treasury}M`,
+        `Військова міць: ${yearStartMetrics.militaryStrength}% → ${finalState.empire.militaryStrength}%`,
+        `Стабільність: ${yearStartMetrics.stability}% → ${finalState.empire.stability}%`,
+        `Єдність: ${yearStartMetrics.unity}% → ${finalState.empire.unity}%`,
+        `Добробут: ${yearStartMetrics.prosperity}% → ${finalState.empire.prosperity}%`,
+      ],
+    };
+    finalState.yearSummary = yearSummaryData;
+  }
+
   return {
     state: finalState,
     logs: allLogs,
+    previousMetrics,
+    newMetrics: { ...finalState.empire },
     resolvedScheduledEvents: scheduledResult.resolved,
     newEvents: [...crisisEvents, ...scheduledResult.newEvents],
+    politicalReactionsSummary,
+    isYearAgendaComplete: agenda.isYearComplete,
+    yearSummary: yearSummaryData,
   };
 }
 
 /**
- * Advances imperial year by delta and triggers any due consequences.
+ * Backwards-compatible wrapper around resolveChoice.
  */
-export function advanceTime(
+export function executeChoice(
+  currentState: GameState,
+  scenarioId: string,
+  choiceId: string
+): ChoiceExecutionResult {
+  const result = resolveChoice(currentState, scenarioId, choiceId);
+  return {
+    state: result.state,
+    logs: result.logs,
+    resolvedScheduledEvents: result.resolvedScheduledEvents,
+    newEvents: result.newEvents,
+  };
+}
+
+/**
+ * Advances imperial year by delta and processes the entire annual state transition:
+ * Economic cycle, promises evaluation, scheduled consequences, political crises,
+ * dynastic history event, derived state recalculation, and new YearAgenda.
+ */
+export function advanceYear(
   currentState: GameState,
   years = 1
 ): { state: GameState; logs: string[]; resolved: ScheduledConsequence[]; newEvents: ImperialEvent[] } {
-  const nextYear = currentState.identity.year + years;
+  const currentYear = currentState.identity.year;
+  const nextYear = currentYear + years;
+
   let state: GameState = {
     ...currentState,
     identity: {
@@ -374,24 +699,21 @@ export function advanceTime(
     },
   };
 
-  const advanceLogs: string[] = [`Рік переведено на ${nextYear}`];
+  const advanceLogs: string[] = [`Рік ${currentYear} завершено. Імперія вступає у ${nextYear} рік правління.`];
   const newEvents: ImperialEvent[] = [];
 
-  // Check promises (Requirement 12)
+  // Check promises
   const promiseEvaluation = evaluatePromises(state.promises || [], nextYear, state);
   state.promises = promiseEvaluation.updatedPromises;
 
   for (const broken of promiseEvaluation.brokenList) {
     advanceLogs.push(`ОБІЦЯНКУ ГЕТЬМАНА ПОРУШЕНО: «${broken.text}»! Втрата довіри та капіталу.`);
-    // Reduce loyalty of target faction
     state.factions = state.factions.map((f) =>
       f.id === broken.targetFaction || f.name === broken.targetFaction
         ? { ...f, loyalty: Math.max(0, f.loyalty - 15), tension: Math.min(100, (f.tension ?? 25) + 15) }
         : f
     );
-    // Reduce political capital
     state.politicalCapital = Math.max(0, (state.politicalCapital ?? 55) - 12);
-    // Add to history
     state.history = [
       {
         id: 'hist_broken_' + Date.now() + '_' + broken.id,
@@ -399,7 +721,7 @@ export function advanceTime(
         timestamp: Date.now(),
         type: 'PROMISE_BROKEN',
         title: `Порушена обіцянка: «${broken.text}»`,
-        description: `Минув призначений термін (${broken.deadlineYear} р.), але обіцяне перед фракцією «${broken.targetFaction}» не було виконано. Політичний капітал та довіра зазнали удару.`,
+        description: `Минув призначений термін (${broken.deadlineYear} р.), але обіцяне перед фракцією «${broken.targetFaction}» не було виконано.`,
         importance: 'major',
         tags: ['обіцянка_порушена', broken.targetFaction],
         category: 'promise',
@@ -407,12 +729,11 @@ export function advanceTime(
       },
       ...state.history,
     ];
-    // Queue Imperial Event
     newEvents.push({
       id: 'evt_broken_' + broken.id,
       year: nextYear,
       title: 'Порушена обітниця Гетьмана',
-      description: `Термін виконання обіцянки перед фракцією «${broken.targetFaction}» вичерпано. Рада засуджує зволікання.`,
+      description: `Термін виконання обіцянки перед фракцією «${broken.targetFaction}» вичерпано.`,
       source: 'Обітниця перед Радою',
       timestamp: Date.now(),
     });
@@ -455,7 +776,7 @@ export function advanceTime(
     });
   }
 
-  // Natural state drift / annual chronicle note
+  // Dynastic chronicle event
   const advanceHistoryId = 'hist_year_' + Date.now();
   state = {
     ...state,
@@ -475,10 +796,6 @@ export function advanceTime(
     ],
   };
 
-  // Recalculate legitimacy
-  const leg = calculateLegitimacy(state);
-  state.legitimacy = leg.components;
-
   // Execute Stage 5 Annual Economic Cycle
   if (state.economy && state.military) {
     const ecoResult = advanceEconomicYear(state, years);
@@ -486,8 +803,49 @@ export function advanceTime(
     advanceLogs.push(...ecoResult.logs);
   }
 
+  // Resolve scheduled consequences due in nextYear
   const scheduledResult = checkAndResolveScheduledConsequences(state);
   state = scheduledResult.state;
+
+  // Recalculate derived state
+  state = recalculateDerivedState(state);
+
+  // Initialize new year agenda & progress
+  const newYearScenarios = allScenarios.filter((s) => (s.year ?? nextYear) === nextYear);
+  const totalRequired = newYearScenarios.filter((s) => s.required).length;
+  state = {
+    ...state,
+    yearProgress: {
+      year: nextYear,
+      completedScenarioIds: [],
+      resolvedScenarioCount: 0,
+      totalRequiredScenarios: totalRequired,
+      yearStartMetrics: { ...state.empire },
+    },
+    yearSummary: null,
+    currentScenarioId: null,
+  };
+
+  const ascension = evaluateAscension(state);
+  state = {
+    ...state,
+    behaviorPatterns: ascension.behaviorPatterns,
+    contradictions: ascension.contradictions,
+    reflections: ascension.reflections,
+    insights: ascension.insights,
+    stressTests: ascension.stressTests,
+    transformations: ascension.transformations,
+    ascensionStage: ascension.ascensionStage,
+    archetypeProfile: ascension.archetypeProfile,
+    availableScenarioIds: determineAvailableScenarios(state),
+  };
+
+  // Stage 7: Check and trigger Narrative Mirrors (e.g. entering 1850)
+  const mirrorResult = checkAndTriggerNarrativeMirrors(state);
+  state = mirrorResult.state;
+  if (mirrorResult.mirror) {
+    advanceLogs.push(`ДЗЕРКАЛО ВОЛОДАРЯ (${state.identity.year} р.): «${mirrorResult.mirror.title}»`);
+  }
 
   return {
     state,
@@ -497,3 +855,12 @@ export function advanceTime(
   };
 }
 
+/**
+ * Backwards-compatible alias for advanceYear.
+ */
+export function advanceTime(
+  currentState: GameState,
+  years = 1
+): { state: GameState; logs: string[]; resolved: ScheduledConsequence[]; newEvents: ImperialEvent[] } {
+  return advanceYear(currentState, years);
+}

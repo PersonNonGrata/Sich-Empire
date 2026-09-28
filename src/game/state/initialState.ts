@@ -6,7 +6,7 @@ import { PoliticalRelationship } from '../politics/types.ts';
 import { EconomyState } from '../economy/types.ts';
 import { MilitaryState } from '../military/types.ts';
 
-export const CURRENT_STATE_VERSION = 5;
+export const CURRENT_STATE_VERSION = 7;
 
 export function createInitialGameState(rulerName = 'Ярослав Нескорений'): GameState {
   const gameId = 'sich_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
@@ -519,25 +519,65 @@ export function createInitialGameState(rulerName = 'Ярослав Нескор�
       military_reform_instituted: false,
     },
 
+    reputationTags: [],
+    memoryTags: [],
+    reputationSignals: [],
+    narrativeMirrors: [],
+
     eventQueue: [],
 
     currentScenarioId: 'scenario_first_council',
     completedScenarioIds: [],
     availableScenarioIds: ['scenario_first_council'],
 
+    yearProgress: {
+      year: 1848,
+      completedScenarioIds: [],
+      resolvedScenarioCount: 0,
+      totalRequiredScenarios: 3,
+      yearStartMetrics: {
+        stability: 65,
+        treasury: 50,
+        militaryStrength: 60,
+        unity: 58,
+        prosperity: 55,
+      },
+    },
+    yearSummary: null,
+
     unlockedScenarioIds: ['scenario_first_council'],
     lockedScenarioIds: [],
 
     archetypeProfile: {
+      archetype: 'ОХОРОНЕЦЬ',
+      archetypeCode: 'GUARDIAN',
+      summaryQuote: '«Не ми цей лад починали — не нам його й ламати. Рубежі повинні стояти твердо.»',
+      evidence: ['Обрання на Великій Січовій Раді 1848 року'],
+      strength: 'Спадкове козацьке право та довіра Старшинської Ради',
+      shadow: 'Ризик потрапити під надмірний вплив мілітарної старшини',
+      contradiction: 'Пошук рівноваги між становою вольницею та потребою сильної оборони рубежів',
+      transformations: [],
+      unresolvedQuestion: 'Чи можна захистити віковічні вольності, не розколовши державу перед зовнішньою загрозою?',
+      keyDecisions: ['1848 р. — Обрання нового Гетьмана на Хортиці'],
+      calculatedAtYear: 1848,
       dominantTendencies: [],
       secondaryTendencies: [],
       tensionsAndContradictions: [],
       recognizedStrengths: ['Спадкове козацьке право', 'Довіра Старшинської Ради'],
       shadowRisks: ['Ризик потрапити під вплив мілітарної фракції'],
       historicalPrecedents: ['Богдан Хмельницький (1648)', 'Іван Мазепа (1700)'],
-      tentativeArchetypeTitle: 'Новообраний Гетьман на роздоріжжі',
-      calculatedAtYear: 1848,
+      tentativeArchetypeTitle: 'ОХОРОНЕЦЬ',
     },
+
+    // Stage 6 Psychological Ascension Core
+    behaviorPatterns: [],
+    contradictions: [],
+    psychologicalTensions: [],
+    reflections: [],
+    insights: [],
+    stressTests: [],
+    transformations: [],
+    ascensionStage: 'EXPERIENCE',
 
     lastSavedTimestamp: Date.now(),
   };

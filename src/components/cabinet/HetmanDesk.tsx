@@ -73,7 +73,7 @@ export const HetmanDesk: React.FC<HetmanDeskProps> = ({
                   Кабінет Гетьмана
                 </span>
                 <span className="text-[10px] font-mono tracking-wider px-2 py-0.5 rounded bg-[#1D2534] text-[#C9A96E] border border-[#C9A96E]/30">
-                  1848 РІК
+                  {state.identity.year} РІК
                 </span>
               </div>
               <p className="text-[11px] text-[#8E93A0] hidden sm:block">
@@ -212,8 +212,9 @@ export const HetmanDesk: React.FC<HetmanDeskProps> = ({
                 Особистий профіль, психологічні сигнали та вектор архетипу.
               </p>
             </div>
-            <div className="mt-3 pt-2 border-t border-[#1C2433] text-[10px] font-mono text-[#C9A96E]">
-              {decisionsCount} ухвалених рішень
+            <div className="mt-3 pt-2 border-t border-[#1C2433] text-[10px] font-mono text-[#C9A96E] flex items-center justify-between">
+              <span>{decisionsCount} ухвал</span>
+              <span className="text-[#8E93A0]">{(state.reputationTags || []).length} карбів пам'яті</span>
             </div>
           </button>
         </div>

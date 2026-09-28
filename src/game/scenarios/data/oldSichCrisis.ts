@@ -23,11 +23,53 @@ export const oldSichCrisisScenario: Scenario = {
     'Напруження навколо централізації та утиску автономії Запоріжжя вибухнуло відкритим протистоянням. На курінному майдані зібралися тисячі озброєних козаків під чорними прапорами. Дзвони Січової дзвіниці б’ють тривогу.',
   situation:
     'Стара Січ перейшла червону лінію: отамани вимагають негайного скасування нагляду чиновників або загрожують відмовою присяги. Поруч стоїть генерал Чайка з готовими до бою гарматами, а представники громад благають уникнути братовбивчої крові.',
+  narrativePressures: [
+    {
+      id: 'pressure_sich_centralization',
+      sourcePatternOrTag: 'Встановив столичний нагляд',
+      condition: {
+        type: 'HAS_MEMORY_TAG',
+        memoryTag: 'Встановив столичний нагляд',
+      },
+      impactDescription: 'Наслідок 1848 року: Ваша сувора столична вертикаль переконала отаманів, що уряд прагне знищити козацький звичай. Криза загострена минулою централізацією.',
+      speakerModifier: {
+        speakerQuote:
+          '«Гетьмане! Ми терпіли столичних чиновників та накази з кабінетів, якими ви обплутали воєводства у 1848 році! Але коли зазіхають на віковічну волю Хортиці та козацький суд — шаблі виходять із піхов самі. Ми вже знаємо, як ви звикли наказувати, але Запоріжжя не стане на коліна!»',
+      },
+    },
+    {
+      id: 'pressure_sich_military_force',
+      sourcePatternOrTag: 'Спирався на зброю генералітету',
+      condition: {
+        type: 'HAS_MEMORY_TAG',
+        memoryTag: 'Спирався на зброю генералітету',
+      },
+      impactDescription: 'Наслідок 1848 року: Минуле спирання на військову силу зробило конфлікт вибухонебезпечним: отамани тримають шаблі наголо.',
+      speakerModifier: {
+        speakerQuote:
+          '«Гетьмане! Ви вже щедро наповнили скрині генерала Чайки золотом, і тепер його гармати дивляться нам у груди! Але вільне козацтво не злякати картеччю. Вирішуйте: ви володар усього народу чи командувач каральної експедиції?»',
+      },
+    },
+    {
+      id: 'pressure_sich_civic_freedom',
+      sourcePatternOrTag: 'Заступився за громади',
+      condition: {
+        type: 'HAS_MEMORY_TAG',
+        memoryTag: 'Заступився за громади',
+      },
+      impactDescription: 'Наслідок 1848 року: Розширення прав міських громад підштовхнуло Низове Військо вимагати аналогічного визнання своїх вільностей.',
+      speakerModifier: {
+        speakerQuote:
+          '«Гетьмане! Ви захистили права міських цехів та київських громад, але де ж справедливість для Низового Війська? Якщо міщани мають волю, то козаки Хортиці вимагають не меншого!»',
+      },
+    },
+  ],
   choices: [
     {
       id: 'choice_crisis_concede_autonomy',
       text: 'Поступитися: підтвердити суверенні права Низової Січі та відкликати інспекторів.',
       description: 'Визнати повну внутрішню автономію Запоріжжя, обмежити владу столичних чиновників та знизити централізацію.',
+      memoryTags: ['Захистив автономію Галичини', 'Відмовився від надзвичайних повноважень'],
       consequences: [
         {
           type: 'FACTION_CHANGE',
@@ -69,6 +111,20 @@ export const oldSichCrisisScenario: Scenario = {
           resolutionNote: 'Кризу врегульовано через повернення вольностей Запоріжжю',
         },
         {
+          type: 'PSYCHOLOGICAL_SIGNAL',
+          dimension: 'FREEDOM',
+          value: 2,
+          context: 'crisis',
+          contextNote: 'Поступка перед козацькою вольницею Хортиці',
+        },
+        {
+          type: 'PSYCHOLOGICAL_SIGNAL',
+          dimension: 'TRADITION',
+          value: 1,
+          context: 'crisis',
+          contextNote: 'Збереження звичаю Запоріжжя',
+        },
+        {
           type: 'HISTORY_EVENT',
           eventType: 'CRISIS_RESOLVED',
           title: 'Умиротворення Хортиці: Відновлення Вольностей Старої Січі',
@@ -82,6 +138,7 @@ export const oldSichCrisisScenario: Scenario = {
       id: 'choice_crisis_threaten_force',
       text: 'Погрожувати силою: націлити гармати генерала Чайки та вимагати скласти зброю.',
       description: 'Поставити ультиматум бунтівним куреням: заколотники будуть розсіяні картеччю за спробу порушення державної присяги.',
+      memoryTags: ['Застосував силу проти повстанців', 'Обмежив Стару Січ'],
       consequences: [
         {
           type: 'STATE_CHANGE',
@@ -120,6 +177,20 @@ export const oldSichCrisisScenario: Scenario = {
           resolutionNote: 'Бунт придушено погрозою артилерії, посіяно глибоку ворожнечу',
         },
         {
+          type: 'PSYCHOLOGICAL_SIGNAL',
+          dimension: 'DOMINANCE',
+          value: 3,
+          context: 'war',
+          contextNote: 'Беззастережний силовий диктат та погроза артилерією',
+        },
+        {
+          type: 'PSYCHOLOGICAL_SIGNAL',
+          dimension: 'POWER',
+          value: 2,
+          context: 'war',
+          contextNote: 'Спирання на зброю задля втримання контролю',
+        },
+        {
           type: 'HISTORY_EVENT',
           eventType: 'CRISIS_RESOLVED',
           title: 'Залізна Рука на Хортиці: Приборкання Куренів Силою',
@@ -133,6 +204,7 @@ export const oldSichCrisisScenario: Scenario = {
       id: 'choice_crisis_propose_new_pact',
       text: 'Запропонувати Нову Угоду: Козацька Палата при Гетьмані та збереження клейнодів.',
       description: 'Шлях високого державного розуму: створити постійну Палату Військових Отаманів у столиці з правом вето на військові закони.',
+      memoryTags: ['Уклав інституційний Соборний Пакт', 'Відмовився від надзвичайних повноважень'],
       consequences: [
         {
           type: 'STATE_CHANGE',
@@ -168,6 +240,27 @@ export const oldSichCrisisScenario: Scenario = {
           type: 'RESOLVE_CRISIS',
           crisisId: 'crisis_voice_of_old_sich',
           resolutionNote: 'Укладено нову інституційну угоду з Низовим Військом',
+        },
+        {
+          type: 'PSYCHOLOGICAL_SIGNAL',
+          dimension: 'RESPONSIBILITY',
+          value: 2,
+          context: 'moral',
+          contextNote: 'Інституційний синтез замість братовбивчого насильства',
+        },
+        {
+          type: 'PSYCHOLOGICAL_SIGNAL',
+          dimension: 'CREATION',
+          value: 2,
+          context: 'moral',
+          contextNote: 'Створення Палати Отаманів — нова архітектура влади',
+        },
+        {
+          type: 'PSYCHOLOGICAL_SIGNAL',
+          dimension: 'WILL',
+          value: 2,
+          context: 'moral',
+          contextNote: 'Державницька воля до соборної злагоди',
         },
         {
           type: 'HISTORY_EVENT',

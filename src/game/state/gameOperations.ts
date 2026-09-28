@@ -3,8 +3,11 @@ import { createInitialGameState } from './initialState.ts';
 import {
   determineAvailableScenarios,
   executeChoice,
+  resolveChoice as engineResolveChoice,
+  advanceYear as engineAdvanceYear,
   advanceTime as engineAdvanceTime,
   checkAndResolveScheduledConsequences,
+  ChoiceResolutionResult,
 } from '../engine/scenarioEngine.ts';
 import { Consequence, ScheduledConsequence } from '../consequences/types.ts';
 import { applyConsequences, applySingleConsequence } from '../consequences/applier.ts';
@@ -12,6 +15,8 @@ import { HistoryEvent, HistoryEventType } from '../history/types.ts';
 import { PsychologicalDimension, PsychologicalSignal } from '../psychology/types.ts';
 import { Importance, ImperialEvent } from '../../types/index.ts';
 import { evaluateArchetypeProfile } from '../archetypes/evaluator.ts';
+import { handlePlayerReflectionResponse } from '../psychology/ascensionEngine.ts';
+import { ReflectionResponse } from '../psychology/types.ts';
 
 /**
  * PURE STATE OPERATIONS (Immutable transitions)
@@ -32,21 +37,30 @@ export function makeChoice(
   state: GameState,
   scenarioId: string,
   choiceId: string
-): { state: GameState; logs: string[]; resolvedScheduled: ScheduledConsequence[]; newEvents?: ImperialEvent[] } {
-  const result = executeChoice(state, scenarioId, choiceId);
-  return {
-    state: result.state,
-    logs: result.logs,
-    resolvedScheduled: result.resolvedScheduledEvents,
-    newEvents: result.newEvents,
-  };
+): ChoiceResolutionResult {
+  return engineResolveChoice(state, scenarioId, choiceId);
+}
+
+export function resolveChoice(
+  state: GameState,
+  scenarioId: string,
+  choiceId: string
+): ChoiceResolutionResult {
+  return engineResolveChoice(state, scenarioId, choiceId);
+}
+
+export function advanceYear(
+  state: GameState,
+  years = 1
+): { state: GameState; logs: string[]; resolved: ScheduledConsequence[]; newEvents: ImperialEvent[] } {
+  return engineAdvanceYear(state, years);
 }
 
 export function advanceTime(
   state: GameState,
   years = 1
 ): { state: GameState; logs: string[]; resolved: ScheduledConsequence[]; newEvents: ImperialEvent[] } {
-  return engineAdvanceTime(state, years);
+  return engineAdvanceYear(state, years);
 }
 
 export function dismissEvent(state: GameState, eventId: string): GameState {
@@ -213,3 +227,13 @@ export function addTension(state: GameState, key: string, valueDelta: number): G
 export function resetGame(rulerName?: string): GameState {
   return createInitialGameState(rulerName);
 }
+
+export function respondToReflection(
+  state: GameState,
+  reflectionId: string,
+  response: ReflectionResponse,
+  note?: string
+): GameState {
+  return handlePlayerReflectionResponse(state, reflectionId, response, note);
+}
+
