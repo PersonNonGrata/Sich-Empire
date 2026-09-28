@@ -12,8 +12,8 @@ export const EventRevealModal: React.FC<EventRevealModalProps> = ({ event, onDis
   if (!event) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="relative w-full max-w-2xl bg-[#0D111A] border-2 border-[#C9A96E] rounded-2xl shadow-2xl overflow-hidden text-[#F3EFE6]">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300 overflow-y-auto">
+      <div className="relative w-full max-w-2xl max-h-[100dvh] sm:max-h-[calc(100dvh-2rem)] bg-[#0D111A] border-2 border-[#C9A96E] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden text-[#F3EFE6] flex flex-col">
         {/* Ambient Top Glow */}
         <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-[#C9A96E]/15 rounded-full blur-3xl pointer-events-none" />
 
