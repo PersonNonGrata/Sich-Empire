@@ -351,7 +351,7 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
           }))}
 
           {/* Dedicated modern coastlines guarantee that Britain and Italy remain visibly present
-              even when the historical 1700 layer names/partitions differ from the alternate canon. */}
+              even when the historical base layer differs from the alternate canon. */}
           {britainPaths.map((d, index) => (
             <g key={`britain-${index}`}>
               <path d={d} fill={POWER_COLORS.england} fillOpacity=".9" />
