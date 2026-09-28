@@ -41,7 +41,7 @@ export const EventRevealModal: React.FC<EventRevealModalProps> = ({ event, onDis
         </div>
 
         {/* Content Body */}
-        <div className="p-6 md:p-8 space-y-6">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 pb-4">
           {/* Source Attribution */}
           <div className="flex items-center gap-2 text-xs font-mono text-[#8E93A0] bg-[#141A26] px-3.5 py-2 rounded-lg border border-[#222B3B]">
             <Bell className="w-4 h-4 text-[#C9A96E]" />
@@ -73,7 +73,7 @@ export const EventRevealModal: React.FC<EventRevealModalProps> = ({ event, onDis
           )}
 
           {/* Footer Action */}
-          <div className="pt-2 flex items-center justify-between">
+          <div className="sticky bottom-0 -mx-4 sm:-mx-6 md:-mx-8 px-4 sm:px-6 md:px-8 py-3 bg-[#0D111A]/95 backdrop-blur border-t border-[#232A39] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <span className="text-xs text-[#8E93A0] font-mono flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-[#34D399]" />
               <span>Зафіксовано в Літописі</span>
@@ -81,7 +81,7 @@ export const EventRevealModal: React.FC<EventRevealModalProps> = ({ event, onDis
 
             <button
               onClick={onDismiss}
-              className="px-6 py-3 rounded-lg bg-[#C9A96E] hover:bg-[#DBBC82] text-[#0A0D14] font-serif font-bold text-sm tracking-wide flex items-center gap-2 cursor-pointer transition-all shadow-lg hover:shadow-[#C9A96E]/20"
+              className="w-full sm:w-auto min-h-[48px] px-6 py-3 rounded-lg bg-[#C9A96E] hover:bg-[#DBBC82] text-[#0A0D14] font-serif font-bold text-sm tracking-wide flex items-center gap-2 cursor-pointer transition-all shadow-lg hover:shadow-[#C9A96E]/20"
             >
               <span>Прийняти до уваги</span>
               <ArrowRight className="w-4 h-4" />
