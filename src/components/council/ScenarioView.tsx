@@ -551,14 +551,36 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                     {/* Mobile Action Button */}
                     <div className="block md:hidden pt-1">
                       <button
-                        onClick={() => handleMakeChoice(choice)}
+                        type="button"
+                        onClick={() => highlightedChoice?.id === choice.id ? handleConfirmChoice(choice) : handleMakeChoice(choice)}
                         disabled={calculateChoicePoliticalWillCost(choice, state) > (state.politicalWill ?? 55)}
-                        className="w-full min-h-[48px] px-5 py-3 rounded-lg bg-[#8E2525] hover:bg-[#A32A2A] active:bg-[#6E1C1C] text-white font-serif font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow transition-colors"
+                        aria-label={highlightedChoice?.id === choice.id ? 'Підтвердити рішення' : 'Обрати рішення'}
+                        className={`w-full min-h-[48px] px-5 py-3 rounded-lg font-serif font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow transition-all ${
+                          highlightedChoice?.id === choice.id
+                            ? 'bg-[#C9A96E] hover:bg-[#DCBE84] active:bg-[#B5965C] text-[#0A0D14]'
+                            : 'bg-[#8E2525] hover:bg-[#A32A2A] active:bg-[#6E1C1C] text-white'
+                        }`}
                       >
-                        <span>Ухвалити універсал</span>
-                        <ArrowRight className="w-4 h-4" />
+                        {highlightedChoice?.id === choice.id ? (
+                          <>
+                            <CheckCircle2 className="w-5 h-5" />
+                            <span>Ухвалити рішення</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Обрати рішення</span>
+                            <ArrowRight className="w-4 h-4" />
+                          </>
+                        )}
                       </button>
                     </div>
+
+                    {highlightedChoice?.id === choice.id && (
+                      <div className="flex items-center justify-center gap-1.5 pt-1 text-[10px] font-mono font-bold uppercase tracking-widest text-[#8E2525] text-center">
+                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                        <span>Рішення обрано · натисніть ще раз для ухвалення</span>
+                      </div>
+                    )}
 
                   </div>
                 ))}
