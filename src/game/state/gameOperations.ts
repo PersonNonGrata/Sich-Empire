@@ -2,6 +2,7 @@ import { GameState } from './types.ts';
 import { createInitialGameState } from './initialState.ts';
 import {
   determineAvailableScenarios,
+  recalculateDerivedState,
   executeChoice,
   resolveChoice as engineResolveChoice,
   advanceYear as engineAdvanceYear,
@@ -229,7 +230,9 @@ export function addTension(state: GameState, key: string, valueDelta: number): G
 }
 
 export function negotiateFactionDemand(state: GameState, demandId: string, action: FactionNegotiationAction): { state: GameState; logs: string[]; politicalWillCost: number } {
-  return engineNegotiateFactionDemand(state, demandId, action);
+  const result = engineNegotiateFactionDemand(state, demandId, action);
+  const nextState = recalculateDerivedState(result.state);
+  return { ...result, state: nextState };
 }
 
 export function resetGame(rulerName?: string): GameState {

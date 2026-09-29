@@ -146,7 +146,7 @@ export function recalculateDerivedState(currentState: GameState): GameState {
         }
       : state.military,
     legitimacy: leg.components,
-    politicalWill: recalculatePoliticalWill(state.politicalWill ?? 55, 0, leg.aggregate),
+    politicalWill: state.politicalWill ?? state.politicalCapital ?? 55,
   };
 
   return state;
