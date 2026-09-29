@@ -100,8 +100,17 @@
 }
 
 
-/* Mobile navigation fallback for reliable fixed positioning on mobile browsers. */
-.mobile-bottom-nav { display: none; }
+/* Stable mobile viewport layer. Keep navigation outside the scrolling content. */
+html, body, #root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.mobile-bottom-nav {
+  display: none;
+}
+
 @media (max-width: 767px) {
   .mobile-bottom-nav {
     display: block !important;
@@ -109,7 +118,41 @@
     left: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
-    z-index: 1000 !important;
-    width: 100% !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+    min-height: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+    z-index: 2147483000 !important;
+    transform: translate3d(0, 0, 0) !important;
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    will-change: transform;
+    contain: layout paint style;
+    isolation: isolate;
+    box-sizing: border-box;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    overscroll-behavior: contain;
+  }
+
+  .mobile-bottom-nav > div {
+    height: 64px !important;
+  }
+
+  main {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  main > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .mobile-bottom-nav button {
+    min-width: 0;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 }
