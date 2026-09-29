@@ -109,9 +109,10 @@ const POWER_COLORS = {
   italy: '#76664D',
 } as const;
 
-type PowerKey = keyof typeof POWER_COLORS | 'iran';
+type PowerKey = keyof typeof POWER_COLORS;
+type LabelPowerKey = PowerKey | 'iran';
 
-const LABEL_COLORS: Record<PowerKey, string> = {
+const LABEL_COLORS: Record<LabelPowerKey, string> = {
   sich: '#241A0C',
   ottoman: '#F4E8D4',
   austria: '#24262A',
@@ -123,7 +124,7 @@ const LABEL_COLORS: Record<PowerKey, string> = {
   iran: '#E8DCC4',
 };
 
-const LABEL_STROKES: Record<PowerKey, string> = {
+const LABEL_STROKES: Record<LabelPowerKey, string> = {
   sich: '#E8D19A',
   ottoman: '#241A18',
   austria: '#F0E9D8',
@@ -775,14 +776,14 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
                 y={y}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                fill={label.power && label.power in LABEL_COLORS ? LABEL_COLORS[label.power as PowerKey] : "#F0E8D8"}
+                fill={label.power && label.power in LABEL_COLORS ? LABEL_COLORS[label.power as LabelPowerKey] : "#F0E8D8"}
                 opacity=".98"
                 fontSize={label.power === 'sich' ? label.size + 1 : label.size}
                 fontFamily="Georgia, serif"
                 fontWeight={label.weight}
                 letterSpacing={label.power === 'sich' ? "2.2" : "1.5"}
                 paintOrder="stroke"
-                stroke={label.power && label.power in LABEL_STROKES ? LABEL_STROKES[label.power as PowerKey] : "#15191D"}
+                stroke={label.power && label.power in LABEL_STROKES ? LABEL_STROKES[label.power as LabelPowerKey] : "#15191D"}
                 strokeWidth={label.power === 'sich' ? 2.8 : 2.1}
                 strokeOpacity=".95"
               >
