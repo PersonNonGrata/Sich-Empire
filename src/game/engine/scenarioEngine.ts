@@ -12,6 +12,8 @@ import {
   evaluatePromises,
   calculateLegitimacy,
   recalculatePoliticalWill,
+  updateFactionDemandsAfterDecision,
+  expireFactionDemands,
 } from '../politics/evaluator.ts';
 import { advanceEconomicYear } from '../economy/economyEngine.ts';
 import {
@@ -519,10 +521,24 @@ export function resolveChoice(
     };
   });
 
+  // Phase 5: turn faction reactions into persistent political pressure.
+  const demandResult = updateFactionDemandsAfterDecision(
+    updatedState,
+    decisionId,
+    choice.politicalReactions || [],
+  );
+  let politicalState = demandResult.state;
+  const demandLogs = [...demandResult.logs];
+
+  // A demand that outlived its deadline becomes historical pressure.
+  const expiredDemandResult = expireFactionDemands(politicalState);
+  politicalState = expiredDemandResult.state;
+  demandLogs.push(...expiredDemandResult.logs);
+
   // Check for newly triggered political crises
-  const newCrises = detectPoliticalCrises(updatedState, updatedState.crises || []);
+  const newCrises = detectPoliticalCrises(politicalState, politicalState.crises || []);
   const crisisEvents: ImperialEvent[] = [];
-  let postCrisisState = { ...updatedState };
+  let postCrisisState = { ...politicalState };
 
   for (const crisis of newCrises) {
     postCrisisState.crises = [...(postCrisisState.crises || []), crisis];
