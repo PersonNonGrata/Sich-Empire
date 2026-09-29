@@ -33,6 +33,7 @@ interface CouncilViewProps {
   lastExecutionLogs: string[] | null;
   lastResolutionResult?: ChoiceResolutionResult | null;
   onContinue: () => void;
+  onNegotiateFactionDemand: (demandId: string, action: 'concession' | 'guarantee' | 'bargain' | 'refuse') => void;
   onAdvanceYear: () => void;
 }
 
@@ -43,6 +44,7 @@ export const CouncilView: React.FC<CouncilViewProps> = ({
   lastExecutionLogs,
   lastResolutionResult,
   onContinue,
+  onNegotiateFactionDemand,
   onAdvanceYear,
 }) => {
   const [selectedMetric, setSelectedMetric] = useState<MetricType | null>(null);
@@ -67,6 +69,7 @@ export const CouncilView: React.FC<CouncilViewProps> = ({
         lastExecutionLogs={lastExecutionLogs}
         lastResolutionResult={lastResolutionResult}
         onContinue={onContinue}
+        onNegotiateFactionDemand={onNegotiateFactionDemand}
       />
     );
   }

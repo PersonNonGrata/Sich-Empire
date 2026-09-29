@@ -33,6 +33,7 @@ interface ScenarioViewProps {
   lastExecutionLogs: string[] | null;
   lastResolutionResult?: ChoiceResolutionResult | null;
   onContinue: () => void;
+  onNegotiateFactionDemand: (demandId: string, action: 'concession' | 'guarantee' | 'bargain' | 'refuse') => void;
 }
 
 export const ScenarioView: React.FC<ScenarioViewProps> = ({
@@ -43,6 +44,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
   lastExecutionLogs,
   lastResolutionResult,
   onContinue,
+  onNegotiateFactionDemand,
 }) => {
   const [selectedChoice, setSelectedChoice] = useState<Choice | null>(null);
   const [pendingChoice, setPendingChoice] = useState<Choice | null>(null);
@@ -374,8 +376,31 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                           <p className="mt-1.5 text-[11px] sm:text-xs text-[#544D45] leading-snug">
                             {demand.text}
                           </p>
-                          <div className="mt-2 text-[9px] font-mono text-[#7A6F60]">
-                            Термін політичної відповіді: {demand.deadlineYear} рік
+                          <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                            <div className="text-[9px] font-mono text-[#7A6F60]">
+                              Термін політичної відповіді: {demand.deadlineYear} рік
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {[
+                                { action: 'concession' as const, label: 'Поступка', cost: 6 + demand.urgency * 2 },
+                                { action: 'guarantee' as const, label: 'Гарантія', cost: 3 + demand.urgency },
+                                { action: 'bargain' as const, label: 'Домовитись', cost: 4 + demand.urgency },
+                                { action: 'refuse' as const, label: 'Відмова', cost: 0 },
+                              ].map((option) => {
+                                const affordable = option.cost <= (state.politicalWill ?? 55);
+                                return (
+                                  <button
+                                    key={option.action}
+                                    type="button"
+                                    disabled={!affordable}
+                                    onClick={() => onNegotiateFactionDemand(demand.id, option.action)}
+                                    className="px-2 py-1 rounded border border-[#CBB48B] bg-[#F7EEDB] text-[9px] font-mono font-bold text-[#544D45] hover:border-[#8E2525] hover:text-[#8E2525] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                  >
+                                    {option.label}{option.cost > 0 ? ' · −' + option.cost + ' ВП' : ''}
+                                  </button>
+                                );
+                              })}
+                            </div>
                           </div>
                         </div>
                       );
