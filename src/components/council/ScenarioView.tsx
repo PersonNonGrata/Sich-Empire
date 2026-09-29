@@ -859,8 +859,3 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
     </div>
   );
 };
-
-      </article>
-    </div>
-  );
-};
