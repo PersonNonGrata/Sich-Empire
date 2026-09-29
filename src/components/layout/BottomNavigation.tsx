@@ -5,12 +5,14 @@ interface BottomNavigationProps {
   activeTab: string;
   onSelectTab: (tab: string) => void;
   availableScenariosCount: number;
+  hasHetmanUpdates: boolean;
 }
 
 export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   activeTab,
   onSelectTab,
   availableScenariosCount,
+  hasHetmanUpdates,
 }) => {
   const tabs = [
     {
@@ -35,13 +37,13 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
       id: 'hetman',
       label: 'ГЕТЬМАН',
       icon: <User className="w-5 h-5" />,
-      badge: 0,
+      badge: hasHetmanUpdates ? 1 : 0,
     },
   ];
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0A0D13]/95 backdrop-blur-md border-t border-[#232A39] shadow-2xl"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-[#0A0D13]/98 backdrop-blur-md border-t border-[#232A39] shadow-2xl"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       aria-label="Мобільна навігація Гетьмана"
     >
