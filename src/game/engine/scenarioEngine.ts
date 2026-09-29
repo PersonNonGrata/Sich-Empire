@@ -284,10 +284,16 @@ export function checkAndResolveScheduledConsequences(
 
         // Add history chronicle entry about the delayed consequence coming due
         const resolvedHistoryId = 'hist_res_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+        const sourceDecision = state.decisions.find((d) => d.id === sc.sourceDecisionId);
+        const sourceLabel = sourceDecision
+          ? `«${sourceDecision.choiceText}»`
+          : (sc.sourceScenarioTitle || 'Попередній Універсал');
         const resolvedDescription = sc.sourceYear
-          ? `${sc.description} (Подія є прямим відлунням вашого рішення у ${sc.sourceYear} році: «${sc.sourceScenarioTitle || 'Попередній Універсал'}»).`
+          ? `${sc.description} Це пряме відлуння рішення ${sc.sourceYear} року: ${sourceLabel}.`
           : sc.description;
-
+        const causalChainNote = sc.sourceYear
+          ? `${sc.sourceYear} → ${sourceLabel} → ${state.identity.year} → ${sc.title}`
+          : `Рішення → ${sc.title}`;
         state = {
           ...state,
           history: [
@@ -301,6 +307,9 @@ export function checkAndResolveScheduledConsequences(
               sourceDecisionId: sc.sourceDecisionId,
               importance: 'major',
               tags: ['відкладений_наслідок', 'історія', `${sc.triggerYear}`],
+              category: 'decision',
+              causalRootDecisionId: sc.sourceDecisionId,
+              causalChainNote,
             },
             ...state.history,
           ],
