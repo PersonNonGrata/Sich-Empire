@@ -14,6 +14,7 @@ import {
   recalculatePoliticalWill,
   updateFactionDemandsAfterDecision,
   expireFactionDemands,
+  calculateChoicePoliticalWillCost,
 } from '../politics/evaluator.ts';
 import { advanceEconomicYear } from '../economy/economyEngine.ts';
 import {
@@ -408,8 +409,27 @@ export function resolveChoice(
 
   const decisionId = 'dec_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
 
+  // Political Will is a real decision resource.
+  // Explicit costs are increased when the choice directly confronts active faction demands.
+  const politicalWillCost = calculateChoicePoliticalWillCost(choice, currentState);
+  const currentPoliticalWill = currentState.politicalWill ?? currentState.politicalCapital ?? 55;
+  if (politicalWillCost > currentPoliticalWill) {
+    throw new Error(
+      `Недостатньо політичної волі. Потрібно ${politicalWillCost}, доступно ${currentPoliticalWill}.`
+    );
+  }
+
   // Build full consequences list from choice attributes
   const allConsequences: Consequence[] = [...choice.consequences];
+
+  if (politicalWillCost > 0) {
+    allConsequences.push({
+      type: 'POLITICAL_WILL_CHANGE',
+      value: -politicalWillCost,
+      label: `Політична воля: ціна проведення рішення`,
+      reason: 'Витрати на проведення рішення через Раду та подолання політичного опору',
+    });
+  }
 
   // Stage 7: Memory tags from choice
   if (choice.memoryTags) {
