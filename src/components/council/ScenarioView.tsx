@@ -534,7 +534,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                     <div className="block md:hidden pt-1">
                       <button
                         onClick={() => handleMakeChoice(choice)}
-                        disabled={!canAffordWill}
+                        disabled={calculateChoicePoliticalWillCost(choice, state) > (state.politicalWill ?? 55)}
                         className="w-full min-h-[48px] px-5 py-3 rounded-lg bg-[#8E2525] hover:bg-[#A32A2A] active:bg-[#6E1C1C] text-white font-serif font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow transition-colors"
                       >
                         <span>Ухвалити універсал</span>
