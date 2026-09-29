@@ -19,6 +19,7 @@ import {
   Landmark,
   Crown,
   HeartHandshake,
+  Users,
   CheckCircle2,
   Bookmark,
 } from 'lucide-react';
@@ -318,6 +319,67 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                     <span className="text-[11px] text-[#544D45] leading-snug">{scenario.inaction}</span>
                   </div>
                 )}
+              </div>
+            </section>
+          )}
+
+          {/* SECTION: Active Faction Pressure */}
+          {!isResolved && (state.factionDemands || []).some((d) => d.status === 'open') && (
+            <section className="space-y-3" aria-label="Активні політичні вимоги">
+              <div className="border-t-2 border-[#765B2A] pt-3">
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <h3 className="font-serif text-base md:text-lg font-bold uppercase tracking-wider text-[#765B2A] flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    ПОЛІТИЧНЕ ПОЛЕ
+                  </h3>
+                  <span className="text-[9px] font-mono uppercase tracking-widest text-[#7A6F60]">
+                    АКТИВНІ ВИМОГИ
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  {(state.factionDemands || [])
+                    .filter((d) => d.status === 'open')
+                    .slice(0, 5)
+                    .map((demand) => {
+                      const faction = state.factions.find((f: any) => f.id === demand.factionId);
+                      const urgent = demand.urgency >= 3;
+                      return (
+                        <div
+                          key={demand.id}
+                          className={`rounded-lg border px-3 py-2.5 ${
+                            urgent
+                              ? 'border-[#B86B5C] bg-[#F8ECE9]'
+                              : 'border-[#D8C6A5] bg-[#FAF3E3]'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="text-[9px] font-mono font-bold uppercase tracking-widest text-[#8E2525]">
+                                {faction?.name || 'Політична фракція'}
+                              </div>
+                              <div className="font-serif text-sm font-bold text-[#1C1815] leading-snug">
+                                {demand.title}
+                              </div>
+                            </div>
+                            <span className={`shrink-0 px-2 py-1 rounded border text-[9px] font-mono font-bold uppercase ${
+                              urgent
+                                ? 'border-[#B86B5C] text-[#8E2525] bg-[#F8ECE9]'
+                                : 'border-[#D8C6A5] text-[#765B2A] bg-[#F4E8D2]'
+                            }`}>
+                              {urgent ? 'УЛЬТИМАТУМ' : demand.urgency === 2 ? 'ВИМОГА' : 'НАПОЛЯГАННЯ'}
+                            </span>
+                          </div>
+                          <p className="mt-1.5 text-[11px] sm:text-xs text-[#544D45] leading-snug">
+                            {demand.text}
+                          </p>
+                          <div className="mt-2 text-[9px] font-mono text-[#7A6F60]">
+                            Термін політичної відповіді: {demand.deadlineYear} рік
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
               </div>
             </section>
           )}
