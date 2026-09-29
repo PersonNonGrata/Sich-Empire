@@ -397,19 +397,19 @@ export const HetmanView: React.FC<HetmanViewProps> = ({ state, onRespondToReflec
               return (
                 <div
                   key={char.id}
-                  className="p-3.5 sm:p-4 rounded-xl bg-[#101522] border border-[#222B3D] space-y-2 hover:border-[#384868] transition-colors"
+                  className="min-w-0 w-full p-3.5 sm:p-4 rounded-xl bg-[#101522] border border-[#222B3D] space-y-2 hover:border-[#384868] transition-colors overflow-hidden"
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h4 className="font-serif text-sm sm:text-base font-bold text-[#F3EFE6]">
+                  <div className="min-w-0 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-serif text-sm sm:text-base font-bold text-[#F3EFE6] break-words">
                         {char.name}
                       </h4>
-                      <p className="text-[11px] text-[#8E929E] truncate">
+                      <p className="text-[11px] text-[#8E929E] break-words sm:truncate">
                         {char.role}
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-2 text-[10px] font-mono shrink-0">
+                    <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-mono shrink-0 max-w-full">
                       <span className="px-1.5 py-0.5 rounded bg-[#0E2016] text-[#34D399] border border-[#10B981]/30" title="Довіра">
                         Д: {trust}
                       </span>
