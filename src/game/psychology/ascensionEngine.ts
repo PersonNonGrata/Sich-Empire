@@ -416,7 +416,7 @@ export function evaluateAscension(state: GameState): AscensionEvaluationResult {
   let progressionNote = 'Ти починаєш часто обирати перші рішення. Внутрішній стрижень лише окреслюється у перших універсалах.';
   let compositeTitle = primaryDef.title;
 
-  if (decCount <= 3) {
+  if (decCount <= 2) {
     crystallizationStage = 'EMERGING';
     if ((summary.ORDER || 0) + (summary.CENTRALIZATION || 0) >= 1) {
       progressionNote = 'Ти починаєш часто обирати централізовані рішення та мілітарний порядок.';
