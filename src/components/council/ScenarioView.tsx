@@ -213,6 +213,102 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
             </div>
           )}
 
+          {/* SECTION: Structured Case Dossier */}
+          {!isResolved && (
+            <section className="space-y-4" aria-label="Досьє державної справи">
+              <div className="border-t-2 border-[#8E2525] pt-5">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <h3 className="font-serif text-lg md:text-xl font-bold uppercase tracking-wider text-[#8E2525]">
+                    ДОСЬЄ СПРАВИ
+                  </h3>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-[#7A6F60]">
+                    БРИФІНГ РАДИ
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="bg-[#F7EEDB] border border-[#CBB48B] rounded-lg p-4 shadow-sm">
+                    <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#8E2525] mb-1.5">
+                      ПРОБЛЕМА
+                    </div>
+                    <p className="font-serif text-sm sm:text-base text-[#1C1815] leading-relaxed">
+                      {scenario.problem || scenario.situation}
+                    </p>
+                  </div>
+
+                  <div className="bg-[#FAF3E3] border border-[#D8C6A5] rounded-lg p-4">
+                    <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#6E6354] mb-1.5">
+                      КОНТЕКСТ
+                    </div>
+                    <p className="text-sm text-[#544D45] leading-relaxed">
+                      {scenario.context || scenario.introduction}
+                    </p>
+                  </div>
+
+                  {scenario.actors && scenario.actors.length > 0 && (
+                    <div className="bg-[#FAF3E3] border border-[#D8C6A5] rounded-lg p-4">
+                      <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#6E6354] mb-2">
+                        АКТОРИ ТА ЇХНІ ІНТЕРЕСИ
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {scenario.actors.map((actor) => (
+                          <div key={actor.id} className="rounded-md border border-[#E0D1B5] bg-[#FDF7EA] px-3 py-2.5">
+                            <div className="font-serif font-bold text-sm text-[#1C1815]">
+                              {actor.name || actor.id}
+                            </div>
+                            <div className="text-[10px] font-mono uppercase tracking-wide text-[#8E2525] mt-0.5">
+                              {actor.role}
+                            </div>
+                            <p className="text-xs text-[#544D45] leading-relaxed mt-1.5">
+                              <span className="font-semibold text-[#6E6354]">Інтерес:</span> {actor.interest}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {scenario.knowledge && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="bg-[#F3F0E7] border border-[#C8C0AD] rounded-lg p-4">
+                        <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#315B45] mb-2">
+                          ВІДОМО
+                        </div>
+                        <ul className="space-y-1.5 text-sm text-[#3F3A34] leading-relaxed list-disc pl-4">
+                          {scenario.knowledge.known.map((item, index) => (
+                            <li key={index}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="bg-[#F3F0E7] border border-[#C8C0AD] rounded-lg p-4">
+                        <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#765B2A] mb-2">
+                          НЕВІДОМО
+                        </div>
+                        <ul className="space-y-1.5 text-sm text-[#3F3A34] leading-relaxed list-disc pl-4">
+                          {scenario.knowledge.uncertain.map((item, index) => (
+                            <li key={index}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+
+                  {scenario.inaction && (
+                    <div className="bg-[#F4E8D2] border border-[#B99A67] rounded-lg p-4">
+                      <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#765B2A] mb-1.5">
+                        ЯКЩО НІЧОГО НЕ РОБИТИ
+                      </div>
+                      <p className="text-sm text-[#544D45] leading-relaxed">
+                        {scenario.inaction}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
+
           {/* SECTION: Choices OR Immediate Consequence Resolution Flow (Section 10) */}
           {!isResolved ? (
             <div className="pt-6 border-t border-[#CBB48B] space-y-4">
