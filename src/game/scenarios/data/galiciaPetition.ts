@@ -17,6 +17,10 @@ export const galiciaPetitionScenario: Scenario = {
       value: 1849,
     },
     {
+      type: 'SCENARIO_COMPLETED',
+      scenarioId: 'scenario_tax_reform_1849',
+    },
+    {
       type: 'SCENARIO_NOT_COMPLETED',
       scenarioId: 'scenario_petition_galicia_land',
     },
