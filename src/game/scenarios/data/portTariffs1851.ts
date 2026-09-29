@@ -11,8 +11,12 @@ export const portTariffs1851Scenario: Scenario = {
   conditions: [
     {
       type: 'YEAR',
-      operator: '>=',
+      operator: '==',
       value: 1851,
+    },
+    {
+      type: 'SCENARIO_COMPLETED',
+      scenarioId: 'scenario_border_echoes_1851',
     },
     {
       type: 'SCENARIO_NOT_COMPLETED',
