@@ -23,6 +23,7 @@ import {
   Users,
   CheckCircle2,
   Bookmark,
+  Clock,
 } from 'lucide-react';
 
 interface ScenarioViewProps {
@@ -521,7 +522,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                       {/* Desktop Action Button */}
                       <button
                         onClick={() => handleMakeChoice(choice)}
-                        disabled={!canAffordWill}
+                        disabled={calculateChoicePoliticalWillCost(choice, state) > (state.politicalWill ?? 55)}
                         className="hidden md:flex px-5 py-2.5 rounded bg-[#8E2525] hover:bg-[#A32A2A] text-white font-serif font-bold text-xs uppercase tracking-wider items-center gap-1.5 shrink-0 cursor-pointer shadow transition-colors min-h-[44px]"
                       >
                         <span>Ухвалити</span>

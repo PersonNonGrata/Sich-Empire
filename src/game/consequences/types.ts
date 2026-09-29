@@ -168,6 +168,7 @@ export type Consequence =
         socialCost?: number;
         institutionalCost?: number;
         capitalCost?: number;
+        politicalWillCost?: number;
       };
       label?: string;
     }

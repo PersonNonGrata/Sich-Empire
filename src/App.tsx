@@ -219,7 +219,6 @@ export default function App() {
       if (!savedGameState) return;
       setGameState(savedGameState);
       setShowPrologue(false);
-      setIsPrologueMenuOpen(false);
       setBannerNotice('Збережену кампанію завантажено.');
     };
 
