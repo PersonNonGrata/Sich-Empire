@@ -7,6 +7,8 @@ export const tradeLaw1852Scenario: Scenario = {
   location: 'Велика Рада Старшини, Хортиця',
   tags: ['закон', 'торгівля', 'контроль', 'монополія', '1852'],
   priority: 95,
+  sequenceOrder: 20,
+  required: true,
   importance: 'standard',
   conditions: [
     {
