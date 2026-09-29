@@ -4,6 +4,35 @@ import { TopBar } from '../TopBar.tsx';
 import { BottomNavigation } from './BottomNavigation.tsx';
 import { HetmanDesk } from '../cabinet/HetmanDesk.tsx';
 import { Bell, Sparkles } from 'lucide-react';
+class ViewErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-[50vh] flex items-center justify-center p-6">
+          <div className="max-w-lg w-full rounded-xl border border-[#5B1B1B] bg-[#141014] p-6 text-center space-y-3">
+            <div className="text-[#EF4444] font-mono text-xs uppercase tracking-widest">Помилка відображення</div>
+            <p className="font-serif text-xl text-[#F3EFE6]">Профіль Гетьмана не вдалося відкрити.</p>
+            <p className="text-xs text-[#8E93A0]">Навігація залишається доступною. Перейдіть до іншої вкладки та поверніться ще раз.</p>
+            <button
+              onClick={() => this.setState({ hasError: false })}
+              className="px-4 py-2 rounded-lg bg-[#1C2535] border border-[#384868] text-[#C9A96E] text-xs font-mono"
+            >
+              Спробувати ще раз
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 
 interface AppShellProps {
   state: GameState;
@@ -92,7 +121,9 @@ export const AppShell: React.FC<AppShellProps> = ({
         )}
 
         {/* Section View Content */}
-        <div className="mt-2 md:mt-4">{children}</div>
+        <div className="mt-2 md:mt-4">
+          <ViewErrorBoundary>{children}</ViewErrorBoundary>
+        </div>
       </main>
 
       {/* 3. Mobile Bottom Navigation */}
