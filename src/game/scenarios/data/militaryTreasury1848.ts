@@ -212,6 +212,43 @@ export const militaryTreasury1848Scenario: Scenario = {
         { factionId: 'faction_military_command', reaction: 'support', note: 'Блискучий тріумф оборонного бюджету' },
         { factionId: 'faction_communities', reaction: 'concern', note: 'Занепокоєння стрімким таненням резервів' },
       ],
+      scheduledConsequences: [
+        {
+          triggerYear: 1851,
+          title: 'Військова вага: ціна сильної армії',
+          description:
+            'Переозброєння 1848 року дало Січі сильніші гарнізони, але разом із ними зросли вплив генералітету, очікування нових асигнувань та політична вага війська.',
+          kind: 'self_created_problem',
+          unlockScenarioId: 'scenario_military_influence_1851',
+          conditions: [
+            {
+              type: 'HAS_FLAG',
+              flag: 'garrisons_fully_rearmed_1848',
+              value: true,
+            },
+          ],
+          consequences: [
+            {
+              type: 'FACTION_CHANGE',
+              factionId: 'faction_military_command',
+              influenceChange: 8,
+              tensionChange: 8,
+              label: 'Зростання політичної ваги генералітету',
+            },
+            {
+              type: 'POLITICAL_WILL_CHANGE',
+              value: -4,
+              label: 'Політична воля витрачається на стримування військового впливу',
+            },
+            {
+              type: 'TENSION',
+              key: 'tension_might_prosperity',
+              value: 8,
+              label: 'Посилення напруги між військовою силою та цивільними пріоритетами',
+            },
+          ],
+        },
+      ],
       consequences: [
         {
           type: 'STATE_CHANGE',
