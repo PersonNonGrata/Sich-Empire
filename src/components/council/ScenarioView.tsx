@@ -48,22 +48,21 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
   onNegotiateFactionDemand,
 }) => {
   const [selectedChoice, setSelectedChoice] = useState<Choice | null>(null);
-  const [pendingChoice, setPendingChoice] = useState<Choice | null>(null);
+  const [highlightedChoice, setHighlightedChoice] = useState<Choice | null>(null);
 
   const speaker = scenario.speakerId
     ? characters.find((c) => c.id === scenario.speakerId)
     : null;
 
   const handleMakeChoice = (choice: Choice) => {
-    // First tap only selects the universal. A second explicit action seals it.
-    setPendingChoice(choice);
+    // First tap only highlights the choice. The explicit checkmark commits it.
+    setHighlightedChoice(choice);
   };
 
-  const handleConfirmChoice = () => {
-    if (!pendingChoice) return;
-    setSelectedChoice(pendingChoice);
-    setPendingChoice(null);
-    onSelectChoice(pendingChoice.id);
+  const handleConfirmChoice = (choice: Choice) => {
+    setSelectedChoice(choice);
+    setHighlightedChoice(null);
+    onSelectChoice(choice.id);
   };
 
   // Helper to extract metric changes from choice consequences
@@ -427,7 +426,11 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                 {scenario.choices.map((choice, idx) => (
                   <div
                     key={choice.id}
-                    className="p-4 md:p-5 rounded-lg bg-[#FAF3E3] hover:bg-[#FFFFFF] border-2 border-[#D3C1A1] hover:border-[#8E2525] shadow-sm hover:shadow-md transition-all duration-200 group space-y-3"
+                    className={`p-4 md:p-5 rounded-lg shadow-sm transition-all duration-200 group space-y-3 ${
+                      highlightedChoice?.id === choice.id
+                        ? 'bg-[#FFF8E8] border-2 border-[#C9A96E] shadow-[0_0_0_2px_rgba(201,169,110,0.18)]'
+                        : 'bg-[#FAF3E3] border-2 border-[#D3C1A1] hover:bg-[#FFFFFF] hover:border-[#8E2525] hover:shadow-md'
+                    }`}
                   >
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 md:gap-4">
                       <div className="space-y-2 flex-1">
@@ -521,12 +524,27 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
 
                       {/* Desktop Action Button */}
                       <button
-                        onClick={() => handleMakeChoice(choice)}
+                        type="button"
+                        onClick={() => highlightedChoice?.id === choice.id ? handleConfirmChoice(choice) : handleMakeChoice(choice)}
                         disabled={calculateChoicePoliticalWillCost(choice, state) > (state.politicalWill ?? 55)}
-                        className="hidden md:flex px-5 py-2.5 rounded bg-[#8E2525] hover:bg-[#A32A2A] text-white font-serif font-bold text-xs uppercase tracking-wider items-center gap-1.5 shrink-0 cursor-pointer shadow transition-colors min-h-[44px]"
+                        aria-label={highlightedChoice?.id === choice.id ? 'Підтвердити рішення' : 'Обрати рішення'}
+                        className={`hidden md:flex min-h-[44px] min-w-[150px] px-5 py-2.5 rounded-lg font-serif font-bold text-xs uppercase tracking-wider items-center justify-center gap-1.5 shrink-0 cursor-pointer shadow transition-all ${
+                          highlightedChoice?.id === choice.id
+                            ? 'bg-[#C9A96E] hover:bg-[#DCBE84] text-[#0A0D14] shadow-[#C9A96E]/20'
+                            : 'bg-[#8E2525] hover:bg-[#A32A2A] text-white'
+                        }`}
                       >
-                        <span>Ухвалити</span>
-                        <ArrowRight className="w-4 h-4" />
+                        {highlightedChoice?.id === choice.id ? (
+                          <>
+                            <CheckCircle2 className="w-4 h-4" />
+                            <span>Ухвалити</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Обрати</span>
+                            <ArrowRight className="w-4 h-4" />
+                          </>
+                        )}
                       </button>
                     </div>
 
@@ -814,26 +832,12 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
 
           )}
 
-            {/* Explicit seal confirmation: prevents accidental canonical choices on touch screens. */}
-            {pendingChoice && (
-              <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-3 sm:p-4">
-                <div className="w-full max-w-lg rounded-2xl bg-[#10141E] border-2 border-[#C9A96E] shadow-2xl p-5 sm:p-7 space-y-5 animate-in slide-in-from-bottom-4 duration-200">
-                  <div className="text-[10px] uppercase tracking-widest font-mono font-bold text-[#C9A96E]">Перед скріпленням печаткою</div>
-                  <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#F3EFE6] leading-tight">«{pendingChoice.text}»</h3>
-                  {pendingChoice.description && <p className="text-sm text-[#A8AFBD] leading-relaxed">{pendingChoice.description}</p>}
-                  <div className="flex flex-col gap-2 pt-2">
-                    <button onClick={handleConfirmChoice} className="w-full min-h-[52px] rounded-xl bg-[#C9A96E] text-[#0A0D14] font-serif font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.99]">
-                      <CheckCircle2 className="w-5 h-5" />
-                      СКРІПИТИ ПЕЧАТКОЮ
-                    </button>
-                    <button onClick={() => setPendingChoice(null)} className="w-full min-h-[48px] rounded-xl border border-[#3A4558] text-[#C8CDD8] font-serif font-bold text-sm hover:bg-[#18202E]">
-                      Повернутися до вибору
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
         </div>
+      </article>
+    </div>
+  );
+};
+
       </article>
     </div>
   );
