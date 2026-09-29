@@ -33,12 +33,12 @@ export function MainMenu({ hasSave, onNewGame, onContinue }: Props) {
     <div className="min-h-screen min-h-[100dvh] bg-[#080A0E] text-[#F3EFE6] overflow-hidden">
       <main className="relative min-h-[100dvh] flex flex-col">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-[-8%] scale-110 opacity-55 blur-[5px]">
+          <div className="absolute inset-[-6%] scale-110 opacity-85 blur-[1px]">
             <SichEmpireMap variant="prologue" />
           </div>
-          <div className="absolute inset-0 bg-[#080A0E]/58" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(201,169,110,0.15),transparent_45%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(8,10,14,0.25),rgba(8,10,14,0.72))]" />
+          <div className="absolute inset-0 bg-[#080A0E]/30" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(201,169,110,0.10),transparent_48%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(8,10,14,0.12),rgba(8,10,14,0.48))]" />
         </div>
 
         <section className="relative flex-1 flex flex-col justify-center px-5 pt-10 pb-6 sm:px-8">
