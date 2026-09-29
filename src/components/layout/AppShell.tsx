@@ -87,6 +87,7 @@ export const AppShell: React.FC<AppShellProps> = ({
             activeTab={activeTab}
             onSelectTab={setActiveTab}
             onOpenCouncil={onOpenCouncil}
+            hasHetmanUpdates={hasHetmanUpdates}
           />
         )}
 
