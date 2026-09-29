@@ -423,57 +423,60 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
               </div>
 
               <div className="space-y-4">
-                {scenario.choices.map((choice, idx) => (
-                  <div
-                    key={choice.id}
-                    className={`p-4 md:p-5 rounded-lg shadow-sm transition-all duration-200 group space-y-3 ${
-                      highlightedChoice?.id === choice.id
-                        ? 'bg-[#FFF8E8] border-2 border-[#C9A96E] shadow-[0_0_0_2px_rgba(201,169,110,0.18)]'
-                        : 'bg-[#FAF3E3] border-2 border-[#D3C1A1] hover:bg-[#FFFFFF] hover:border-[#8E2525] hover:shadow-md'
-                    }`}
-                  >
-                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 md:gap-4">
-                      <div className="space-y-2 flex-1">
+                {scenario.choices.map((choice, idx) => {
+                  const resources = getChoiceResourceStakes(choice);
+                  const political = getChoicePoliticalStakes(choice);
+                  const risk = getChoiceRisk(choice);
+                  const willCost = calculateChoicePoliticalWillCost(choice, state);
+                  const willAvailable = state.politicalWill ?? 55;
+                  const canAffordWill = willCost <= willAvailable;
+                  const isHighlighted = highlightedChoice?.id === choice.id;
+
+                  return (
+                    <div
+                      key={choice.id}
+                      className={`rounded-lg shadow-sm transition-all duration-200 group \${
+                        isHighlighted
+                          ? 'bg-[#FFF8E8] border-2 border-[#C9A96E] shadow-[0_0_0_2px_rgba(201,169,110,0.18)]'
+                          : 'bg-[#FAF3E3] border-2 border-[#D3C1A1] hover:bg-[#FFFFFF] hover:border-[#8E2525] hover:shadow-md'
+                      }`}
+                    >
+                      <div className="p-3.5 sm:p-4 md:p-5">
                         <div className="flex items-start gap-2.5">
-                          <span className="w-6 h-6 rounded-full bg-[#1C1815] text-[#F4EAD4] text-xs font-mono font-bold flex items-center justify-center group-hover:bg-[#8E2525] transition-colors shrink-0 mt-0.5">
+                          <span className={`w-6 h-6 rounded-full text-[#F4EAD4] text-xs font-mono font-bold flex items-center justify-center shrink-0 mt-0.5 \${
+                            isHighlighted ? 'bg-[#8E2525]' : 'bg-[#1C1815] group-hover:bg-[#8E2525]'
+                          }`}>
                             {idx + 1}
                           </span>
-                          <span className="font-serif text-base sm:text-lg font-bold text-[#1C1815] group-hover:text-[#8E2525] transition-colors leading-snug">
-                            {choice.text}
-                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <h4 className="font-serif text-base sm:text-lg font-bold text-[#1C1815] group-hover:text-[#8E2525] leading-snug">
+                                {choice.text}
+                              </h4>
+                              {isHighlighted && (
+                                <CheckCircle2 className="w-5 h-5 text-[#8E2525] shrink-0 mt-0.5" />
+                              )}
+                            </div>
+                            {choice.description && (
+                              <p className="mt-1.5 text-xs sm:text-sm text-[#544D45] leading-snug">
+                                {choice.description}
+                              </p>
+                            )}
+                          </div>
                         </div>
 
-                        {choice.description && (
-                          <p className="text-sm sm:text-base text-[#544D45] pl-0 sm:pl-8 leading-relaxed">
-                            {choice.description}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Decision Stakes: compact, visible before commitment. */}
-                      {(() => {
-                        const resources = getChoiceResourceStakes(choice);
-                        const political = getChoicePoliticalStakes(choice);
-                        const risk = getChoiceRisk(choice);
-                        const willCost = calculateChoicePoliticalWillCost(choice, state);
-                        const willAvailable = state.politicalWill ?? 55;
-                        const canAffordWill = willCost <= willAvailable;
-
-                        if (resources.length === 0 && political.length === 0 && !risk && willCost === 0) return null;
-
-                        return (
-                          <div className="pl-0 md:pl-8 pt-2 border-t border-[#E5D7BE] space-y-2">
-                            <div className="text-[9px] uppercase tracking-widest font-mono font-bold text-[#8E2525]">СТАВКИ РІШЕННЯ</div>
-
+                        {(resources.length > 0 || political.length > 0 || risk || !canAffordWill) && (
+                          <div className="mt-3 ml-0 sm:ml-8 rounded-md border border-[#E0D1B4] bg-[#F7EEDB]/80 px-2.5 py-2 space-y-2">
                             {resources.length > 0 && (
-                              <div className="flex flex-wrap gap-1.5">
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-[#765B2A] mr-0.5">ЦІНА</span>
                                 {resources.map((item) => {
                                   const Icon = item.icon;
                                   const positive = item.value > 0;
                                   return (
-                                    <div
+                                    <span
                                       key={item.label}
-                                      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded border text-[10px] sm:text-[11px] font-mono font-semibold ${
+                                      className={`inline-flex items-center gap-1 px-2 py-1 rounded border text-[10px] font-mono font-semibold \${
                                         positive
                                           ? 'bg-[#EEF6EF] border-[#B7D0B8] text-[#315B45]'
                                           : 'bg-[#F8ECE9] border-[#D9B5AD] text-[#8E2525]'
@@ -482,14 +485,15 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                                       <Icon className="w-3 h-3 shrink-0" />
                                       <span>{item.label}</span>
                                       <strong>{positive ? '+' : ''}{item.value}{item.suffix}</strong>
-                                    </div>
+                                    </span>
                                   );
                                 })}
                               </div>
                             )}
 
                             {political.length > 0 && (
-                              <div className="flex flex-wrap gap-1.5">
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-[#765B2A] mr-0.5">РЕАКЦІЯ</span>
                                 {political.map((reaction, index) => {
                                   const faction = state.factions.find((f: any) => f.id === reaction.factionId);
                                   const label = faction?.name || reaction.factionId.replace(/^faction_/, '').replace(/_/g, ' ');
@@ -498,9 +502,16 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                                     : reaction.reaction === 'opposition' || reaction.reaction === 'crisis'
                                     ? 'text-[#8E2525] border-[#D9B5AD] bg-[#F8ECE9]'
                                     : 'text-[#765B2A] border-[#D8C6A5] bg-[#FAF3E3]';
+                                  const reactionLabel = reaction.reaction === 'support'
+                                    ? 'підтримка'
+                                    : reaction.reaction === 'opposition'
+                                    ? 'опір'
+                                    : reaction.reaction === 'crisis'
+                                    ? 'криза'
+                                    : 'занепокоєння';
                                   return (
-                                    <span key={`${reaction.factionId}-${index}`} className={`px-2 py-1 rounded border text-[9px] sm:text-[10px] font-mono ${tone}`}>
-                                      {label}: {reaction.reaction === 'support' ? 'підтримка' : reaction.reaction === 'opposition' ? 'опір' : reaction.reaction === 'crisis' ? 'криза' : 'занепокоєння'}
+                                    <span key={`${reaction.factionId}-${index}`} className={`px-2 py-1 rounded border text-[9px] font-mono \${tone}`}>
+                                      {label}: {reactionLabel}
                                     </span>
                                   );
                                 })}
@@ -508,82 +519,56 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                             )}
 
                             {risk && (
-                              <div className="text-[10px] sm:text-[11px] text-[#765B2A] leading-snug">
-                                <span className="font-mono font-bold uppercase tracking-wide">Ризик · </span>{risk}
+                              <div className="flex items-start gap-1.5 text-[10px] text-[#765B2A] leading-snug">
+                                <span className="font-mono font-bold uppercase tracking-wide shrink-0">РИЗИК</span>
+                                <span>{risk}</span>
                               </div>
                             )}
 
                             {!canAffordWill && (
-                              <div className="text-[10px] sm:text-[11px] text-[#8E2525] leading-snug font-semibold">
-                                Недостатньо політичної волі для проведення цього рішення. Потрібно {willCost}, доступно {willAvailable}.
+                              <div className="text-[10px] text-[#8E2525] leading-snug font-semibold">
+                                Потрібно {willCost} політичної волі, доступно {willAvailable}.
                               </div>
                             )}
                           </div>
-                        );
-                      })()}
-
-                      {/* Desktop Action Button */}
-                      <button
-                        type="button"
-                        onClick={() => highlightedChoice?.id === choice.id ? handleConfirmChoice(choice) : handleMakeChoice(choice)}
-                        disabled={calculateChoicePoliticalWillCost(choice, state) > (state.politicalWill ?? 55)}
-                        aria-label={highlightedChoice?.id === choice.id ? 'Підтвердити рішення' : 'Обрати рішення'}
-                        className={`hidden md:flex min-h-[44px] min-w-[150px] px-5 py-2.5 rounded-lg font-serif font-bold text-xs uppercase tracking-wider items-center justify-center gap-1.5 shrink-0 cursor-pointer shadow transition-all ${
-                          highlightedChoice?.id === choice.id
-                            ? 'bg-[#C9A96E] hover:bg-[#DCBE84] text-[#0A0D14] shadow-[#C9A96E]/20'
-                            : 'bg-[#8E2525] hover:bg-[#A32A2A] text-white'
-                        }`}
-                      >
-                        {highlightedChoice?.id === choice.id ? (
-                          <>
-                            <CheckCircle2 className="w-4 h-4" />
-                            <span>Ухвалити</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>Обрати</span>
-                            <ArrowRight className="w-4 h-4" />
-                          </>
                         )}
-                      </button>
-                    </div>
 
-                    {/* Mobile Action Button */}
-                    <div className="block md:hidden pt-1">
-                      <button
-                        type="button"
-                        onClick={() => highlightedChoice?.id === choice.id ? handleConfirmChoice(choice) : handleMakeChoice(choice)}
-                        disabled={calculateChoicePoliticalWillCost(choice, state) > (state.politicalWill ?? 55)}
-                        aria-label={highlightedChoice?.id === choice.id ? 'Підтвердити рішення' : 'Обрати рішення'}
-                        className={`w-full min-h-[48px] px-5 py-3 rounded-lg font-serif font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow transition-all ${
-                          highlightedChoice?.id === choice.id
-                            ? 'bg-[#C9A96E] hover:bg-[#DCBE84] active:bg-[#B5965C] text-[#0A0D14]'
-                            : 'bg-[#8E2525] hover:bg-[#A32A2A] active:bg-[#6E1C1C] text-white'
-                        }`}
-                      >
-                        {highlightedChoice?.id === choice.id ? (
-                          <>
-                            <CheckCircle2 className="w-5 h-5" />
-                            <span>Ухвалити рішення</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>Обрати рішення</span>
-                            <ArrowRight className="w-4 h-4" />
-                          </>
+                        <div className="mt-3 flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() => isHighlighted ? handleConfirmChoice(choice) : handleMakeChoice(choice)}
+                            disabled={!canAffordWill}
+                            aria-label={isHighlighted ? 'Підтвердити рішення' : 'Обрати рішення'}
+                            className={`min-h-[44px] w-full sm:w-auto px-5 py-2.5 rounded-lg font-serif font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow transition-all \${
+                              isHighlighted
+                                ? 'bg-[#C9A96E] hover:bg-[#DCBE84] active:bg-[#B5965C] text-[#0A0D14] shadow-[#C9A96E]/20'
+                                : 'bg-[#8E2525] hover:bg-[#A32A2A] active:bg-[#6E1C1C] text-white'
+                            }`}
+                          >
+                            {isHighlighted ? (
+                              <>
+                                <CheckCircle2 className="w-5 h-5" />
+                                <span>Ухвалити рішення</span>
+                              </>
+                            ) : (
+                              <>
+                                <span>Обрати рішення</span>
+                                <ArrowRight className="w-4 h-4" />
+                              </>
+                            )}
+                          </button>
+                        </div>
+
+                        {isHighlighted && (
+                          <div className="flex items-center justify-center gap-1.5 mt-2 text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-[#8E2525] text-center">
+                            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                            <span>Обрано · натисніть ще раз для ухвалення</span>
+                          </div>
                         )}
-                      </button>
-                    </div>
-
-                    {highlightedChoice?.id === choice.id && (
-                      <div className="flex items-center justify-center gap-1.5 pt-1 text-[10px] font-mono font-bold uppercase tracking-widest text-[#8E2525] text-center">
-                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                        <span>Рішення обрано · натисніть ще раз для ухвалення</span>
                       </div>
-                    )}
-
-                  </div>
-                ))}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ) : (
