@@ -12,6 +12,7 @@ interface TopBarProps {
   isSaving: boolean;
   onOpenCouncil: () => void;
   onOpenDiagnostics?: () => void;
+  hasHetmanUpdates: boolean;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -22,6 +23,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   isSaving,
   onOpenCouncil,
   onOpenDiagnostics,
+  hasHetmanUpdates,
 }) => {
   const { identity, empire } = state;
   const [selectedMetric, setSelectedMetric] = useState<MetricType | null>(null);
@@ -30,7 +32,7 @@ export const TopBar: React.FC<TopBarProps> = ({
     { id: 'rada', label: 'РАДА', badge: availableScenariosCount },
     { id: 'state', label: 'ДЕРЖАВА', badge: 0 },
     { id: 'chronicle', label: 'ЛІТОПИС', badge: 0 },
-    { id: 'hetman', label: 'ГЕТЬМАН', badge: 0 },
+    { id: 'hetman', label: 'ГЕТЬМАН', badge: hasHetmanUpdates ? 1 : 0 },
   ];
 
   return (
