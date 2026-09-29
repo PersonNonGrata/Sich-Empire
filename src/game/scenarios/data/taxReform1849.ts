@@ -17,6 +17,10 @@ export const taxReform1849Scenario: Scenario = {
       value: 1849,
     },
     {
+      type: 'SCENARIO_COMPLETED',
+      scenarioId: 'scenario_military_treasury_1848',
+    },
+    {
       type: 'SCENARIO_NOT_COMPLETED',
       scenarioId: 'scenario_tax_reform_1849',
     },
