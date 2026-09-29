@@ -32,6 +32,16 @@ const NORWAY_URL =
   'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/norway.geojson';
 const DENMARK_URL =
   'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/denmark.geojson';
+const FINLAND_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/finland.geojson';
+const ESTONIA_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/estonia.geojson';
+const LATVIA_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/latvia.geojson';
+const LITHUANIA_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/lithuania.geojson';
+const KAZAKHSTAN_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/kazakhstan.geojson';
 
 const TARGET_NAMES = new Set([
   'Polish–Lithuanian Commonwealth',
@@ -41,14 +51,13 @@ const TARGET_NAMES = new Set([
 
 const COUNTRY_LABELS = [
   { name: 'ІМПЕРІЯ СІЧ', lon: 31.5, lat: 53.5, size: 24, power: 'sich' as const, weight: 700 },
-  { name: 'ОСМАНСЬКА ІМПЕРІЯ', lon: 27.0, lat: 40.8, size: 9, power: 'ottoman' as const, weight: 700 },
-  { name: 'АВСТРІЯ', lon: 14.4, lat: 47.6, size: 10, power: 'austria' as const, weight: 700 },
-  { name: 'НІМЕЦЬКИЙ СОЮЗ', lon: 10.5, lat: 50.5, size: 9, power: 'germany' as const, weight: 700 },
-  { name: 'ШВЕЦІЯ-НОРВЕГІЯ', lon: 16.5, lat: 62.2, size: 8, power: 'sweden' as const, weight: 700 },
-  { name: 'ДАНІЯ', lon: 10.0, lat: 56.1, size: 7, power: 'sweden' as const, weight: 700 },
-  { name: 'ФРАНЦІЯ', lon: 2.2, lat: 46.4, size: 10, power: 'france' as const, weight: 700 },
-  { name: 'ВЕЛИКА БРИТАНІЯ', lon: -0.7, lat: 52.7, size: 8, power: 'england' as const, weight: 700 },
-  { name: 'ІТАЛІЙСЬКІ ДЕРЖАВИ', lon: 12.4, lat: 42.3, size: 8, power: 'italy' as const, weight: 700 },
+  { name: 'ОСМАНСЬКА ІМПЕРІЯ', lon: 27.0, lat: 40.8, size: 11, power: 'ottoman' as const, weight: 700 },
+  { name: 'АВСТРІЯ', lon: 14.4, lat: 47.6, size: 12, power: 'austria' as const, weight: 700 },
+  { name: 'НІМЕЦЬКИЙ СОЮЗ', lon: 10.5, lat: 50.5, size: 12, power: 'germany' as const, weight: 700 },
+  { name: 'ШВЕЦІЯ-НОРВЕГІЯ', lon: 16.5, lat: 62.2, size: 10, power: 'sweden' as const, weight: 700 },
+  { name: 'ФРАНЦІЯ', lon: 2.2, lat: 46.4, size: 12, power: 'france' as const, weight: 700 },
+  { name: 'ВЕЛИКА БРИТАНІЯ', lon: -0.7, lat: 52.7, size: 10, power: 'england' as const, weight: 700 },
+  { name: 'ІТАЛІЙСЬКІ ДЕРЖАВИ', lon: 12.4, lat: 42.3, size: 10, power: 'italy' as const, weight: 700 },
 ];
 
 const POWER_COLORS = {
@@ -63,6 +72,28 @@ const POWER_COLORS = {
 } as const;
 
 type PowerKey = keyof typeof POWER_COLORS;
+
+const LABEL_COLORS: Record<PowerKey, string> = {
+  sich: '#241A0C',
+  ottoman: '#F4E8D4',
+  austria: '#24262A',
+  germany: '#F4E7CB',
+  sweden: '#10252D',
+  france: '#F5EDE2',
+  england: '#F6E7E7',
+  italy: '#F4E9D5',
+};
+
+const LABEL_STROKES: Record<PowerKey, string> = {
+  sich: '#E8D19A',
+  ottoman: '#241A18',
+  austria: '#F0E9D8',
+  germany: '#1A2025',
+  sweden: '#D6E8E8',
+  france: '#29333B',
+  england: '#2B2024',
+  italy: '#2C2720',
+};
 
 const POWER_LEGEND: { name: string; power: PowerKey }[] = [
   { name: 'ІМПЕРІЯ СІЧ', power: 'sich' },
@@ -121,6 +152,11 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
   const [swedenFeature, setSwedenFeature] = useState<GeoFeature | null>(null);
   const [norwayFeature, setNorwayFeature] = useState<GeoFeature | null>(null);
   const [denmarkFeature, setDenmarkFeature] = useState<GeoFeature | null>(null);
+  const [finlandFeature, setFinlandFeature] = useState<GeoFeature | null>(null);
+  const [estoniaFeature, setEstoniaFeature] = useState<GeoFeature | null>(null);
+  const [latviaFeature, setLatviaFeature] = useState<GeoFeature | null>(null);
+  const [lithuaniaFeature, setLithuaniaFeature] = useState<GeoFeature | null>(null);
+  const [kazakhstanFeature, setKazakhstanFeature] = useState<GeoFeature | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -234,6 +270,26 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
         if (!cancelled) setUkraineFeature(null);
       });
 
+    const loadFeature = (url: string, setter: (feature: GeoFeature | null) => void) => {
+      fetch(url)
+        .then((response) => {
+          if (!response.ok) throw new Error(`Geometry request failed: ${response.status}`);
+          return response.json() as Promise<GeoFeature>;
+        })
+        .then((feature) => {
+          if (!cancelled) setter(feature);
+        })
+        .catch(() => {
+          if (!cancelled) setter(null);
+        });
+    };
+
+    loadFeature(FINLAND_URL, setFinlandFeature);
+    loadFeature(ESTONIA_URL, setEstoniaFeature);
+    loadFeature(LATVIA_URL, setLatviaFeature);
+    loadFeature(LITHUANIA_URL, setLithuaniaFeature);
+    loadFeature(KAZAKHSTAN_URL, setKazakhstanFeature);
+
     return () => {
       cancelled = true;
     };
@@ -286,13 +342,41 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
     () => denmarkFeature ? geometryToPaths(denmarkFeature.geometry, bounds) : [],
     [denmarkFeature, bounds]
   );
+  const finlandPaths = useMemo(
+    () => finlandFeature ? geometryToPaths(finlandFeature.geometry, bounds) : [],
+    [finlandFeature, bounds]
+  );
+  const estoniaPaths = useMemo(
+    () => estoniaFeature ? geometryToPaths(estoniaFeature.geometry, bounds) : [],
+    [estoniaFeature, bounds]
+  );
+  const latviaPaths = useMemo(
+    () => latviaFeature ? geometryToPaths(latviaFeature.geometry, bounds) : [],
+    [latviaFeature, bounds]
+  );
+  const lithuaniaPaths = useMemo(
+    () => lithuaniaFeature ? geometryToPaths(lithuaniaFeature.geometry, bounds) : [],
+    [lithuaniaFeature, bounds]
+  );
+  const kazakhstanPaths = useMemo(
+    () => kazakhstanFeature ? geometryToPaths(kazakhstanFeature.geometry, bounds) : [],
+    [kazakhstanFeature, bounds]
+  );
 
   // The Sich is rendered as one visual political silhouette. Historical polygons and
   // modern Ukraine are united through a single luminance mask, so internal source
   // boundaries can never become visible seams.
   const sichPaths = useMemo(
-    () => [...paths, ...ukrainePaths],
-    [paths, ukrainePaths]
+    () => [
+      ...paths,
+      ...ukrainePaths,
+      ...finlandPaths,
+      ...estoniaPaths,
+      ...latviaPaths,
+      ...lithuaniaPaths,
+      ...kazakhstanPaths,
+    ],
+    [paths, ukrainePaths, finlandPaths, estoniaPaths, latviaPaths, lithuaniaPaths, kazakhstanPaths]
   );
 
   return (
@@ -401,25 +485,30 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
               name === 'Two Sicilies' ? 'italy' : null;
             const fill = power ? POWER_COLORS[power] : '#273640';
             const stroke = power === 'austria' ? '#FFFFFF' : '#71818A';
+            const isGermany = power === 'germany';
 
             return (
               <g key={`context-${name}-${index}`}>
                 <path d={d} fill={fill} opacity={name === 'Austrian Empire' ? '.94' : '.9'} />
-                <path
-                  d={d}
-                  fill="none"
-                  stroke={stroke}
-                  strokeWidth="2.8"
-                  strokeOpacity=".24"
-                  filter={`url(#sichMapSoftBorder-${mapId})`}
-                />
-                <path
-                  d={d}
-                  fill="none"
-                  stroke={stroke}
-                  strokeWidth={name === 'Austrian Empire' ? 0.85 : 0.7}
-                  strokeOpacity={name === 'Austrian Empire' ? '.62' : '.46'}
-                />
+                {!isGermany && (
+                  <>
+                    <path
+                      d={d}
+                      fill="none"
+                      stroke={stroke}
+                      strokeWidth="2.8"
+                      strokeOpacity=".24"
+                      filter={`url(#sichMapSoftBorder-${mapId})`}
+                    />
+                    <path
+                      d={d}
+                      fill="none"
+                      stroke={stroke}
+                      strokeWidth={name === 'Austrian Empire' ? 0.85 : 0.7}
+                      strokeOpacity={name === 'Austrian Empire' ? '.62' : '.46'}
+                    />
+                  </>
+                )}
               </g>
             );
           }))}
@@ -445,12 +534,27 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
             ...swedenPaths.map((d, index) => ({ d, key: `sweden-${index}` })),
             ...norwayPaths.map((d, index) => ({ d, key: `norway-${index}` })),
             ...denmarkPaths.map((d, index) => ({ d, key: `denmark-${index}` })),
+            ...finlandPaths.map((d, index) => ({ d, key: `finland-${index}` })),
           ].map(({ d, key }) => (
             <g key={key}>
               <path d={d} fill={POWER_COLORS.sweden} fillOpacity=".88" />
               <path d={d} fill="none" stroke="#8FBBC8" strokeWidth="1.15" strokeOpacity=".7" />
             </g>
           ))}
+
+          {/* Baltic lands, Finland, Kazakhstan and Kuban are folded into the alternate Sich canon. */}
+          <g>
+            {[
+              ...estoniaPaths.map((d, index) => ({ d, key: `sich-estonia-${index}` })),
+              ...latviaPaths.map((d, index) => ({ d, key: `sich-latvia-${index}` })),
+              ...lithuaniaPaths.map((d, index) => ({ d, key: `sich-lithuania-${index}` })),
+              ...kazakhstanPaths.map((d, index) => ({ d, key: `sich-kazakhstan-${index}` })),
+            ].map(({ d, key }) => <path key={key} d={d} fill={`url(#sichMapLand-${mapId})`} />)}
+            <path
+              d="M649,356 L670,348 L695,352 L718,365 L732,378 L724,393 L703,401 L681,397 L663,387 L649,374 Z"
+              fill={`url(#sichMapLand-${mapId})`}
+            />
+          </g>
 
           {/* One canonical silhouette for the alternate 1848 Sich Empire.
               Its territorial canon is kept separate from the real-world 1848 base,
@@ -487,16 +591,16 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
                 y={y}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                fill={label.power ? POWER_COLORS[label.power] : "#D0D4D0"}
-                opacity=".94"
-                fontSize={label.size}
+                fill={label.power ? LABEL_COLORS[label.power] : "#F0E8D8"}
+                opacity=".98"
+                fontSize={label.power === 'sich' ? label.size + 1 : label.size}
                 fontFamily="Georgia, serif"
                 fontWeight={label.weight}
-                letterSpacing={label.power === 'sich' ? "2.2" : "1.2"}
+                letterSpacing={label.power === 'sich' ? "2.2" : "1.5"}
                 paintOrder="stroke"
-                stroke="#08131B"
-                strokeWidth={label.power === 'sich' ? 2.8 : 1.6}
-                strokeOpacity=".82"
+                stroke={label.power ? LABEL_STROKES[label.power] : "#15191D"}
+                strokeWidth={label.power === 'sich' ? 2.8 : 2.1}
+                strokeOpacity=".95"
               >
                 {label.name}
               </text>
