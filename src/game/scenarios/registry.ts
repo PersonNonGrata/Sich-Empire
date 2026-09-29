@@ -14,6 +14,7 @@ import { portTariffs1851Scenario } from './data/portTariffs1851.ts';
 import { tradeLaw1852Scenario } from './data/tradeLaw1852.ts';
 import { railwayOpening1853Scenario } from './data/railwayOpening1853.ts';
 import { budgetCrisisScenario, tradeCollapseScenario } from './data/economicCrisesScenarios.ts';
+import { militaryInfluence1851Scenario } from './data/militaryInfluence1851.ts';
 
 /**
  * SCENARIO REGISTRY
@@ -34,6 +35,7 @@ export const allScenarios: Scenario[] = [
   portTariffs1851Scenario,
   tradeLaw1852Scenario,
   railwayOpening1853Scenario,
+  militaryInfluence1851Scenario,
   budgetCrisisScenario,
   tradeCollapseScenario,
 ];
