@@ -383,10 +383,29 @@ export const ChronicleView: React.FC<ChronicleViewProps> = ({ events, scheduledC
                     <h4 className="font-serif text-base font-bold text-[#EAE6DD]">
                       «Відлуння рішення {sc.sourceYear || 1848} року»
                     </h4>
+                    {(() => {
+                      const sourceDecision = state.decisions.find((d) => d.id === sc.sourceDecisionId);
+                      return sourceDecision ? (
+                        <p className="text-xs text-[#93C5FD]">
+                          ↳ Почалося з рішення: «{sourceDecision.choiceText}»
+                        </p>
+                      ) : null;
+                    })()}
 
-                    <p className="text-xs text-[#8E93A0] italic">
-                      «Деякі рішення ще не сказали останнього слова. Приховані сили дозрівають у тиші — наслідки проявляться у повному обсязі, коли настане призначений рік.»
-                    </p>
+                    {(() => {
+                      const sourceDecision = state.decisions.find((d) => d.id === sc.sourceDecisionId);
+                      return (
+                        <div className="space-y-1.5">
+                          <p className="text-xs text-[#C8D1DF] leading-relaxed">
+                            <span className="text-[#C9A96E] font-mono font-bold">Причина:</span>{' '}
+                            {sourceDecision?.choiceText || sc.sourceScenarioTitle || 'Попереднє рішення Гетьмана'}
+                          </p>
+                          <p className="text-[10px] text-[#8E93A0] italic">
+                            Відлуння ще не настало. Його точний ефект стане відомим у {sc.triggerYear} році.
+                          </p>
+                        </div>
+                      );
+                    })()}
                   </div>
                 ))}
               </div>
