@@ -174,6 +174,7 @@ export function createInitialGameState(rulerName = 'Ярослав Нескор�
     crises: [],
     politicalRelationships: initialRelationships,
     activeProposal: null,
+    factionDemands: [],
 
     // Regions: Core 4 MVP regions + additional industrial belt
     regions: [
