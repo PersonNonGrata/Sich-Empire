@@ -11,8 +11,17 @@ export const railwayCredit1850Scenario: Scenario = {
   conditions: [
     {
       type: 'YEAR',
-      operator: '>=',
+      operator: '==',
       value: 1850,
+    },
+    {
+      type: 'SCENARIO_COMPLETED',
+      scenarioId: 'scenario_cost_of_decision',
+    },
+    {
+      type: 'HAS_FLAG',
+      flag: 'railway_mandate_issued',
+      value: true,
     },
     {
       type: 'SCENARIO_NOT_COMPLETED',
