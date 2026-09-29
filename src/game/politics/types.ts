@@ -31,6 +31,25 @@ export interface RedLine {
   crisisId?: string; // Links to a PoliticalCrisis if triggered
 }
 
+export type FactionDemandStatus = 'open' | 'fulfilled' | 'expired';
+
+export interface FactionDemand {
+  id: string;
+  factionId: string;
+  title: string;
+  text: string;
+  domain: keyof PoliticalInterests;
+  desiredDirection: -1 | 1;
+  createdYear: number;
+  deadlineYear: number;
+  sourceDecisionId: string;
+  urgency: 1 | 2 | 3;
+  pressure: number;
+  status: FactionDemandStatus;
+  resolvedYear?: number;
+  resolutionNote?: string;
+}
+
 export interface PoliticalRelationship {
   id: string;
   sourceId: string;
