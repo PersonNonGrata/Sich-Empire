@@ -51,6 +51,18 @@ export interface Choice {
   };
 }
 
+export interface ScenarioActor {
+  id: string;
+  name?: string;
+  role: string;
+  interest: string;
+}
+
+export interface ScenarioKnowledge {
+  known: string[];
+  uncertain: string[];
+}
+
 export interface Scenario {
   id: string;
   title: string;
@@ -68,6 +80,12 @@ export interface Scenario {
   speakerQuote?: string;
   introduction: string;
   situation: string;
+  // Structured case dossier fields. Optional for backwards compatibility.
+  problem?: string;
+  context?: string;
+  actors?: ScenarioActor[];
+  knowledge?: ScenarioKnowledge;
+  inaction?: string;
   choices: Choice[];
   reflection?: string;
   followUp?: string;
