@@ -125,7 +125,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
       {/* Historical Parchment Document Container */}
       <article className="parchment-sheet rounded-xl border border-[#C5AF88] shadow-2xl overflow-visible relative">
         {/* Top Seal & Imperial Header */}
-        <header className="border-b border-[#C8B289] px-3 py-2.5 sm:px-4 sm:py-3 md:px-5 md:py-3.5 bg-[#EFE3C8]/90 flex flex-row items-center justify-between gap-3 sticky top-0 z-40">
+        <header className="border-b border-[#C8B289] px-3 py-2.5 sm:px-4 sm:py-3 md:px-5 md:py-3.5 bg-[#EFE3C8]/90 flex flex-row items-center justify-between gap-3">
           <div className="space-y-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-[#544D45]">
               <span className="flex items-center gap-1 font-semibold text-[#1C1815] bg-[#E2D2B0] px-1.5 py-0.5 rounded border border-[#C8B289]">
@@ -155,7 +155,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
         {/* Parchment Body */}
         <div className="p-4 sm:p-5 md:p-8 space-y-6 text-[#1C1815]">
           {/* Compact resource bar: always visible while reading the case. */}
-          <div className="sticky top-[52px] sm:top-[56px] md:top-[62px] z-30 -mx-4 sm:-mx-5 md:-mx-8 px-4 sm:px-5 md:px-8 py-1.5 bg-[#1C1815]/95 backdrop-blur-sm border-y border-[#C9A96E]/40 shadow-lg">
+          <div className="sticky top-0 z-40 -mx-4 sm:-mx-5 md:-mx-8 px-4 sm:px-5 md:px-8 py-1.5 bg-[#1C1815]/95 backdrop-blur-sm border-y border-[#C9A96E]/40 shadow-lg">
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
               <span className="shrink-0 text-[9px] font-mono font-bold uppercase tracking-widest text-[#C9A96E] mr-1">РЕСУРСИ</span>
               <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-[#2A241A] border border-[#8B6A2B]/50 text-[#FBBF24]">
