@@ -293,6 +293,7 @@ export const voicesOfCouncilScenario: Scenario = {
       text: 'Зміцнити гетьманську вертикаль: запровадити інспекторів та прямий нагляд столиці.',
       description: 'Призначити у всі п’ять воєводств гетьманських генеральних наглядачів із правом вето на рішення місцевих рад.',
       memoryTags: ['Встановив столичний нагляд'],
+      unlocks: ['scenario_crisis_old_sich_revolt'],
       consequences: [
         {
           type: 'STATE_CHANGE',
