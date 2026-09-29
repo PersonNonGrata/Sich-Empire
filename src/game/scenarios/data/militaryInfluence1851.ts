@@ -151,7 +151,7 @@ export const militaryInfluence1851Scenario: Scenario = {
         },
         {
           type: 'INSTITUTION_CHANGE',
-          institutionId: 'institution_council',
+          institutionId: 'institution_great_council',
           authorityChange: 8,
           influenceChange: 5,
           label: 'Рада посилює контроль над державним бюджетом',
@@ -205,7 +205,7 @@ export const militaryInfluence1851Scenario: Scenario = {
         },
         {
           type: 'INSTITUTION_CHANGE',
-          institutionId: 'institution_council',
+          institutionId: 'institution_great_council',
           authorityChange: 4,
           label: 'Рада отримує право вимагати щорічний військовий звіт',
         },
