@@ -10,6 +10,7 @@ import {
   resetGame,
   dismissEvent,
   respondToReflection,
+  negotiateFactionDemand,
 } from './game/state/gameOperations.ts';
 import { saveGame, loadGame, deleteSave } from './persistence/storage.ts';
 import { AppShell } from './components/layout/AppShell.tsx';
@@ -100,6 +101,21 @@ export default function App() {
       if (result.resolvedScheduledEvents && result.resolvedScheduledEvents.length > 0) {
         setBannerNotice(`Увага: Справдився відкладений наслідок: «${result.resolvedScheduledEvents[0].title}»!`);
       }
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message);
+    }
+  };
+
+  const handleNegotiateFactionDemand = (demandId: string, action: 'concession' | 'guarantee' | 'bargain' | 'refuse') => {
+    if (!gameState) return;
+    try {
+      const result = negotiateFactionDemand(gameState, demandId, action);
+      setGameState(result.state);
+      setLastExecutionLogs(result.logs);
+      setLastResolutionResult(null);
+      persistState(result.state);
+      setBannerNotice(result.logs[0] || 'Переговори завершено.');
     } catch (err: any) {
       console.error(err);
       alert(err.message);
@@ -239,6 +255,7 @@ export default function App() {
           lastExecutionLogs={lastExecutionLogs}
           lastResolutionResult={lastResolutionResult}
           onContinue={handleContinueScenario}
+          onNegotiateFactionDemand={handleNegotiateFactionDemand}
           onAdvanceYear={() => handleAdvanceYear(1)}
         />
       )}
