@@ -272,7 +272,6 @@ export const costOfDecisionScenario: Scenario = {
         importance: 'major',
         tags: ['залізниця', 'модернізація'],
       },
-    }
     },
   ],
   reflection:
