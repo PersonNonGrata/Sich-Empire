@@ -3,6 +3,7 @@ import { Scenario, Choice } from '../../game/scenarios/types.ts';
 import { GameState } from '../../game/state/types.ts';
 import { Character } from '../../types/index.ts';
 import { ChoiceResolutionResult } from '../../game/engine/scenarioEngine.ts';
+import { calculateChoicePoliticalWillCost } from '../../game/politics/evaluator.ts';
 import { WaxSeal } from '../ui/WaxSeal.tsx';
 import {
   MapPin,
@@ -134,11 +135,11 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
       .filter((c: any) => (c.type === 'STATE_CHANGE' || c.type === 'EMPIRE_METRIC_CHANGE') && c.metric === 'stability')
       .reduce((sum: number, c: any) => sum + (c.value || 0), 0);
 
-    const politicalWillCost = choice.politicalCost?.politicalWillCost ?? choice.politicalCost?.capitalCost ?? 0;
+    const politicalWillCost = calculateChoicePoliticalWillCost(choice, state);
 
     return [
-      treasuryDelta ? { label: 'Скарбниця', value: treasuryDelta, suffix: 'M', icon: Coins } : null,
       politicalWillCost ? { label: 'Політична воля', value: -politicalWillCost, suffix: '', icon: Crown } : null,
+      treasuryDelta ? { label: 'Скарбниця', value: treasuryDelta, suffix: 'M', icon: Coins } : null,
       militaryDelta ? { label: 'Військо', value: militaryDelta, suffix: '%', icon: Shield } : null,
       stabilityDelta ? { label: 'Стабільність', value: stabilityDelta, suffix: '%', icon: Landmark } : null,
     ].filter(Boolean) as Array<{ label: string; value: number; suffix: string; icon: React.ElementType }>;
@@ -425,8 +426,11 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                         const resources = getChoiceResourceStakes(choice);
                         const political = getChoicePoliticalStakes(choice);
                         const risk = getChoiceRisk(choice);
+                        const willCost = calculateChoicePoliticalWillCost(choice, state);
+                        const willAvailable = state.politicalWill ?? 55;
+                        const canAffordWill = willCost <= willAvailable;
 
-                        if (resources.length === 0 && political.length === 0 && !risk) return null;
+                        if (resources.length === 0 && political.length === 0 && !risk && willCost === 0) return null;
 
                         return (
                           <div className="pl-0 md:pl-8 pt-2 border-t border-[#E5D7BE] space-y-2">
@@ -479,6 +483,12 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                                 <span className="font-mono font-bold uppercase tracking-wide">Ризик · </span>{risk}
                               </div>
                             )}
+
+                            {!canAffordWill && (
+                              <div className="text-[10px] sm:text-[11px] text-[#8E2525] leading-snug font-semibold">
+                                Недостатньо політичної волі для проведення цього рішення. Потрібно {willCost}, доступно {willAvailable}.
+                              </div>
+                            )}
                           </div>
                         );
                       })()}
@@ -486,6 +496,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                       {/* Desktop Action Button */}
                       <button
                         onClick={() => handleMakeChoice(choice)}
+                        disabled={!canAffordWill}
                         className="hidden md:flex px-5 py-2.5 rounded bg-[#8E2525] hover:bg-[#A32A2A] text-white font-serif font-bold text-xs uppercase tracking-wider items-center gap-1.5 shrink-0 cursor-pointer shadow transition-colors min-h-[44px]"
                       >
                         <span>Ухвалити</span>
@@ -497,6 +508,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                     <div className="block md:hidden pt-1">
                       <button
                         onClick={() => handleMakeChoice(choice)}
+                        disabled={!canAffordWill}
                         className="w-full min-h-[48px] px-5 py-3 rounded-lg bg-[#8E2525] hover:bg-[#A32A2A] active:bg-[#6E1C1C] text-white font-serif font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow transition-colors"
                       >
                         <span>Ухвалити універсал</span>
