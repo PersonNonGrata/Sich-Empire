@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { HistoryEvent, ChronicleFilterCategory } from '../game/history/types.ts';
 import { GameState } from '../game/state/types.ts';
 import { ScheduledConsequence } from '../game/consequences/types.ts';
+import { deriveCharacterExpectation } from '../game/narrative/narrativeEngine.ts';
 import { WaxSeal } from './ui/WaxSeal.tsx';
 import {
   BookOpen,
