@@ -14,6 +14,7 @@ interface AppShellProps {
   onCloseBanner: () => void;
   onOpenCouncil: () => void;
   onOpenDiagnostics: () => void;
+  hasHetmanUpdates: boolean;
   children: React.ReactNode;
 }
 
@@ -26,6 +27,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   onCloseBanner,
   onOpenCouncil,
   onOpenDiagnostics,
+  hasHetmanUpdates,
   children,
 }) => {
   return (
@@ -35,6 +37,7 @@ export const AppShell: React.FC<AppShellProps> = ({
         state={state}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        hasHetmanUpdates={hasHetmanUpdates}
         availableScenariosCount={state.availableScenarioIds.length}
         isSaving={isSaving}
         onOpenCouncil={onOpenCouncil}
@@ -63,6 +66,18 @@ export const AppShell: React.FC<AppShellProps> = ({
         </aside>
       )}
 
+      {hasHetmanUpdates && activeTab !== 'hetman' && (
+        <aside className="border-b border-[#5B1B1B] bg-[#241014] px-4 py-2.5 animate-in fade-in duration-200">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="w-2 h-2 rounded-full bg-[#EF4444] shadow-[0_0_8px_rgba(239,68,68,0.7)] shrink-0 animate-pulse" />
+              <span className="text-xs text-[#F3D0D0] font-medium truncate">Наприкінці року профіль Гетьмана змінився. Варто переглянути нові записи.</span>
+            </div>
+            <button onClick={() => setActiveTab('hetman')} className="shrink-0 px-3 py-1.5 rounded-lg bg-[#8E2525] hover:bg-[#A82D2D] text-[#FFF5F5] border border-[#EF4444]/60 text-[10px] font-mono font-bold uppercase tracking-wider transition-colors">Переглянути</button>
+          </div>
+        </aside>
+      )}
+
       {/* 2. Central Working Space */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-6 py-4 md:py-6 pb-28 md:pb-12">
         {/* Keep the active Council screen focused: the document desk is navigation, not part of the decision itself. */}
@@ -84,6 +99,7 @@ export const AppShell: React.FC<AppShellProps> = ({
         activeTab={activeTab}
         onSelectTab={setActiveTab}
         availableScenariosCount={state.availableScenarioIds.length}
+        hasHetmanUpdates={hasHetmanUpdates}
       />
 
       {/* Desktop Footer */}
