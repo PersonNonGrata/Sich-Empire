@@ -8,6 +8,8 @@ import {
   PoliticalCrisis,
   Promise,
   PoliticalRelationship,
+  FactionDemand,
+  FactionDemandStatus,
 } from './types.ts';
 import { CRISIS_IDS, clampRange } from './constants.ts';
 import { evaluateAllConditions } from '../conditions/evaluator.ts';
@@ -61,6 +63,162 @@ export function evaluateFactionReaction(
   } else {
     return { reaction: 'crisis', score, reason: reasons.join('; ') || 'Критичний розрив із владою' };
   }
+}
+
+/**
+ * Phase 5: Active Factions.
+ * Turns strong faction reactions into persistent political demands.
+ * Demands are deliberately qualitative in the UI, while pressure remains
+ * a deterministic hidden state used by the simulation.
+ */
+const DEMAND_DOMAIN_LABELS: Record<keyof PoliticalInterests, string> = {
+  armyFunding: 'фінансування війська',
+  taxation: 'податкова політика',
+  autonomy: 'автономія',
+  centralization: 'межі централізації',
+  landReform: 'земельна політика',
+  education: 'освіта',
+  tradeFreedom: 'торговельна свобода',
+  freedom: 'громадянські свободи',
+  stability: 'державна стабільність',
+};
+
+function getFactionDemandDomain(faction: DetailedFaction): keyof PoliticalInterests {
+  const entries = Object.entries(faction.interests)
+    .filter(([, value]) => typeof value === 'number' && value !== 0)
+    .sort((a, b) => Math.abs(Number(b[1])) - Math.abs(Number(a[1])));
+  return (entries[0]?.[0] || 'stability') as keyof PoliticalInterests;
+}
+
+function getDemandUrgency(reaction: PoliticalReactionType): 1 | 2 | 3 {
+  if (reaction === 'crisis') return 3;
+  if (reaction === 'opposition') return 2;
+  return 1;
+}
+
+function getDemandTitle(reaction: PoliticalReactionType, factionName: string, domain: keyof PoliticalInterests): string {
+  const prefix = reaction === 'crisis' ? 'Ультиматум' : reaction === 'opposition' ? 'Вимога' : 'Наполягання';
+  return `${prefix} фракції: ${factionName} · ${DEMAND_DOMAIN_LABELS[domain]}`;
+}
+
+function getDemandText(
+  reaction: PoliticalReactionType,
+  faction: DetailedFaction,
+  domain: keyof PoliticalInterests,
+): string {
+  const interest = faction.interests[domain] ?? 0;
+  const direction = interest >= 0 ? 'посилити' : 'зменшити';
+  const tone = reaction === 'crisis'
+    ? 'Фракція ставить це питання на межу відкритого конфлікту'
+    : reaction === 'opposition'
+      ? 'Фракція вимагає політичної відповіді'
+      : 'Фракція очікує поступок або гарантій';
+  return `${tone}: ${direction} вплив держави у сфері «${DEMAND_DOMAIN_LABELS[domain]}». Її інтерес у цій сфері: ${interest > 0 ? '+' : ''}${interest}.`;
+}
+
+export function updateFactionDemandsAfterDecision(
+  state: GameState,
+  decisionId: string,
+  reactions: Array<{ factionId: string; reaction: PoliticalReactionType; note: string }>,
+): { state: GameState; logs: string[] } {
+  let demands: FactionDemand[] = [...(state.factionDemands || [])];
+  const logs: string[] = [];
+  const currentYear = state.identity.year;
+
+  // Existing demands react to the new political decision.
+  for (const demand of demands) {
+    if (demand.status !== 'open') continue;
+
+    const reaction = reactions.find((r) => r.factionId === demand.factionId);
+    if (!reaction) continue;
+
+    if (reaction.reaction === 'support') {
+      demand.status = 'fulfilled';
+      demand.resolvedYear = currentYear;
+      demand.resolutionNote = 'Подальша ухвала дала фракції достатню політичну відповідь.';
+      logs.push(`ПОЛІТИЧНА ВИМОГА ЗНЯТА: «${demand.title}»`);
+    } else if (reaction.reaction === 'opposition' || reaction.reaction === 'crisis') {
+      demand.pressure = clampRange(demand.pressure + (reaction.reaction === 'crisis' ? 25 : 15), 0, 100);
+      demand.urgency = Math.min(3, demand.urgency + 1) as 1 | 2 | 3;
+      const faction = state.factions.find((f) => f.id === demand.factionId);
+      if (faction) {
+        faction.tension = clampRange((faction.tension ?? 0) + (reaction.reaction === 'crisis' ? 4 : 2), 0, 100);
+      }
+      logs.push(`ПОЛІТИЧНИЙ ТИСК ЗРОС: «${demand.title}»`);
+    }
+  }
+
+  // A new demand appears when a faction has moved beyond simple concern.
+  for (const reaction of reactions) {
+    if (!['concern', 'opposition', 'crisis'].includes(reaction.reaction)) continue;
+
+    const faction = state.factions.find((f) => f.id === reaction.factionId) as DetailedFaction | undefined;
+    if (!faction) continue;
+
+    const hasOpenDemand = demands.some(
+      (d) => d.status === 'open' && d.factionId === faction.id
+    );
+    if (hasOpenDemand) continue;
+
+    const domain = getFactionDemandDomain(faction);
+    const interest = faction.interests[domain] ?? 0;
+    const urgency = getDemandUrgency(reaction.reaction);
+    const demand: FactionDemand = {
+      id: `fd_${decisionId}_${faction.id}`,
+      factionId: faction.id,
+      title: getDemandTitle(reaction.reaction, faction.name, domain),
+      text: getDemandText(reaction.reaction, faction, domain),
+      domain,
+      desiredDirection: interest >= 0 ? 1 : -1,
+      createdYear: currentYear,
+      deadlineYear: currentYear + (urgency === 3 ? 1 : urgency === 2 ? 2 : 3),
+      sourceDecisionId: decisionId,
+      urgency,
+      pressure: urgency === 3 ? 70 : urgency === 2 ? 50 : 30,
+      status: 'open',
+    };
+    demands = [demand, ...demands];
+    logs.push(`ФРАКЦІЯ ВИСУНУЛА НОВУ ПОЛІТИЧНУ ВИМОГУ: «${demand.title}»`);
+  }
+
+  // Keep completed demands in the chronicle, but prevent an ever-growing active queue.
+  const active = demands.filter((d) => d.status === 'open');
+  const closed = demands
+    .filter((d) => d.status !== 'open')
+    .slice(0, 40);
+
+  return {
+    state: {
+      ...state,
+      factionDemands: [...active, ...closed],
+    },
+    logs,
+  };
+}
+
+/**
+ * Expires overdue demands. Expiry is pressure, not automatic collapse:
+ * the next political decision still determines whether a faction escalates.
+ */
+export function expireFactionDemands(state: GameState): { state: GameState; logs: string[] } {
+  const demands = [...(state.factionDemands || [])];
+  const logs: string[] = [];
+  let changed = false;
+
+  for (const demand of demands) {
+    if (demand.status === 'open' && demand.deadlineYear < state.identity.year) {
+      demand.status = 'expired' as FactionDemandStatus;
+      demand.resolvedYear = state.identity.year;
+      demand.resolutionNote = 'Термін політичної вимоги минув без зафіксованої відповіді.';
+      demand.pressure = clampRange(demand.pressure + 20, 0, 100);
+      const faction = state.factions.find((f) => f.id === demand.factionId);
+      if (faction) faction.tension = clampRange((faction.tension ?? 0) + 5, 0, 100);
+      logs.push(`ПОЛІТИЧНА ВИМОГА ПРОТЕРМІНУВАЛА: «${demand.title}»`);
+      changed = true;
+    }
+  }
+
+  return changed ? { state: { ...state, factionDemands: demands }, logs } : { state, logs };
 }
 
 /**
