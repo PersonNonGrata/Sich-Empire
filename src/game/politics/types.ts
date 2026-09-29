@@ -33,6 +33,8 @@ export interface RedLine {
 
 export type FactionDemandStatus = 'open' | 'fulfilled' | 'expired';
 
+export type FactionNegotiationAction = 'concession' | 'guarantee' | 'bargain' | 'refuse';
+
 export interface FactionDemand {
   id: string;
   factionId: string;
