@@ -42,6 +42,44 @@ const LITHUANIA_URL =
   'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/lithuania.geojson';
 const KAZAKHSTAN_URL =
   'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/kazakhstan.geojson';
+const GEORGIA_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/georgia.geojson';
+const ARMENIA_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/armenia.geojson';
+const AZERBAIJAN_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/azerbaijan.geojson';
+const IRAN_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/iran.geojson';
+const AFGHANISTAN_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/afghanistan.geojson';
+const UZBEKISTAN_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/uzbekistan.geojson';
+const TURKMENISTAN_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/turkmenistan.geojson';
+const TAJIKISTAN_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/tajikistan.geojson';
+const KYRGYZSTAN_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/kyrgyzstan.geojson';
+const PAKISTAN_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/pakistan.geojson';
+const CHINA_URL =
+  'https://raw.githubusercontent.com/glynnbird/countriesgeojson/master/china.geojson';
+const KRASNODAR_URL =
+  'https://raw.githubusercontent.com/simp37/Russia_geoJSON/master/Krasnodarskiy-kray.geojson';
+const ADYGEYA_URL =
+  'https://raw.githubusercontent.com/simp37/Russia_geoJSON/master/Adygeya.geojson';
+const NORTH_OSSETIA_URL =
+  'https://raw.githubusercontent.com/simp37/Russia_geoJSON/master/Severnaya-Osetiya-Alaniya.geojson';
+const KABARDINO_BALKARIA_URL =
+  'https://raw.githubusercontent.com/simp37/Russia_geoJSON/master/Kabardino-Balkarskaya.geojson';
+const KARACHAY_CHERKESSIA_URL =
+  'https://raw.githubusercontent.com/simp37/Russia_geoJSON/master/Karachayevo-Cherkesskaya.geojson';
+const INGUSHETIA_URL =
+  'https://raw.githubusercontent.com/simp37/Russia_geoJSON/master/Ingushskaya.geojson';
+const CHECHNYA_URL =
+  'https://raw.githubusercontent.com/simp37/Russia_geoJSON/master/Chechenskaya.geojson';
+const DAGESTAN_URL =
+  'https://raw.githubusercontent.com/simp37/Russia_geoJSON/master/Dagestan.geojson';
 
 const TARGET_NAMES = new Set([
   'Polish–Lithuanian Commonwealth',
@@ -71,7 +109,7 @@ const POWER_COLORS = {
   italy: '#76664D',
 } as const;
 
-type PowerKey = keyof typeof POWER_COLORS;
+type PowerKey = keyof typeof POWER_COLORS | 'iran';
 
 const LABEL_COLORS: Record<PowerKey, string> = {
   sich: '#241A0C',
@@ -82,6 +120,7 @@ const LABEL_COLORS: Record<PowerKey, string> = {
   france: '#F5EDE2',
   england: '#F6E7E7',
   italy: '#F4E9D5',
+  iran: '#E8DCC4',
 };
 
 const LABEL_STROKES: Record<PowerKey, string> = {
@@ -93,6 +132,7 @@ const LABEL_STROKES: Record<PowerKey, string> = {
   france: '#29333B',
   england: '#2B2024',
   italy: '#2C2720',
+  iran: '#27231D',
 };
 
 const POWER_LEGEND: { name: string; power: PowerKey }[] = [
@@ -114,6 +154,11 @@ const CITIES = [
   { name: 'МОСКВА', lon: 37.62, lat: 55.76, dx: 8, dy: -7, anchor: 'start' as const },
   { name: 'ВІДЕНЬ', lon: 16.37, lat: 48.21, dx: -8, dy: -8, anchor: 'end' as const },
   { name: 'БЕРЛІН', lon: 13.40, lat: 52.52, dx: -8, dy: -8, anchor: 'end' as const },
+  { name: 'МАЗЕПИН', lon: 39.1, lat: 47.2, dx: 8, dy: -7, anchor: 'start' as const },
+  { name: 'ВИГОВСЬК', lon: 43.3, lat: 47.8, dx: 8, dy: -7, anchor: 'start' as const },
+  { name: 'ОРЛИК', lon: 45.1, lat: 43.6, dx: 8, dy: 10, anchor: 'start' as const },
+  { name: 'САГАЙДАЧНИЙ', lon: 48.0, lat: 44.8, dx: 8, dy: -7, anchor: 'start' as const },
+  { name: 'ДОРОШЕНКО', lon: 49.8, lat: 45.7, dx: 8, dy: 10, anchor: 'start' as const },
 ];
 
 function project(lon: number, lat: number, bounds: { minLon: number; maxLon: number; minLat: number; maxLat: number }) {
@@ -157,6 +202,25 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
   const [latviaFeature, setLatviaFeature] = useState<GeoFeature | null>(null);
   const [lithuaniaFeature, setLithuaniaFeature] = useState<GeoFeature | null>(null);
   const [kazakhstanFeature, setKazakhstanFeature] = useState<GeoFeature | null>(null);
+  const [georgiaFeature, setGeorgiaFeature] = useState<GeoFeature | null>(null);
+  const [armeniaFeature, setArmeniaFeature] = useState<GeoFeature | null>(null);
+  const [azerbaijanFeature, setAzerbaijanFeature] = useState<GeoFeature | null>(null);
+  const [iranFeature, setIranFeature] = useState<GeoFeature | null>(null);
+  const [afghanistanFeature, setAfghanistanFeature] = useState<GeoFeature | null>(null);
+  const [uzbekistanFeature, setUzbekistanFeature] = useState<GeoFeature | null>(null);
+  const [turkmenistanFeature, setTurkmenistanFeature] = useState<GeoFeature | null>(null);
+  const [tajikistanFeature, setTajikistanFeature] = useState<GeoFeature | null>(null);
+  const [kyrgyzstanFeature, setKyrgyzstanFeature] = useState<GeoFeature | null>(null);
+  const [pakistanFeature, setPakistanFeature] = useState<GeoFeature | null>(null);
+  const [chinaFeature, setChinaFeature] = useState<GeoFeature | null>(null);
+  const [krasnodarFeature, setKrasnodarFeature] = useState<GeoFeature | null>(null);
+  const [adygeyaFeature, setAdygeyaFeature] = useState<GeoFeature | null>(null);
+  const [northOssetiaFeature, setNorthOssetiaFeature] = useState<GeoFeature | null>(null);
+  const [kabardinoBalkariaFeature, setKabardinoBalkariaFeature] = useState<GeoFeature | null>(null);
+  const [karachayCherkessiaFeature, setKarachayCherkessiaFeature] = useState<GeoFeature | null>(null);
+  const [ingushetiaFeature, setIngushetiaFeature] = useState<GeoFeature | null>(null);
+  const [chechnyaFeature, setChechnyaFeature] = useState<GeoFeature | null>(null);
+  const [dagestanFeature, setDagestanFeature] = useState<GeoFeature | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -172,8 +236,15 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
         // Keep every named historical polygon in the European frame so there are
         // no artificial gaps between countries. The Sich mask later replaces its
         // alternate-history territory on top of this base.
+        const quietMapExclusions = new Set([
+          'Iceland', 'Ireland', 'Faroe Islands', 'Shetland Islands',
+          'Orkney Islands', 'Svalbard', 'Greenland'
+        ]);
         setContextFeatures(
-          data.features.filter((feature) => Boolean(feature.properties?.NAME))
+          data.features.filter((feature) => {
+            const name = feature.properties?.NAME ?? '';
+            return Boolean(name) && !quietMapExclusions.has(name);
+          })
         );
       })
       .catch(() => {
@@ -286,6 +357,25 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
     loadFeature(LATVIA_URL, setLatviaFeature);
     loadFeature(LITHUANIA_URL, setLithuaniaFeature);
     loadFeature(KAZAKHSTAN_URL, setKazakhstanFeature);
+    loadFeature(GEORGIA_URL, setGeorgiaFeature);
+    loadFeature(ARMENIA_URL, setArmeniaFeature);
+    loadFeature(AZERBAIJAN_URL, setAzerbaijanFeature);
+    loadFeature(IRAN_URL, setIranFeature);
+    loadFeature(AFGHANISTAN_URL, setAfghanistanFeature);
+    loadFeature(UZBEKISTAN_URL, setUzbekistanFeature);
+    loadFeature(TURKMENISTAN_URL, setTurkmenistanFeature);
+    loadFeature(TAJIKISTAN_URL, setTajikistanFeature);
+    loadFeature(KYRGYZSTAN_URL, setKyrgyzstanFeature);
+    loadFeature(PAKISTAN_URL, setPakistanFeature);
+    loadFeature(CHINA_URL, setChinaFeature);
+    loadFeature(KRASNODAR_URL, setKrasnodarFeature);
+    loadFeature(ADYGEYA_URL, setAdygeyaFeature);
+    loadFeature(NORTH_OSSETIA_URL, setNorthOssetiaFeature);
+    loadFeature(KABARDINO_BALKARIA_URL, setKabardinoBalkariaFeature);
+    loadFeature(KARACHAY_CHERKESSIA_URL, setKarachayCherkessiaFeature);
+    loadFeature(INGUSHETIA_URL, setIngushetiaFeature);
+    loadFeature(CHECHNYA_URL, setChechnyaFeature);
+    loadFeature(DAGESTAN_URL, setDagestanFeature);
 
     return () => {
       cancelled = true;
@@ -295,9 +385,9 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
   const bounds = useMemo(() => ({
     // Europe-first framing. Siberia and the distant Asian extent stay outside the composition.
     minLon: -13,
-    maxLon: 90,
-    minLat: 33,
-    maxLat: 74,
+    maxLon: 105,
+    minLat: 20,
+    maxLat: 70,
   }), []);
 
   const paths = useMemo(
@@ -360,6 +450,49 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
     [kazakhstanFeature, bounds]
   );
 
+  const caucasusPaths = useMemo(
+    () => [
+      ...(georgiaFeature ? geometryToPaths(georgiaFeature.geometry, bounds) : []),
+      ...(armeniaFeature ? geometryToPaths(armeniaFeature.geometry, bounds) : []),
+      ...(azerbaijanFeature ? geometryToPaths(azerbaijanFeature.geometry, bounds) : []),
+      ...(krasnodarFeature ? geometryToPaths(krasnodarFeature.geometry, bounds) : []),
+      ...(adygeyaFeature ? geometryToPaths(adygeyaFeature.geometry, bounds) : []),
+      ...(northOssetiaFeature ? geometryToPaths(northOssetiaFeature.geometry, bounds) : []),
+      ...(kabardinoBalkariaFeature ? geometryToPaths(kabardinoBalkariaFeature.geometry, bounds) : []),
+      ...(karachayCherkessiaFeature ? geometryToPaths(karachayCherkessiaFeature.geometry, bounds) : []),
+      ...(ingushetiaFeature ? geometryToPaths(ingushetiaFeature.geometry, bounds) : []),
+      ...(chechnyaFeature ? geometryToPaths(chechnyaFeature.geometry, bounds) : []),
+      ...(dagestanFeature ? geometryToPaths(dagestanFeature.geometry, bounds) : []),
+    ],
+    [
+      georgiaFeature, armeniaFeature, azerbaijanFeature,
+      krasnodarFeature, adygeyaFeature, northOssetiaFeature,
+      kabardinoBalkariaFeature, karachayCherkessiaFeature, ingushetiaFeature,
+      chechnyaFeature, dagestanFeature, bounds
+    ]
+  );
+
+  const iranPaths = useMemo(
+    () => [
+      ...(iranFeature ? geometryToPaths(iranFeature.geometry, bounds) : []),
+      ...(afghanistanFeature ? geometryToPaths(afghanistanFeature.geometry, bounds) : []),
+      ...(uzbekistanFeature ? geometryToPaths(uzbekistanFeature.geometry, bounds) : []),
+      ...(turkmenistanFeature ? geometryToPaths(turkmenistanFeature.geometry, bounds) : []),
+      ...(tajikistanFeature ? geometryToPaths(tajikistanFeature.geometry, bounds) : []),
+      ...(kyrgyzstanFeature ? geometryToPaths(kyrgyzstanFeature.geometry, bounds) : []),
+      ...(pakistanFeature ? geometryToPaths(pakistanFeature.geometry, bounds) : []),
+    ],
+    [
+      iranFeature, afghanistanFeature, uzbekistanFeature, turkmenistanFeature,
+      tajikistanFeature, kyrgyzstanFeature, pakistanFeature, bounds
+    ]
+  );
+
+  const chinaPaths = useMemo(
+    () => chinaFeature ? geometryToPaths(chinaFeature.geometry, bounds) : [],
+    [chinaFeature, bounds]
+  );
+
   // The Sich is rendered as one visual political silhouette. Historical polygons and
   // modern Ukraine are united through a single luminance mask, so internal source
   // boundaries can never become visible seams.
@@ -372,8 +505,12 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
       ...latviaPaths,
       ...lithuaniaPaths,
       ...kazakhstanPaths,
+      ...caucasusPaths,
     ],
-    [paths, ukrainePaths, finlandPaths, estoniaPaths, latviaPaths, lithuaniaPaths, kazakhstanPaths]
+    [
+      paths, ukrainePaths, finlandPaths, estoniaPaths,
+      latviaPaths, lithuaniaPaths, kazakhstanPaths, caucasusPaths
+    ]
   );
 
   return (
@@ -403,6 +540,10 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
           <stop offset=".45" stopColor="#181C20" stopOpacity=".02" />
           <stop offset="1" stopColor="#050608" stopOpacity=".34" />
         </linearGradient>
+
+        <clipPath id={`sichMapChinaEdge-${mapId}`}>
+          <rect x="920" y="0" width="80" height="520" />
+        </clipPath>
 
         <radialGradient id={`sichMapWaterVignette-${mapId}`} cx="50%" cy="48%" r="72%">
           <stop offset="0" stopColor="#FFFFFF" stopOpacity=".035" />
@@ -549,19 +690,52 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
             </g>
           ))}
 
-          {/* Baltic lands, Finland, Kazakhstan and Kuban are folded into the alternate Sich canon. */}
+          {/* Baltic lands, Finland, Kazakhstan, Kuban and the Caucasus are folded into the Sich canon. */}
           <g>
             {[
               ...estoniaPaths.map((d, index) => ({ d, key: `sich-estonia-${index}` })),
               ...latviaPaths.map((d, index) => ({ d, key: `sich-latvia-${index}` })),
               ...lithuaniaPaths.map((d, index) => ({ d, key: `sich-lithuania-${index}` })),
               ...kazakhstanPaths.map((d, index) => ({ d, key: `sich-kazakhstan-${index}` })),
+              ...caucasusPaths.map((d, index) => ({ d, key: `sich-caucasus-${index}` })),
             ].map(({ d, key }) => <path key={key} d={d} fill={`url(#sichMapLand-${mapId})`} />)}
-            <path
-              d="M485,356 L505,349 L524,354 L540,366 L546,379 L538,392 L520,400 L501,396 L489,386 L482,371 Z"
-              fill={`url(#sichMapLand-${mapId})`}
-            />
           </g>
+
+          {/* Alternate Iran: Persia plus the Central/South Asian stan states. */}
+          <g>
+            {iranPaths.map((d, index) => (
+              <path key={`iran-${index}`} d={d} fill="#4F4A42" fillOpacity=".94" />
+            ))}
+            {iranPaths.map((d, index) => (
+              <path key={`iran-border-${index}`} d={d} fill="none" stroke="#9A8E79" strokeWidth="1.2" strokeOpacity=".52" />
+            ))}
+          </g>
+
+          {/* China appears only as a restrained eastern edge, keeping the map continental rather than global. */}
+          <g clipPath={`url(#sichMapChinaEdge-${mapId})`}>
+            {chinaPaths.map((d, index) => (
+              <g key={`china-${index}`}>
+                <path d={d} fill="#4B4A45" fillOpacity=".86" />
+                <path d={d} fill="none" stroke="#7B756A" strokeWidth="1" strokeOpacity=".5" />
+              </g>
+            ))}
+          </g>
+          <text
+            x="965"
+            y={project(99, 39, bounds)[1]}
+            textAnchor="middle"
+            fill="#C8C0AE"
+            fontSize="10"
+            fontFamily="Georgia, serif"
+            fontWeight="700"
+            letterSpacing="1.8"
+            paintOrder="stroke"
+            stroke="#16191B"
+            strokeWidth="2"
+            strokeOpacity=".85"
+          >
+            КИТАЙ
+          </text>
 
           {/* One canonical silhouette for the alternate 1848 Sich Empire.
               Its territorial canon is kept separate from the real-world 1848 base,
@@ -589,7 +763,10 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
           />
 
           {/* Political labels keep the map readable as an atlas rather than a technical GIS layer. */}
-          {COUNTRY_LABELS.map((label) => {
+          {[
+            ...COUNTRY_LABELS,
+            { name: 'ІРАН', lon: 65, lat: 34.5, size: 13, power: 'iran' as const, weight: 700 },
+          ].map((label) => {
             const [x, y] = project(label.lon, label.lat, bounds);
             return (
               <text
@@ -598,14 +775,14 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
                 y={y}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                fill={label.power ? LABEL_COLORS[label.power] : "#F0E8D8"}
+                fill={label.power && label.power in LABEL_COLORS ? LABEL_COLORS[label.power as PowerKey] : "#F0E8D8"}
                 opacity=".98"
                 fontSize={label.power === 'sich' ? label.size + 1 : label.size}
                 fontFamily="Georgia, serif"
                 fontWeight={label.weight}
                 letterSpacing={label.power === 'sich' ? "2.2" : "1.5"}
                 paintOrder="stroke"
-                stroke={label.power ? LABEL_STROKES[label.power] : "#15191D"}
+                stroke={label.power && label.power in LABEL_STROKES ? LABEL_STROKES[label.power as PowerKey] : "#15191D"}
                 strokeWidth={label.power === 'sich' ? 2.8 : 2.1}
                 strokeOpacity=".95"
               >
