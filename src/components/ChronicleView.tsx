@@ -5,6 +5,7 @@ import { ScheduledConsequence } from '../game/consequences/types.ts';
 import { WaxSeal } from './ui/WaxSeal.tsx';
 import {
   BookOpen,
+  Users,
   Calendar,
   Tag,
   Sparkles,
@@ -25,7 +26,7 @@ interface ChronicleViewProps {
 }
 
 export const ChronicleView: React.FC<ChronicleViewProps> = ({ events, scheduledConsequences = [], state }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'history' | 'chains' | 'delayed'>('history');
+  const [activeSubTab, setActiveSubTab] = useState<'history' | 'chains' | 'delayed' | 'characters'>('history');
   const [filterCategory, setFilterCategory] = useState<ChronicleFilterCategory>('all');
   const [filterYear, setFilterYear] = useState<number | 'all'>('all');
 
@@ -96,6 +97,17 @@ export const ChronicleView: React.FC<ChronicleViewProps> = ({ events, scheduledC
           >
             <GitBranch className="w-3.5 h-3.5 shrink-0" />
             <span>Ланцюги</span>
+          </button>
+          <button
+            onClick={() => setActiveSubTab('characters')}
+            className={`flex-1 sm:flex-initial px-3 py-2 text-xs font-mono rounded transition-colors flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px] whitespace-nowrap ${
+              activeSubTab === 'characters'
+                ? 'bg-[#C9A96E] text-[#0A0D14] font-bold'
+                : 'text-[#8E93A0] hover:text-[#F3EFE6]'
+            }`}
+          >
+            <Users className="w-3.5 h-3.5" />
+            <span>Персонажі ({state.characters?.length ?? 0})</span>
           </button>
           <button
             onClick={() => setActiveSubTab('delayed')}
@@ -354,6 +366,46 @@ export const ChronicleView: React.FC<ChronicleViewProps> = ({ events, scheduledC
       {/* ============================================================== */}
       {/* VIEW 3: ВІДКЛАДЕНІ НАСЛІДКИ                                     */}
       {/* ============================================================== */}
+      {activeSubTab === 'characters' && (
+        <div className="space-y-5">
+          <div className="bg-[#0E131E] border border-[#232B3C] rounded-xl p-5 md:p-6">
+            <div className="flex items-center gap-2 text-[#C9A96E] font-mono text-xs uppercase tracking-widest font-bold">
+              <Users className="w-4 h-4" />
+              Діячі держави
+            </div>
+            <h3 className="font-serif text-2xl font-bold text-[#F3EFE6] mt-2">Як вас бачать люди навколо влади</h3>
+            <p className="text-xs text-[#8E93A0] mt-2 leading-relaxed">
+              Тут зберігається політична пам'ять про стосунки Гетьмана з ключовими діячами. Їхня довіра, повага, страх та очікування змінюються разом із вашими рішеннями.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {(state.characters ?? []).slice(0, 12).map((char) => {
+              const currentExp = deriveCharacterExpectation(char, state);
+              const trust = char.trust ?? 0;
+              const fear = char.fear ?? 0;
+              const respect = char.respect ?? 0;
+              return (
+                <article key={char.id} className="p-4 sm:p-5 rounded-xl bg-[#101522] border border-[#222B3D] space-y-3 overflow-hidden">
+                  <div className="min-w-0">
+                    <h4 className="font-serif text-lg font-bold text-[#F3EFE6] break-words">{char.name}</h4>
+                    <p className="text-xs text-[#8E93A0] break-words mt-0.5">{char.role}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 text-[10px] font-mono">
+                    <span className="px-2 py-1 rounded bg-[#0E2016] text-[#34D399] border border-[#10B981]/30">Довіра {trust}</span>
+                    <span className="px-2 py-1 rounded bg-[#181E2E] text-[#60A5FA] border border-[#3B82F6]/30">Повага {respect}</span>
+                    <span className="px-2 py-1 rounded bg-[#2A1014] text-[#F87171] border border-[#EF4444]/30">Страх {fear}</span>
+                  </div>
+                  <div className="bg-[#151D2C] p-3 rounded-lg border border-[#263348] text-sm font-serif text-[#C8D1DF] italic">
+                    <span className="font-mono not-italic text-[10px] uppercase tracking-wider text-[#C9A96E] block mb-1">Очікування від Гетьмана</span>
+                    «{char.expectation || currentExp}»
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {activeSubTab === 'delayed' && (
         <div className="space-y-6">
           <section className="space-y-3">
