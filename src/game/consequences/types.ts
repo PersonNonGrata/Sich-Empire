@@ -252,6 +252,10 @@ export interface ScheduledConsequence {
   conditions?: Condition[];
   consequences: Consequence[];
   resolved: boolean;
+  /** Identifies consequences that intentionally create a later political problem. */
+  kind?: 'delayed' | 'self_created_problem';
+  /** Scenario to unlock when this consequence matures. */
+  unlockScenarioId?: string;
   resolvedYear?: number;
   resolutionNote?: string;
 }
