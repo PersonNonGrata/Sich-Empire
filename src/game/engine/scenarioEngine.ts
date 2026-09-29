@@ -615,7 +615,7 @@ export function resolveChoice(
   // Check if any scheduled consequences can fire for the current year
   const scheduledResult = checkAndResolveScheduledConsequences(finalState);
   finalState = scheduledResult.state;
-  const allLogs = [...logs, ...scheduledResult.logs];
+  const allLogs = [...logs, ...demandLogs, ...scheduledResult.logs];
 
   // Stage 6: Evaluate Psychological Ascension Engine
   const ascensionResult = evaluateAscension(finalState);
