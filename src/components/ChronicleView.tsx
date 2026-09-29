@@ -385,15 +385,6 @@ export const ChronicleView: React.FC<ChronicleViewProps> = ({ events, scheduledC
                     </h4>
                     {(() => {
                       const sourceDecision = state.decisions.find((d) => d.id === sc.sourceDecisionId);
-                      return sourceDecision ? (
-                        <p className="text-xs text-[#93C5FD]">
-                          ↳ Почалося з рішення: «{sourceDecision.choiceText}»
-                        </p>
-                      ) : null;
-                    })()}
-
-                    {(() => {
-                      const sourceDecision = state.decisions.find((d) => d.id === sc.sourceDecisionId);
                       return (
                         <div className="space-y-1.5">
                           <p className="text-xs text-[#C8D1DF] leading-relaxed">
@@ -431,6 +422,19 @@ export const ChronicleView: React.FC<ChronicleViewProps> = ({ events, scheduledC
                     </div>
                     <h4 className="font-serif text-base font-bold text-[#F3EFE6]">{sc.title}</h4>
                     <p className="text-[#B8C0D0]">{sc.description}</p>
+                    {(() => {
+                      const sourceDecision = state.decisions.find((d) => d.id === sc.sourceDecisionId);
+                      return (
+                        <div className="pt-1.5 border-t border-[#1E2638] mt-1.5">
+                          <p className="text-[#93C5FD]">
+                            ↳ Причина: {sourceDecision?.choiceText || sc.sourceScenarioTitle || 'Попереднє рішення Гетьмана'}
+                          </p>
+                          <p className="text-[#8E93A0] text-[10px] mt-0.5">
+                            Ланцюг: {sc.sourceYear || 1848} → {sourceDecision?.choiceText || sc.sourceScenarioTitle || 'рішення'} → {sc.resolvedYear || sc.triggerYear}
+                          </p>
+                        </div>
+                      );
+                    })()}
                   </div>
                 ))}
               </div>
