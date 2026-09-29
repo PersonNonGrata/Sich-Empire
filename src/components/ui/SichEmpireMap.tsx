@@ -169,15 +169,12 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
       })
       .then((data) => {
         if (cancelled) return;
-        const contextNames = new Set([
-          'Sweden', 'Norway', 'Denmark', 'Denmark-Norway', 'Prussia', 'Austrian Empire', 'German Confederation',
-          'Ottoman Empire', 'Denmark-Norway', 'France', 'Spain', 'Portugal',
-          'England', 'Scotland', 'Ireland', 'Dutch Republic', 'Belgium', 'Switzerland',
-          'Kingdom of Hungary', 'Transylvania', 'Moldavia', 'Wallachia', 'Bavaria',
-          'Saxony', 'Hanover', 'Sardinia-Piedmont', 'Kingdom of Naples', 'Tuscany',
-          'Piedmont', 'Two Sicilies', 'Greece', 'Russian Empire', 'Denmark'
-        ]);
-        setContextFeatures(data.features.filter((feature) => contextNames.has(feature.properties?.NAME ?? '')));
+        // Keep every named historical polygon in the European frame so there are
+        // no artificial gaps between countries. The Sich mask later replaces its
+        // alternate-history territory on top of this base.
+        setContextFeatures(
+          data.features.filter((feature) => Boolean(feature.properties?.NAME))
+        );
       })
       .catch(() => {
         if (!cancelled) setError(true);
@@ -298,7 +295,7 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
   const bounds = useMemo(() => ({
     // Europe-first framing. Siberia and the distant Asian extent stay outside the composition.
     minLon: -13,
-    maxLon: 64,
+    maxLon: 90,
     minLat: 33,
     maxLat: 74,
   }), []);
@@ -485,7 +482,17 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
               name === 'Two Sicilies' ? 'italy' : null;
             const fill = power ? POWER_COLORS[power] : '#273640';
             const stroke = power === 'austria' ? '#FFFFFF' : '#71818A';
-            const isGermany = power === 'germany';
+            const germanStates = new Set([
+              'Prussia', 'German Confederation', 'Brandenburg', 'Bavaria', 'Saxony',
+              'Hanover', 'Hesse', 'Hesse-Kassel', 'Hesse-Darmstadt', 'Württemberg',
+              'Baden', 'Mecklenburg-Schwerin', 'Mecklenburg-Strelitz', 'Oldenburg',
+              'Brunswick', 'Nassau', 'Saxe-Weimar-Eisenach', 'Saxe-Coburg-Gotha',
+              'Saxe-Meiningen', 'Saxe-Altenburg', 'Anhalt-Dessau', 'Anhalt-Bernburg',
+              'Lippe', 'Schaumburg-Lippe', 'Waldeck-Pyrmont', 'Reuss', 'Schwarzburg-Rudolstadt',
+              'Schwarzburg-Sondershausen', 'Free City of Frankfurt', 'Free City of Lübeck',
+              'Free City of Bremen', 'Free City of Hamburg'
+            ]);
+            const isGermany = power === 'germany' || germanStates.has(name);
 
             return (
               <g key={`context-${name}-${index}`}>
@@ -551,7 +558,7 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
               ...kazakhstanPaths.map((d, index) => ({ d, key: `sich-kazakhstan-${index}` })),
             ].map(({ d, key }) => <path key={key} d={d} fill={`url(#sichMapLand-${mapId})`} />)}
             <path
-              d="M649,356 L670,348 L695,352 L718,365 L732,378 L724,393 L703,401 L681,397 L663,387 L649,374 Z"
+              d="M485,356 L505,349 L524,354 L540,366 L546,379 L538,392 L520,400 L501,396 L489,386 L482,371 Z"
               fill={`url(#sichMapLand-${mapId})`}
             />
           </g>
@@ -649,7 +656,7 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
       {[
         { name: 'ПІВНІЧНЕ МОРЕ', lon: 4.0, lat: 57.0, size: 8.5 },
         { name: 'ЧОРНЕ МОРЕ', lon: 35.2, lat: 44.4, size: 9.5 },
-        { name: 'КАСПІЙСЬКЕ МОРЕ', lon: 51.2, lat: 42.8, size: 8.5 },
+        { name: 'КАСПІЙСЬКЕ МОРЕ', lon: 53.0, lat: 42.5, size: 8.5 },
         { name: 'СЕРЕДЗЕМНЕ МОРЕ', lon: 18.0, lat: 38.8, size: 8.5 },
       ].map((sea) => {
         const [x, y] = project(sea.lon, sea.lat, bounds);
