@@ -32,15 +32,6 @@ export function MainMenu({ hasSave, onNewGame, onContinue }: Props) {
   return (
     <div className="min-h-screen min-h-[100dvh] bg-[#080A0E] text-[#F3EFE6] overflow-hidden">
       <main className="relative min-h-[100dvh] flex flex-col">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-[-6%] scale-110 opacity-85 blur-[1px]">
-            <SichEmpireMap variant="prologue" />
-          </div>
-          <div className="absolute inset-0 bg-[#080A0E]/30" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(201,169,110,0.10),transparent_48%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(8,10,14,0.12),rgba(8,10,14,0.48))]" />
-        </div>
-
         <section className="relative flex-1 flex flex-col justify-center px-5 pt-10 pb-6 sm:px-8">
           <div className="w-full max-w-3xl mx-auto">
             <div className="text-center space-y-1">
@@ -83,6 +74,19 @@ export function MainMenu({ hasSave, onNewGame, onContinue }: Props) {
               )}
               <button onClick={() => setMenuOpen(true)} className="w-full min-h-[42px] text-[#8E93A0] font-mono text-[9px] tracking-[0.2em] uppercase hover:text-[#C9A96E]">МЕНЮ</button>
             </div>
+
+            <section className="mt-5 rounded-2xl border border-[#303741] bg-[#090C12]/90 overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
+              <div className="px-4 py-3 border-b border-[#252C36] flex items-center justify-between">
+                <div>
+                  <p className="text-[#C9A96E] text-[9px] font-mono tracking-[0.25em] uppercase">АТЛАС СІЧІ</p>
+                  <p className="mt-1 text-[#737B88] text-[9px] font-mono uppercase tracking-[0.12em]">Європа у твоїй альтернативній історії</p>
+                </div>
+                <span className="text-[#555D68] text-[9px] font-mono">1848</span>
+              </div>
+              <div className="relative h-[250px] sm:h-[340px] bg-[#0B0E12]">
+                <SichEmpireMap variant="prologue" />
+              </div>
+            </section>
           </div>
         </section>
 
