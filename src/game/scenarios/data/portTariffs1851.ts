@@ -7,6 +7,8 @@ export const portTariffs1851Scenario: Scenario = {
   location: 'Адміралтейська Колегія, Одеса',
   tags: ['торгівля', 'мита', 'порти', 'чорне_море', '1851'],
   priority: 95,
+  sequenceOrder: 20,
+  required: true,
   importance: 'standard',
   conditions: [
     {
