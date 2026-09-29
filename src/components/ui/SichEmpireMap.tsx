@@ -239,7 +239,10 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
         // alternate-history territory on top of this base.
         const quietMapExclusions = new Set([
           'Iceland', 'Ireland', 'Faroe Islands', 'Shetland Islands',
-          'Orkney Islands', 'Svalbard', 'Greenland'
+          'Orkney Islands', 'Svalbard', 'Greenland',
+          'China', 'Qing China', 'Persia', 'Persian Empire',
+          'Afghanistan', 'Bukhara', 'Khiva', 'Kokand',
+          'Georgia', 'Armenia', 'Azerbaijan'
         ]);
         setContextFeatures(
           data.features.filter((feature) => {
