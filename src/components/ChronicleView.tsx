@@ -24,7 +24,7 @@ interface ChronicleViewProps {
   state: GameState;
 }
 
-export const ChronicleView: React.FC<ChronicleViewProps> = ({ events, scheduledConsequences = [] }) => {
+export const ChronicleView: React.FC<ChronicleViewProps> = ({ events, scheduledConsequences = [], state }) => {
   const [activeSubTab, setActiveSubTab] = useState<'history' | 'chains' | 'delayed'>('history');
   const [filterCategory, setFilterCategory] = useState<ChronicleFilterCategory>('all');
   const [filterYear, setFilterYear] = useState<number | 'all'>('all');
