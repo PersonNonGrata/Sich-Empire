@@ -773,6 +773,25 @@ export function advanceYear(
   const advanceLogs: string[] = [`Рік ${currentYear} завершено. Імперія вступає у ${nextYear} рік правління.`];
   const newEvents: ImperialEvent[] = [];
 
+  // Political Will recovers between political seasons.
+  // Strong legitimacy/stability restores more governing capacity; prolonged instability drains it.
+  const willBeforeRecovery = state.politicalWill ?? 55;
+  const willRecovery = state.empire.stability >= 70
+    ? 6
+    : state.empire.stability >= 55
+      ? 3
+      : state.empire.stability < 40
+        ? -3
+        : 0;
+  state.politicalWill = Math.max(0, Math.min(100, willBeforeRecovery + willRecovery));
+  if (willRecovery !== 0) {
+    advanceLogs.push(
+      willRecovery > 0
+        ? `ПОЛІТИЧНА ВОЛЯ ВІДНОВИЛАСЯ: +${willRecovery} за стабільний політичний сезон.`
+        : `ПОЛІТИЧНА ВОЛЯ ВИСНАЖЕНА: ${willRecovery} через нестабільність.`
+    );
+  }
+
   // Check promises
   const promiseEvaluation = evaluatePromises(state.promises || [], nextYear, state);
   state.promises = promiseEvaluation.updatedPromises;
