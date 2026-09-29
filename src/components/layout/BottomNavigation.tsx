@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { Landmark, Map, BookOpen, User } from 'lucide-react';
 
 interface BottomNavigationProps {
@@ -41,11 +42,24 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
     },
   ];
 
-  return (
+  const navigation = (
     <nav
-      className="mobile-bottom-nav bg-[#0A0D13]/98 backdrop-blur-md border-t border-[#232A39] shadow-2xl"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       aria-label="Мобільна навігація Гетьмана"
+      style={{
+        position: 'fixed',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 2147483000,
+        display: 'block',
+        width: '100%',
+        background: 'rgba(10, 13, 19, 0.98)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderTop: '1px solid #232A39',
+        boxShadow: '0 -8px 24px rgba(0,0,0,0.35)',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+      }}
     >
       <div className="grid grid-cols-4 h-16 max-w-lg mx-auto px-1">
         {tabs.map((tab) => {
@@ -81,4 +95,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
       </div>
     </nav>
   );
+
+  if (typeof document === 'undefined') return null;
+  return createPortal(navigation, document.body);
 };
