@@ -9,6 +9,7 @@ interface HetmanDeskProps {
   activeTab: string;
   onSelectTab: (tab: string) => void;
   onOpenCouncil: () => void;
+  hasHetmanUpdates: boolean;
 }
 
 export const HetmanDesk: React.FC<HetmanDeskProps> = ({
@@ -16,6 +17,7 @@ export const HetmanDesk: React.FC<HetmanDeskProps> = ({
   activeTab,
   onSelectTab,
   onOpenCouncil,
+  hasHetmanUpdates,
 }) => {
   const pendingScenarios = state.availableScenarioIds.length;
   const decisionsCount = state.decisions.length;
@@ -205,8 +207,9 @@ export const HetmanDesk: React.FC<HetmanDeskProps> = ({
                 </span>
                 <User className={`w-4 h-4 ${activeTab === 'hetman' ? 'text-[#C9A96E]' : 'text-[#8E93A0] group-hover:text-[#C9A96E]'}`} />
               </div>
-              <div className="font-serif font-bold text-sm md:text-base text-[#F3EFE6]">
-                Гетьман
+              <div className="font-serif font-bold text-sm md:text-base text-[#F3EFE6] flex items-center gap-2">
+                <span>Гетьман</span>
+                {hasHetmanUpdates && <span className="w-2 h-2 rounded-full bg-[#EF4444] shadow-[0_0_7px_rgba(239,68,68,0.65)] animate-pulse" aria-label="Є нові зміни" />}
               </div>
               <p className="text-[11px] text-[#8E93A0] mt-1 line-clamp-2">
                 Особистий профіль, психологічні сигнали та вектор архетипу.
