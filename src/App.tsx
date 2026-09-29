@@ -23,6 +23,7 @@ import { EventRevealModal } from './components/ui/EventRevealModal.tsx';
 import { CoatOfArms } from './components/ui/CoatOfArms.tsx';
 import { X } from 'lucide-react';
 import { MainMenu } from './components/MainMenu.tsx';
+import { BottomNavigation } from './components/layout/BottomNavigation.tsx';
 
 
 
@@ -258,7 +259,8 @@ export default function App() {
   const activeEvent = gameState.eventQueue && gameState.eventQueue.length > 0 ? gameState.eventQueue[0] : null;
 
   return (
-    <AppShell
+    <>
+      <AppShell
       state={gameState}
       activeTab={activeTab}
       setActiveTab={handleTabChange}
@@ -355,5 +357,12 @@ export default function App() {
       )}
       <Analytics />
     </AppShell>
+    <BottomNavigation
+      activeTab={activeTab}
+      onSelectTab={handleTabChange}
+      availableScenariosCount={gameState.availableScenarioIds.length}
+      hasHetmanUpdates={hasHetmanUpdates}
+    />
+    </>
   );
 }
