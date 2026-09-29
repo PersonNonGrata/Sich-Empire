@@ -249,7 +249,7 @@ export const CouncilView: React.FC<CouncilViewProps> = ({
           <div className="bg-[#121622] p-3 rounded-lg border border-[#222B3D] flex items-center justify-between">
             <div>
               <div className="text-[10px] uppercase font-mono tracking-wider text-[#8E93A0]">
-                Політичний Капітал
+                Політична воля
               </div>
               <div className="font-serif text-lg font-bold text-[#38BDF8]">
                 {politicalWill}%

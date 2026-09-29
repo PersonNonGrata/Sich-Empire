@@ -70,7 +70,7 @@ export const EmpireStateView: React.FC<EmpireStateViewProps> = ({ state }) => {
     institutions = [],
     promises = [],
     crises = [],
-    politicalCapital = 55,
+    politicalWill = 55,
     empire,
     economy,
     military,
@@ -247,12 +247,12 @@ export const EmpireStateView: React.FC<EmpireStateViewProps> = ({ state }) => {
               <div>
                 <div className="flex justify-between text-xs mb-1">
                   <span className="text-[#8E93A0]">Політичний капітал:</span>
-                  <span className="text-[#38BDF8] font-bold">{politicalCapital}%</span>
+                  <span className="text-[#38BDF8] font-bold">{politicalWill}%</span>
                 </div>
                 <div className="w-full bg-[#0A0D14] h-1.5 rounded-full overflow-hidden border border-[#232B3B]">
                   <div
                     className="h-full bg-gradient-to-r from-[#0284C7] to-[#38BDF8]"
-                    style={{ width: `${politicalCapital}%` }}
+                    style={{ width: `${politicalWill}%` }}
                   />
                 </div>
               </div>
