@@ -1,7 +1,6 @@
 import React from 'react';
 import { GameState } from '../../game/state/types.ts';
 import { TopBar } from '../TopBar.tsx';
-import { BottomNavigation } from './BottomNavigation.tsx';
 import { HetmanDesk } from '../cabinet/HetmanDesk.tsx';
 import { Bell, Sparkles } from 'lucide-react';
 class ViewErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
@@ -125,14 +124,6 @@ export const AppShell: React.FC<AppShellProps> = ({
           <ViewErrorBoundary>{children}</ViewErrorBoundary>
         </div>
       </main>
-
-      {/* 3. Mobile Bottom Navigation */}
-      <BottomNavigation
-        activeTab={activeTab}
-        onSelectTab={setActiveTab}
-        availableScenariosCount={state.availableScenarioIds.length}
-        hasHetmanUpdates={hasHetmanUpdates}
-      />
 
       {/* Desktop Footer */}
       <footer className="border-t border-[#1C2331] bg-[#0A0D13] py-4 text-center text-xs text-[#626B7E] font-mono hidden md:block">
