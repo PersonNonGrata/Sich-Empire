@@ -552,6 +552,8 @@ export function applySingleConsequence(
         description: consequence.consequenceData.description,
         conditions: consequence.consequenceData.conditions,
         consequences: consequence.consequenceData.consequences,
+        kind: consequence.consequenceData.kind,
+        unlockScenarioId: consequence.consequenceData.unlockScenarioId,
         resolved: false,
       };
 

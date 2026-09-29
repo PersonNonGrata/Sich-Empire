@@ -130,6 +130,8 @@ export function scheduleConsequence(
     description: scheduledData.description,
     conditions: scheduledData.conditions,
     consequences: scheduledData.consequences,
+    kind: scheduledData.kind,
+    unlockScenarioId: scheduledData.unlockScenarioId,
     resolved: false,
   };
 

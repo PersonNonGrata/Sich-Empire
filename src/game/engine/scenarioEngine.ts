@@ -804,6 +804,14 @@ export function advanceYear(
         : f
     );
     state.politicalWill = Math.max(0, (state.politicalWill ?? 55) - 12);
+    if (broken.onBreakPenalties?.length) {
+      const penaltyResult = applyConsequences(broken.onBreakPenalties, state, {
+        sourceDecisionId: broken.id,
+        scenarioTitle: 'Порушена обіцянка',
+      });
+      state = penaltyResult.state;
+      advanceLogs.push(...penaltyResult.logs);
+    }
     state.history = [
       {
         id: 'hist_broken_' + Date.now() + '_' + broken.id,
@@ -832,6 +840,14 @@ export function advanceYear(
   for (const fulfilled of promiseEvaluation.fulfilledList) {
     advanceLogs.push(`Обітницю Гетьмана виконано: «${fulfilled.text}»!`);
     state.politicalWill = Math.min(100, (state.politicalWill ?? 55) + 8);
+    if (fulfilled.onFulfillRewards?.length) {
+      const rewardResult = applyConsequences(fulfilled.onFulfillRewards, state, {
+        sourceDecisionId: fulfilled.id,
+        scenarioTitle: 'Виконана обіцянка',
+      });
+      state = rewardResult.state;
+      advanceLogs.push(...rewardResult.logs);
+    }
     state.history = [
       {
         id: 'hist_fulfilled_' + Date.now() + '_' + fulfilled.id,
@@ -847,6 +863,11 @@ export function advanceYear(
       ...state.history,
     ];
   }
+
+  // Expire faction demands at the moment their deadline is crossed.
+  const demandExpiry = expireFactionDemands(state);
+  state = demandExpiry.state;
+  advanceLogs.push(...demandExpiry.logs);
 
   // Check for crisis triggers at new year
   const crisesDetected = detectPoliticalCrises(state, state.crises || []);
