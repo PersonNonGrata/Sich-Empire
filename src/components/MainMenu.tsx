@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
-import { SichEmpireMap } from './SichEmpireMap.tsx';
+import { SichEmpireMap } from './ui/SichEmpireMap.tsx';
 
 type PrologueScene = {
   year: string;
