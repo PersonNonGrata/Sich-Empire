@@ -27,6 +27,8 @@ export interface Choice {
     description: string;
     conditions?: Condition[];
     consequences: Consequence[];
+    kind?: 'delayed' | 'self_created_problem';
+    unlockScenarioId?: string;
   }>;
   unlocks?: string[];
   locks?: string[];
