@@ -663,6 +663,22 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                   )}
                 </div>
 
+                {/* Political Will accounting */}
+                {lastResolutionResult && (
+                  <div className="space-y-2.5 border-b border-[#212A3A] pb-4">
+                    <div className="text-[10px] uppercase font-mono tracking-widest text-[#C9A96E] font-bold flex items-center gap-1.5">
+                      <Crown className="w-3.5 h-3.5" />
+                      <span>ПОЛІТИЧНА ВОЛЯ</span>
+                    </div>
+                    <div className="flex items-center justify-between rounded bg-[#131926] border border-[#3A3048] px-3 py-2.5">
+                      <span className="text-xs text-[#C8CDD8]">Ціна проведення рішення</span>
+                      <strong className="font-mono text-sm text-[#FBBF24]">
+                        {lastResolutionResult.previousPoliticalWill} → {lastResolutionResult.newPoliticalWill}
+                      </strong>
+                    </div>
+                  </div>
+                )}
+
                 {/* 4. СТАН ДЕРЖАВИ (до → після) */}
                 {prevM && newM && (
                   <div className="space-y-2.5 border-b border-[#212A3A] pb-4">
