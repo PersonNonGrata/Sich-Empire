@@ -11,7 +11,7 @@ export const railwayOpening1853Scenario: Scenario = {
   conditions: [
     {
       type: 'YEAR',
-      operator: '>=',
+      operator: '==',
       value: 1853,
     },
     {
