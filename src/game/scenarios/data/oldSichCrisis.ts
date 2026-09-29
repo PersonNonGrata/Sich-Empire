@@ -10,6 +10,27 @@ export const oldSichCrisisScenario: Scenario = {
   importance: 'critical',
   conditions: [
     {
+      type: 'YEAR',
+      operator: '==',
+      value: 1849,
+    },
+    {
+      type: 'OR',
+      conditions: [
+        {
+          type: 'HAS_FLAG',
+          flag: 'central_vertical_established',
+          value: true,
+        },
+        {
+          type: 'TENSION',
+          key: 'tension_autonomy_centralization',
+          operator: '>=',
+          value: 62,
+        },
+      ],
+    },
+    {
       type: 'SCENARIO_NOT_COMPLETED',
       scenarioId: 'scenario_crisis_old_sich_revolt',
     },
