@@ -306,7 +306,11 @@ export function checkAndResolveScheduledConsequences(
               description: resolvedDescription,
               sourceDecisionId: sc.sourceDecisionId,
               importance: 'major',
-              tags: ['відкладений_наслідок', 'історія', `${sc.triggerYear}`],
+              tags: [
+                sc.kind === 'self_created_problem' ? 'самостворена_проблема' : 'відкладений_наслідок',
+                'історія',
+                `${sc.triggerYear}`,
+              ],
               category: 'decision',
               causalRootDecisionId: sc.sourceDecisionId,
               causalChainNote,
@@ -314,6 +318,22 @@ export function checkAndResolveScheduledConsequences(
             ...state.history,
           ],
         };
+
+        let stateAfterResolution = state;
+
+        if (sc.unlockScenarioId && !stateAfterResolution.unlockedScenarioIds.includes(sc.unlockScenarioId)) {
+          stateAfterResolution = {
+            ...stateAfterResolution,
+            unlockedScenarioIds: [...stateAfterResolution.unlockedScenarioIds, sc.unlockScenarioId],
+          };
+          logs.push(
+            sc.kind === 'self_created_problem'
+              ? `ВІДКРИЛАСЯ НОВА СПРАВА, ПОРОДЖЕНА ПОПЕРЕДНІМ РІШЕННЯМ: ${sc.unlockScenarioId}`
+              : `Розблоковано нову справу: ${sc.unlockScenarioId}`
+          );
+        }
+
+        state = stateAfterResolution;
 
         const resolvedItem = {
           ...sc,
@@ -447,6 +467,8 @@ export function resolveChoice(
           description: sc.description,
           conditions: sc.conditions,
           consequences: sc.consequences,
+          kind: sc.kind,
+          unlockScenarioId: sc.unlockScenarioId,
           sourceScenarioId: scenarioId,
           sourceScenarioTitle: scenario.title,
           sourceYear: currentState.identity.year,
