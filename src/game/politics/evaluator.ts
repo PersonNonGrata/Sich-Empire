@@ -116,6 +116,28 @@ function getDemandText(
   return `${tone}: ${direction} вплив держави у сфері «${DEMAND_DOMAIN_LABELS[domain]}». Її інтерес у цій сфері: ${interest > 0 ? '+' : ''}${interest}.`;
 }
 
+export function calculateChoicePoliticalWillCost(
+  choice: {
+    politicalCost?: { politicalWillCost?: number; capitalCost?: number };
+    politicalReactions?: Array<{ factionId: string; reaction: PoliticalReactionType }>;
+  },
+  state: GameState,
+): number {
+  const explicit = Math.max(
+    0,
+    choice.politicalCost?.politicalWillCost ?? choice.politicalCost?.capitalCost ?? 0,
+  );
+
+  const openDemands = (state.factionDemands || []).filter((d) => d.status === 'open');
+  const opposingDemandPressure = openDemands.reduce((sum, demand) => {
+    const reaction = choice.politicalReactions?.find((r) => r.factionId === demand.factionId);
+    if (!reaction || !['opposition', 'crisis'].includes(reaction.reaction)) return sum;
+    return sum + demand.urgency;
+  }, 0);
+
+  return Math.min(20, explicit + opposingDemandPressure);
+}
+
 export function updateFactionDemandsAfterDecision(
   state: GameState,
   decisionId: string,
