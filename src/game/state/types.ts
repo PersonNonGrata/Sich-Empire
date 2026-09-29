@@ -21,6 +21,7 @@ import {
   PoliticalCrisis,
   PoliticalRelationship,
   ProposalVote,
+  FactionDemand,
 } from '../politics/types.ts';
 import { EconomyState } from '../economy/types.ts';
 import { MilitaryState } from '../military/types.ts';
@@ -80,6 +81,7 @@ export interface GameState {
   crises: PoliticalCrisis[];             // Active and resolved political crises
   politicalRelationships?: PoliticalRelationship[]; // Universal entity relationships
   activeProposal?: ProposalVote | null;  // Current Great Council vote in progress
+  factionDemands?: FactionDemand[];      // Active political demands created by faction reactions
 
   regions: Region[];
   factions: Faction[];
