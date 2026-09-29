@@ -7,6 +7,8 @@ export const newCouncilScenario: Scenario = {
   location: 'Велика Січова Палата, Хортиця',
   tags: ['велика_рада', 'підсумок', 'держава', 'епоха', '1851'],
   priority: 80,
+  sequenceOrder: 90,
+  required: true,
   importance: 'critical',
   conditions: [
     {
