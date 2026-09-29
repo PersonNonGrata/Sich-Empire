@@ -43,7 +43,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-[#0A0D13]/98 backdrop-blur-md border-t border-[#232A39] shadow-2xl"
+      className="mobile-bottom-nav bg-[#0A0D13]/98 backdrop-blur-md border-t border-[#232A39] shadow-2xl"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       aria-label="Мобільна навігація Гетьмана"
     >
