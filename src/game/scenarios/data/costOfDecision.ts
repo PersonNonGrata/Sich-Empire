@@ -18,7 +18,7 @@ export const costOfDecisionScenario: Scenario = {
     },
     {
       type: 'SCENARIO_COMPLETED',
-      scenarioId: 'scenario_voices_of_the_council',
+      scenarioId: 'scenario_tax_reform_1849',
     },
     {
       type: 'SCENARIO_NOT_COMPLETED',
