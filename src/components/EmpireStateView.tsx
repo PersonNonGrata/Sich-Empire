@@ -40,6 +40,7 @@ import {
 import { calculateLegitimacy } from '../game/politics/evaluator.ts';
 import { DetailedFaction } from '../game/politics/factionsData.ts';
 import { DetailedRegion } from '../game/politics/regionsData.ts';
+import { SichEmpireMap } from './ui/SichEmpireMap.tsx';
 
 interface EmpireStateViewProps {
   state: GameState;
@@ -59,6 +60,7 @@ type StateTab =
 export const EmpireStateView: React.FC<EmpireStateViewProps> = ({ state }) => {
   const [activeTab, setActiveTab] = useState<StateTab>('economy');
   const [selectedRegionId, setSelectedRegionId] = useState<string>('region_sich_core');
+  const [showEmpireMap, setShowEmpireMap] = useState(false);
 
   const {
     regions,
@@ -111,7 +113,7 @@ export const EmpireStateView: React.FC<EmpireStateViewProps> = ({ state }) => {
             </h2>
           </div>
 
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap justify-end">
             {totalActiveCrises > 0 && (
               <span className="flex items-center gap-1.5 px-3 py-1 rounded bg-[#3B1212] border border-[#EF4444] text-[#FCA5A5] text-xs font-mono font-bold animate-pulse">
                 <AlertTriangle className="w-3.5 h-3.5 text-[#EF4444]" />
@@ -121,8 +123,33 @@ export const EmpireStateView: React.FC<EmpireStateViewProps> = ({ state }) => {
             <div className="text-xs font-mono text-[#8E93A0] bg-[#121622] px-3 py-1.5 rounded-lg border border-[#232B3B]">
               Рік {state.identity.year}
             </div>
+            <button
+              onClick={() => setShowEmpireMap((value) => !value)}
+              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-[10px] font-mono font-bold tracking-wider transition-colors ${
+                showEmpireMap
+                  ? 'bg-[#C9A96E] text-[#0A0D14] border-[#C9A96E]'
+                  : 'bg-[#101622] text-[#C9A96E] border-[#4A4F59] hover:bg-[#171E2A]'
+              }`}
+              aria-expanded={showEmpireMap}
+            >
+              <Map className="w-4 h-4" />
+              КАРТА
+              <span className="text-[9px]">{showEmpireMap ? '▲' : '▼'}</span>
+            </button>
           </div>
         </div>
+
+        {showEmpireMap && (
+          <div className="rounded-xl border border-[#303744] bg-[#090C12] overflow-hidden">
+            <div className="px-4 py-2.5 border-b border-[#242B35] flex items-center justify-between">
+              <span className="text-[#C9A96E] text-[9px] font-mono font-bold tracking-[0.22em] uppercase">АТЛАС ІМПЕРІЇ СІЧ</span>
+              <span className="text-[#68717E] text-[9px] font-mono">{state.identity.year}</span>
+            </div>
+            <div className="relative h-[260px] sm:h-[360px]">
+              <SichEmpireMap variant="state" />
+            </div>
+          </div>
+        )}
 
         {/* 3 Dashboard Columns: Single column on mobile, 3 cols on desktop */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 text-xs font-mono">
