@@ -154,34 +154,38 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
 
         {/* Parchment Body */}
         <div className="p-4 sm:p-5 md:p-8 space-y-6 text-[#1C1815]">
-          {/* Situation & Introduction */}
-          <div className="space-y-3">
-            <p className="font-serif text-base md:text-lg text-[#3B342C] italic leading-relaxed border-l-2 border-[#8E2525] pl-3.5 sm:pl-4">
-              {scenario.introduction}
-            </p>
-
-            {/* Stage 7: Narrative Echo of past ruler behavior */}
-            {scenario.narrativeEcho && (
-              <div className="bg-[#DFD0B1]/90 border-l-4 border-[#8E2525] p-3 sm:p-3.5 rounded-r-lg shadow-sm space-y-1 my-2">
-                <div className="text-[10px] font-mono uppercase font-bold tracking-widest text-[#8E2525] flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#8E2525]" />
-                  <span>ВІДГОМІН МИНУЛИХ РІШЕНЬ ГЕТЬМАНА</span>
-                </div>
-                <p className="font-serif text-xs sm:text-sm text-[#2E2822] italic leading-snug">
-                  {scenario.narrativeEcho}
-                </p>
+          {/* Compact resource bar: always visible while reading the case. */}
+          <div className="sticky top-0 z-30 -mx-4 sm:-mx-5 md:-mx-8 px-4 sm:px-5 md:px-8 py-2 bg-[#1C1815]/95 backdrop-blur-sm border-y border-[#C9A96E]/40 shadow-lg">
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+              <span className="shrink-0 text-[9px] font-mono font-bold uppercase tracking-widest text-[#C9A96E] mr-1">РЕСУРСИ</span>
+              <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-[#2A241A] border border-[#8B6A2B]/50 text-[#FBBF24]">
+                <Coins className="w-3.5 h-3.5" /><span className="text-[10px] font-mono uppercase">Скарбниця</span><strong className="text-xs font-mono">{state.empire.treasury}M</strong>
               </div>
-            )}
-
-            <div className="pt-2">
-              <div className="text-[11px] uppercase font-mono font-bold tracking-widest text-[#6E6354] mb-1">
-                СИТУАЦІЯ
+              <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-[#271A1A] border border-[#8E2525]/50 text-[#F87171]">
+                <Shield className="w-3.5 h-3.5" /><span className="text-[10px] font-mono uppercase">Військо</span><strong className="text-xs font-mono">{state.empire.militaryStrength}%</strong>
               </div>
-              <p className="text-base md:text-lg text-[#1C1815] leading-relaxed">
-                {scenario.situation}
-              </p>
+              <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-[#211D28] border border-[#8B6A2B]/50 text-[#C9A96E]">
+                <Crown className="w-3.5 h-3.5" /><span className="text-[10px] font-mono uppercase">Політична воля</span><strong className="text-xs font-mono">{state.politicalWill}</strong>
+              </div>
+              <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-[#18212A] border border-[#315B45]/50 text-[#60A5FA]">
+                <Landmark className="w-3.5 h-3.5" /><span className="text-[10px] font-mono uppercase">Стабільність</span><strong className="text-xs font-mono">{state.empire.stability}%</strong>
+              </div>
+              <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-[#211D28] border border-[#6D4A8A]/50 text-[#A855F7]">
+                <Sparkles className="w-3.5 h-3.5" /><span className="text-[10px] font-mono uppercase">Єдність</span><strong className="text-xs font-mono">{state.empire.unity}%</strong>
+              </div>
             </div>
           </div>
+
+          {/* Narrative context is kept only when it adds information beyond the dossier. */}
+          {scenario.narrativeEcho && (
+            <div className="bg-[#DFD0B1]/90 border-l-4 border-[#8E2525] p-2.5 sm:p-3 rounded-r-lg shadow-sm space-y-1">
+              <div className="text-[10px] font-mono uppercase font-bold tracking-widest text-[#8E2525] flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>ВІДГОМІН МИНУЛИХ РІШЕНЬ</span>
+              </div>
+              <p className="font-serif text-xs sm:text-sm text-[#2E2822] italic leading-snug">{scenario.narrativeEcho}</p>
+            </div>
+          )}
 
           {/* Speaker Testimony / Quotation */}
           {scenario.speakerQuote && (
@@ -215,96 +219,65 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
 
           {/* SECTION: Structured Case Dossier */}
           {!isResolved && (
-            <section className="space-y-4" aria-label="Досьє державної справи">
-              <div className="border-t-2 border-[#8E2525] pt-5">
-                <div className="flex items-center justify-between gap-3 mb-3">
-                  <h3 className="font-serif text-lg md:text-xl font-bold uppercase tracking-wider text-[#8E2525]">
-                    ДОСЬЄ СПРАВИ
-                  </h3>
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-[#7A6F60]">
-                    БРИФІНГ РАДИ
-                  </span>
+            <section className="space-y-3" aria-label="Досьє державної справи">
+              <div className="border-t-2 border-[#8E2525] pt-3">
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <h3 className="font-serif text-base md:text-lg font-bold uppercase tracking-wider text-[#8E2525]">ДОСЬЄ СПРАВИ</h3>
+                  <span className="text-[9px] font-mono uppercase tracking-widest text-[#7A6F60]">КОРОТКИЙ БРИФІНГ</span>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="bg-[#F7EEDB] border border-[#CBB48B] rounded-lg p-4 shadow-sm">
-                    <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#8E2525] mb-1.5">
-                      ПРОБЛЕМА
-                    </div>
-                    <p className="font-serif text-sm sm:text-base text-[#1C1815] leading-relaxed">
-                      {scenario.problem || scenario.situation}
-                    </p>
+                <div className="rounded-lg border border-[#CBB48B] bg-[#F7EEDB] px-3 py-2.5 space-y-2">
+                  <div>
+                    <div className="text-[9px] font-mono font-bold uppercase tracking-widest text-[#8E2525] mb-0.5">ПРОБЛЕМА</div>
+                    <p className="font-serif text-sm text-[#1C1815] leading-snug">{scenario.problem || scenario.situation}</p>
                   </div>
-
-                  <div className="bg-[#FAF3E3] border border-[#D8C6A5] rounded-lg p-4">
-                    <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#6E6354] mb-1.5">
-                      КОНТЕКСТ
-                    </div>
-                    <p className="text-sm text-[#544D45] leading-relaxed">
-                      {scenario.context || scenario.introduction}
-                    </p>
+                  <div className="border-t border-[#D8C6A5] pt-2">
+                    <div className="text-[9px] font-mono font-bold uppercase tracking-widest text-[#6E6354] mb-0.5">КОНТЕКСТ</div>
+                    <p className="text-xs sm:text-sm text-[#544D45] leading-snug">{scenario.context || scenario.introduction}</p>
                   </div>
-
-                  {scenario.actors && scenario.actors.length > 0 && (
-                    <div className="bg-[#FAF3E3] border border-[#D8C6A5] rounded-lg p-4">
-                      <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#6E6354] mb-2">
-                        АКТОРИ ТА ЇХНІ ІНТЕРЕСИ
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {scenario.actors.map((actor) => (
-                          <div key={actor.id} className="rounded-md border border-[#E0D1B5] bg-[#FDF7EA] px-3 py-2.5">
-                            <div className="font-serif font-bold text-sm text-[#1C1815]">
-                              {actor.name || actor.id}
-                            </div>
-                            <div className="text-[10px] font-mono uppercase tracking-wide text-[#8E2525] mt-0.5">
-                              {actor.role}
-                            </div>
-                            <p className="text-xs text-[#544D45] leading-relaxed mt-1.5">
-                              <span className="font-semibold text-[#6E6354]">Інтерес:</span> {actor.interest}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {scenario.knowledge && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div className="bg-[#F3F0E7] border border-[#C8C0AD] rounded-lg p-4">
-                        <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#315B45] mb-2">
-                          ВІДОМО
-                        </div>
-                        <ul className="space-y-1.5 text-sm text-[#3F3A34] leading-relaxed list-disc pl-4">
-                          {scenario.knowledge.known.map((item, index) => (
-                            <li key={index}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div className="bg-[#F3F0E7] border border-[#C8C0AD] rounded-lg p-4">
-                        <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#765B2A] mb-2">
-                          НЕВІДОМО
-                        </div>
-                        <ul className="space-y-1.5 text-sm text-[#3F3A34] leading-relaxed list-disc pl-4">
-                          {scenario.knowledge.uncertain.map((item, index) => (
-                            <li key={index}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  )}
-
-                  {scenario.inaction && (
-                    <div className="bg-[#F4E8D2] border border-[#B99A67] rounded-lg p-4">
-                      <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#765B2A] mb-1.5">
-                        ЯКЩО НІЧОГО НЕ РОБИТИ
-                      </div>
-                      <p className="text-sm text-[#544D45] leading-relaxed">
-                        {scenario.inaction}
-                      </p>
-                    </div>
-                  )}
                 </div>
+
+                {scenario.actors && scenario.actors.length > 0 && (
+                  <div className="mt-2 rounded-lg border border-[#D8C6A5] bg-[#FAF3E3] p-2.5">
+                    <div className="text-[9px] font-mono font-bold uppercase tracking-widest text-[#6E6354] mb-1.5">АКТОРИ / ІНТЕРЕСИ</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1.5">
+                      {scenario.actors.map((actor) => (
+                        <div key={actor.id} className="flex items-start gap-2 min-w-0">
+                          <span className="mt-1 w-1.5 h-1.5 rounded-full bg-[#8E2525] shrink-0" />
+                          <p className="text-[11px] leading-snug text-[#544D45]">
+                            <strong className="font-serif text-[#1C1815]">{actor.name || actor.id}</strong>
+                            <span className="text-[#8E2525]"> · {actor.role}</span>
+                            <span> · {actor.interest}</span>
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {scenario.knowledge && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                    <div className="rounded-lg border border-[#C8C0AD] bg-[#F3F0E7] px-3 py-2">
+                      <div className="text-[9px] font-mono font-bold uppercase tracking-widest text-[#315B45] mb-1">ВІДОМО</div>
+                      <ul className="space-y-0.5 text-[11px] text-[#3F3A34] leading-snug list-disc pl-3.5">
+                        {scenario.knowledge.known.map((item, index) => <li key={index}>{item}</li>)}
+                      </ul>
+                    </div>
+                    <div className="rounded-lg border border-[#C8C0AD] bg-[#F3F0E7] px-3 py-2">
+                      <div className="text-[9px] font-mono font-bold uppercase tracking-widest text-[#765B2A] mb-1">НЕВІДОМО</div>
+                      <ul className="space-y-0.5 text-[11px] text-[#3F3A34] leading-snug list-disc pl-3.5">
+                        {scenario.knowledge.uncertain.map((item, index) => <li key={index}>{item}</li>)}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+
+                {scenario.inaction && (
+                  <div className="mt-2 rounded-lg border border-[#B99A67] bg-[#F4E8D2] px-3 py-2">
+                    <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-[#765B2A]">ЯКЩО НІЧОГО НЕ РОБИТИ · </span>
+                    <span className="text-[11px] text-[#544D45] leading-snug">{scenario.inaction}</span>
+                  </div>
+                )}
               </div>
             </section>
           )}
