@@ -155,11 +155,6 @@ const CITIES = [
   { name: 'МОСКВА', lon: 37.62, lat: 55.76, dx: 8, dy: -7, anchor: 'start' as const },
   { name: 'ВІДЕНЬ', lon: 16.37, lat: 48.21, dx: -8, dy: -8, anchor: 'end' as const },
   { name: 'БЕРЛІН', lon: 13.40, lat: 52.52, dx: -8, dy: -8, anchor: 'end' as const },
-  { name: 'МАЗЕПИН', lon: 39.1, lat: 47.2, dx: 8, dy: -7, anchor: 'start' as const },
-  { name: 'ВИГОВСЬК', lon: 43.3, lat: 47.8, dx: 8, dy: -7, anchor: 'start' as const },
-  { name: 'ОРЛИК', lon: 45.1, lat: 43.6, dx: 8, dy: 10, anchor: 'start' as const },
-  { name: 'САГАЙДАЧНИЙ', lon: 48.0, lat: 44.8, dx: 8, dy: -7, anchor: 'start' as const },
-  { name: 'ДОРОШЕНКО', lon: 49.8, lat: 45.7, dx: 8, dy: 10, anchor: 'start' as const },
 ];
 
 function project(lon: number, lat: number, bounds: { minLon: number; maxLon: number; minLat: number; maxLat: number }) {
@@ -240,6 +235,9 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
         const quietMapExclusions = new Set([
           'Iceland', 'Ireland', 'Faroe Islands', 'Shetland Islands',
           'Orkney Islands', 'Svalbard', 'Greenland',
+          'Novaya Zemlya', 'Franz Josef Land', 'Severny Island',
+          'Yuzhny Island', 'Vaygach Island', 'Kolguyev Island',
+          'Wrangel Island',
           'China', 'Qing China', 'Persia', 'Persian Empire',
           'Afghanistan', 'Bukhara', 'Khiva', 'Kokand',
           'Georgia', 'Armenia', 'Azerbaijan'
@@ -247,7 +245,13 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
         setContextFeatures(
           data.features.filter((feature) => {
             const name = feature.properties?.NAME ?? '';
-            return Boolean(name) && !quietMapExclusions.has(name);
+            const normalized = name.toLowerCase();
+            const isIslandNoise =
+              normalized.includes('island') ||
+              normalized.includes('islands') ||
+              normalized.includes('archipelago') ||
+              normalized.includes('insel');
+            return Boolean(name) && !quietMapExclusions.has(name) && !isIslandNoise;
           })
         );
       })
@@ -387,11 +391,12 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
   }, []);
 
   const bounds = useMemo(() => ({
-    // Europe-first framing. Siberia and the distant Asian extent stay outside the composition.
-    minLon: -13,
-    maxLon: 105,
-    minLat: 20,
-    maxLat: 70,
+    // Europe-first framing for the current map pass.
+    // Asia is intentionally deferred until the European composition is finished.
+    minLon: -12,
+    maxLon: 62,
+    minLat: 35,
+    maxLat: 72,
   }), []);
 
   const paths = useMemo(
@@ -544,10 +549,6 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
           <stop offset=".45" stopColor="#181C20" stopOpacity=".02" />
           <stop offset="1" stopColor="#050608" stopOpacity=".34" />
         </linearGradient>
-
-        <clipPath id={`sichMapChinaEdge-${mapId}`}>
-          <rect x="920" y="0" width="80" height="520" />
-        </clipPath>
 
         <radialGradient id={`sichMapWaterVignette-${mapId}`} cx="50%" cy="48%" r="72%">
           <stop offset="0" stopColor="#FFFFFF" stopOpacity=".035" />
@@ -705,42 +706,7 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
             ].map(({ d, key }) => <path key={key} d={d} fill={`url(#sichMapLand-${mapId})`} />)}
           </g>
 
-          {/* Alternate Iran: Persia plus the Central/South Asian stan states. */}
-          <g>
-            {iranPaths.map((d, index) => (
-              <path key={`iran-${index}`} d={d} fill="#4F4A42" fillOpacity=".94" />
-            ))}
-            {iranPaths.map((d, index) => (
-              <path key={`iran-border-${index}`} d={d} fill="none" stroke="#9A8E79" strokeWidth="1.2" strokeOpacity=".52" />
-            ))}
-          </g>
-
-          {/* China appears only as a restrained eastern edge, keeping the map continental rather than global. */}
-          <g clipPath={`url(#sichMapChinaEdge-${mapId})`}>
-            {chinaPaths.map((d, index) => (
-              <g key={`china-${index}`}>
-                <path d={d} fill="#4B4A45" fillOpacity=".86" />
-                <path d={d} fill="none" stroke="#7B756A" strokeWidth="1" strokeOpacity=".5" />
-              </g>
-            ))}
-          </g>
-          <text
-            x="965"
-            y={project(99, 39, bounds)[1]}
-            textAnchor="middle"
-            fill="#C8C0AE"
-            fontSize="10"
-            fontFamily="Georgia, serif"
-            fontWeight="700"
-            letterSpacing="1.8"
-            paintOrder="stroke"
-            stroke="#16191B"
-            strokeWidth="2"
-            strokeOpacity=".85"
-          >
-            КИТАЙ
-          </text>
-
+          {/* Asia is intentionally deferred in Map 2.0 until the European composition is complete. */}
           {/* One canonical silhouette for the alternate 1848 Sich Empire.
               Its territorial canon is kept separate from the real-world 1848 base,
               so the surrounding European powers retain their historical geography.
@@ -769,7 +735,6 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
           {/* Political labels keep the map readable as an atlas rather than a technical GIS layer. */}
           {[
             ...COUNTRY_LABELS,
-            { name: 'ІРАН', lon: 65, lat: 34.5, size: 13, power: 'iran' as const, weight: 700 },
           ].map((label) => {
             const [x, y] = project(label.lon, label.lat, bounds);
             return (
