@@ -44,7 +44,8 @@ const COUNTRY_LABELS = [
   { name: 'ОСМАНСЬКА ІМПЕРІЯ', lon: 27.0, lat: 40.8, size: 9, power: 'ottoman' as const, weight: 700 },
   { name: 'АВСТРІЯ', lon: 14.4, lat: 47.6, size: 10, power: 'austria' as const, weight: 700 },
   { name: 'НІМЕЦЬКИЙ СОЮЗ', lon: 10.5, lat: 50.5, size: 9, power: 'germany' as const, weight: 700 },
-  { name: 'ШВЕЦІЯ-НОРВЕГІЯ', lon: 16.0, lat: 61.0, size: 8, power: 'sweden' as const, weight: 700 },
+  { name: 'ШВЕЦІЯ-НОРВЕГІЯ', lon: 16.5, lat: 62.2, size: 8, power: 'sweden' as const, weight: 700 },
+  { name: 'ДАНІЯ', lon: 10.0, lat: 56.1, size: 7, power: 'sweden' as const, weight: 700 },
   { name: 'ФРАНЦІЯ', lon: 2.2, lat: 46.4, size: 10, power: 'france' as const, weight: 700 },
   { name: 'ВЕЛИКА БРИТАНІЯ', lon: -0.7, lat: 52.7, size: 8, power: 'england' as const, weight: 700 },
   { name: 'ІТАЛІЙСЬКІ ДЕРЖАВИ', lon: 12.4, lat: 42.3, size: 8, power: 'italy' as const, weight: 700 },
@@ -240,10 +241,10 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
 
   const bounds = useMemo(() => ({
     // Europe-first framing. Siberia and the distant Asian extent stay outside the composition.
-    minLon: -12,
-    maxLon: 62,
-    minLat: 35,
-    maxLat: 71,
+    minLon: -13,
+    maxLon: 64,
+    minLat: 33,
+    maxLat: 74,
   }), []);
 
   const paths = useMemo(
@@ -309,9 +310,23 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
           <stop offset="1" stopColor="#806333" />
         </linearGradient>
 
-        <radialGradient id={`sichMapSea-${mapId}`} cx="42%" cy="42%">
-          <stop offset="0" stopColor="#1D3441" />
-          <stop offset="1" stopColor="#08131B" />
+        <radialGradient id={`sichMapSea-${mapId}`} cx="48%" cy="42%" r="72%">
+          <stop offset="0" stopColor="#3A3E42" />
+          <stop offset="0.42" stopColor="#292D31" />
+          <stop offset="0.78" stopColor="#1B1F23" />
+          <stop offset="1" stopColor="#0D1013" />
+        </radialGradient>
+
+        <linearGradient id={`sichMapWaterDepth-${mapId}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#45494D" stopOpacity=".20" />
+          <stop offset=".45" stopColor="#181C20" stopOpacity=".02" />
+          <stop offset="1" stopColor="#050608" stopOpacity=".34" />
+        </linearGradient>
+
+        <radialGradient id={`sichMapWaterVignette-${mapId}`} cx="50%" cy="48%" r="72%">
+          <stop offset="0" stopColor="#FFFFFF" stopOpacity=".035" />
+          <stop offset=".58" stopColor="#000000" stopOpacity=".08" />
+          <stop offset="1" stopColor="#000000" stopOpacity=".48" />
         </radialGradient>
 
         <filter id={`sichMapGlow-${mapId}`} x="-40%" y="-40%" width="180%" height="180%">
@@ -356,6 +371,8 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
       </defs>
 
       <rect width="1000" height="520" fill={`url(#sichMapSea-${mapId})`} />
+      <rect width="1000" height="520" fill={`url(#sichMapWaterDepth-${mapId})`} />
+      <rect width="1000" height="520" fill={`url(#sichMapWaterVignette-${mapId})`} />
 
       {error ? (
         <g>
@@ -526,10 +543,10 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
       )}
 
       {[
-        { name: 'ПІВНІЧНЕ МОРЕ', lon: 3.5, lat: 55.0, size: 9 },
-        { name: 'ЧОРНЕ МОРЕ', lon: 35.0, lat: 43.2, size: 10 },
-        { name: 'КАСПІЙСЬКЕ МОРЕ', lon: 50.5, lat: 41.5, size: 9 },
-        { name: 'СЕРЕДЗЕМНЕ МОРЕ', lon: 17.5, lat: 37.0, size: 9 },
+        { name: 'ПІВНІЧНЕ МОРЕ', lon: 4.0, lat: 57.0, size: 8.5 },
+        { name: 'ЧОРНЕ МОРЕ', lon: 35.2, lat: 44.4, size: 9.5 },
+        { name: 'КАСПІЙСЬКЕ МОРЕ', lon: 51.2, lat: 42.8, size: 8.5 },
+        { name: 'СЕРЕДЗЕМНЕ МОРЕ', lon: 18.0, lat: 38.8, size: 8.5 },
       ].map((sea) => {
         const [x, y] = project(sea.lon, sea.lat, bounds);
         return (
@@ -539,10 +556,15 @@ export function SichEmpireMap({ variant = 'prologue' }: { variant?: Variant }) {
             y={y}
             textAnchor="middle"
             dominantBaseline="middle"
-            fill="#71818A"
+            fill="#7B8084"
+            opacity=".72"
             fontSize={sea.size}
             fontFamily="Georgia, serif"
             letterSpacing="1.4"
+            paintOrder="stroke"
+            stroke="#111417"
+            strokeWidth="2"
+            strokeOpacity=".65"
           >
             {sea.name}
           </text>
