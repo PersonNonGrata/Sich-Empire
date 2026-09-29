@@ -20,56 +20,10 @@ import { HetmanView } from './components/hetman/HetmanView.tsx';
 import { EngineDiagnostics } from './components/EngineDiagnosticsModal.tsx';
 import { EventRevealModal } from './components/ui/EventRevealModal.tsx';
 import { CoatOfArms } from './components/ui/CoatOfArms.tsx';
-import { SichEmpireMap } from './components/ui/SichEmpireMap.tsx';
 import { X } from 'lucide-react';
 import { MainMenu } from './components/MainMenu.tsx';
 
 
-type PrologueScene = {
-  year: string;
-  eyebrow: string;
-  title: string;
-  body: string;
-  accent: string;
-};
-
-const PROLOGUE_SCENES: PrologueScene[] = [
-  {
-    year: '1648',
-    eyebrow: 'ПОВСТАННЯ ХМЕЛЬНИЦЬКОГО',
-    title: 'Народжується Січ',
-    body: 'Повстання Хмельницького перетворюється на війну за новий порядок у Східній Європі. Січ виходить із боротьби сильнішою та починає будувати власну державу.',
-    accent: 'Початок',
-  },
-  {
-    year: '1654',
-    eyebrow: 'ПЕРЕМОГА ХМЕЛЬНИЦЬКОГО',
-    title: 'Протекторат Січі',
-    body: 'Хмельницький перемагає. Польща та Литва переходять під протекторат Січі. Київ стає центром нової політичної системи.',
-    accent: 'Новий порядок',
-  },
-  {
-    year: '1700',
-    eyebrow: 'ПАДІННЯ МОСКОВІЇ',
-    title: 'Схід відкритий',
-    body: 'Січ вступає у вирішальну війну з Московським царством. Москва зазнає поразки, а її землі переходять під владу Січі.',
-    accent: 'Імперія',
-  },
-  {
-    year: '1805–1815',
-    eyebrow: 'НАПОЛЕОНІВСЬКІ ВІЙНИ',
-    title: 'Велика війна',
-    body: 'Наполеон кидає виклик Січі. Французька армія зазнає поразки, але перемога коштує дорого обом сторонам. Європа виходить із війни зміненою.',
-    accent: 'Випробування',
-  },
-  {
-    year: '1848',
-    eyebrow: 'ВЕСНА НАРОДІВ',
-    title: 'Тепер твоя черга',
-    body: 'Минуло два століття від початку повстання. Січ стала однією з головних сил Європи. Але старий порядок знову тріщить, і нова епоха починається саме зараз.',
-    accent: 'Початок гри',
-  },
-];
 
 export default function App() {
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -80,8 +34,6 @@ export default function App() {
   const [bannerNotice, setBannerNotice] = useState<string | null>(null);
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState<boolean>(false);
   const [showPrologue, setShowPrologue] = useState<boolean>(false);
-  const [prologueScene, setPrologueScene] = useState<number>(0);
-  const [isPrologueMenuOpen, setIsPrologueMenuOpen] = useState<boolean>(false);
   const [savedGameState, setSavedGameState] = useState<GameState | null>(null);
 
   // Load existing save or initialize new state
@@ -244,7 +196,6 @@ export default function App() {
       setGameState(fresh);
       setSavedGameState(null);
       setShowPrologue(false);
-      setIsPrologueMenuOpen(false);
       await saveGame(fresh);
     };
 
