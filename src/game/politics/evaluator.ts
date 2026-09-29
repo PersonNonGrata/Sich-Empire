@@ -71,7 +71,7 @@ export function evaluateFactionReaction(
  * Demands are deliberately qualitative in the UI, while pressure remains
  * a deterministic hidden state used by the simulation.
  */
-const DEMAND_DOMAIN_LABELS: Record<keyof PoliticalInterests, string> = {
+const DEMAND_DOMAIN_LABELS: Record<string, string> = {
   armyFunding: 'фінансування війська',
   taxation: 'податкова політика',
   autonomy: 'автономія',
