@@ -435,7 +435,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                   return (
                     <div
                       key={choice.id}
-                      className={`rounded-lg shadow-sm transition-all duration-200 group \${
+                      className={`rounded-lg shadow-sm transition-all duration-200 group ${
                         isHighlighted
                           ? 'bg-[#FFF8E8] border-2 border-[#C9A96E] shadow-[0_0_0_2px_rgba(201,169,110,0.18)]'
                           : 'bg-[#FAF3E3] border-2 border-[#D3C1A1] hover:bg-[#FFFFFF] hover:border-[#8E2525] hover:shadow-md'
@@ -443,7 +443,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                     >
                       <div className="p-3.5 sm:p-4 md:p-5">
                         <div className="flex items-start gap-2.5">
-                          <span className={`w-6 h-6 rounded-full text-[#F4EAD4] text-xs font-mono font-bold flex items-center justify-center shrink-0 mt-0.5 \${
+                          <span className={`w-6 h-6 rounded-full text-[#F4EAD4] text-xs font-mono font-bold flex items-center justify-center shrink-0 mt-0.5 ${
                             isHighlighted ? 'bg-[#8E2525]' : 'bg-[#1C1815] group-hover:bg-[#8E2525]'
                           }`}>
                             {idx + 1}
@@ -476,7 +476,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                                   return (
                                     <span
                                       key={item.label}
-                                      className={`inline-flex items-center gap-1 px-2 py-1 rounded border text-[10px] font-mono font-semibold \${
+                                      className={`inline-flex items-center gap-1 px-2 py-1 rounded border text-[10px] font-mono font-semibold ${
                                         positive
                                           ? 'bg-[#EEF6EF] border-[#B7D0B8] text-[#315B45]'
                                           : 'bg-[#F8ECE9] border-[#D9B5AD] text-[#8E2525]'
@@ -510,7 +510,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                                     ? 'криза'
                                     : 'занепокоєння';
                                   return (
-                                    <span key={`${reaction.factionId}-${index}`} className={`px-2 py-1 rounded border text-[9px] font-mono \${tone}`}>
+                                    <span key={`${reaction.factionId}-${index}`} className={`px-2 py-1 rounded border text-[9px] font-mono ${tone}`}>
                                       {label}: {reactionLabel}
                                     </span>
                                   );
@@ -539,7 +539,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({
                             onClick={() => isHighlighted ? handleConfirmChoice(choice) : handleMakeChoice(choice)}
                             disabled={!canAffordWill}
                             aria-label={isHighlighted ? 'Підтвердити рішення' : 'Обрати рішення'}
-                            className={`min-h-[44px] w-full sm:w-auto px-5 py-2.5 rounded-lg font-serif font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow transition-all \${
+                            className={`min-h-[44px] w-full sm:w-auto px-5 py-2.5 rounded-lg font-serif font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow transition-all ${
                               isHighlighted
                                 ? 'bg-[#C9A96E] hover:bg-[#DCBE84] active:bg-[#B5965C] text-[#0A0D14] shadow-[#C9A96E]/20'
                                 : 'bg-[#8E2525] hover:bg-[#A32A2A] active:bg-[#6E1C1C] text-white'
