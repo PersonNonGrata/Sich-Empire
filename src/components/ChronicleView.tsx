@@ -21,6 +21,7 @@ import {
 interface ChronicleViewProps {
   events: HistoryEvent[];
   scheduledConsequences?: ScheduledConsequence[];
+  state: GameState;
 }
 
 export const ChronicleView: React.FC<ChronicleViewProps> = ({ events, scheduledConsequences = [] }) => {

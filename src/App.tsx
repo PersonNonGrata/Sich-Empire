@@ -268,6 +268,7 @@ export default function App() {
       {activeTab === 'chronicle' && (
         <ChronicleView
           events={gameState.history}
+          state={gameState}
           scheduledConsequences={gameState.scheduledConsequences || gameState.consequences || []}
         />
       )}
