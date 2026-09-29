@@ -11,8 +11,12 @@ export const tradeLaw1852Scenario: Scenario = {
   conditions: [
     {
       type: 'YEAR',
-      operator: '>=',
+      operator: '==',
       value: 1852,
+    },
+    {
+      type: 'SCENARIO_COMPLETED',
+      scenarioId: 'scenario_port_customs_1851',
     },
     {
       type: 'SCENARIO_NOT_COMPLETED',
