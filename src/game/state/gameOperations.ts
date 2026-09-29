@@ -17,6 +17,8 @@ import { Importance, ImperialEvent } from '../../types/index.ts';
 import { evaluateArchetypeProfile } from '../archetypes/evaluator.ts';
 import { handlePlayerReflectionResponse } from '../psychology/ascensionEngine.ts';
 import { ReflectionResponse } from '../psychology/types.ts';
+import { FactionNegotiationAction } from '../politics/types.ts';
+import { negotiateFactionDemand as engineNegotiateFactionDemand } from '../politics/negotiationEngine.ts';
 
 /**
  * PURE STATE OPERATIONS (Immutable transitions)
@@ -222,6 +224,10 @@ export function addTension(state: GameState, key: string, valueDelta: number): G
       [key]: Math.max(0, Math.min(100, current + valueDelta)),
     },
   };
+}
+
+export function negotiateFactionDemand(state: GameState, demandId: string, action: FactionNegotiationAction): { state: GameState; logs: string[]; politicalWillCost: number } {
+  return engineNegotiateFactionDemand(state, demandId, action);
 }
 
 export function resetGame(rulerName?: string): GameState {
