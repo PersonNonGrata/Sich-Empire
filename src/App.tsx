@@ -36,6 +36,7 @@ export default function App() {
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState<boolean>(false);
   const [showPrologue, setShowPrologue] = useState<boolean>(false);
   const [savedGameState, setSavedGameState] = useState<GameState | null>(null);
+  const [hasHetmanUpdates, setHasHetmanUpdates] = useState(false);
 
   // Load existing save or initialize new state
   useEffect(() => {
@@ -80,7 +81,7 @@ export default function App() {
       setLastResolutionResult(null);
       setGameState(nextState);
       persistState(nextState);
-      setActiveTab('rada');
+      handleTabChange('rada');
     } catch (err: any) {
       console.error(err);
       alert(err.message);
@@ -129,11 +130,33 @@ export default function App() {
     setActiveTab('rada');
   };
 
+  const getHetmanProfileSignature = (state: GameState) => JSON.stringify({
+    ascensionStage: state.ascensionStage,
+    archetypeProfile: state.archetypeProfile,
+    behaviorPatterns: state.behaviorPatterns,
+    contradictions: state.contradictions,
+    reflections: state.reflections,
+    insights: state.insights,
+    stressTests: state.stressTests,
+    transformations: state.transformations,
+    reputationTags: state.reputationTags,
+    narrativeMirrors: state.narrativeMirrors,
+  });
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    if (tab === 'hetman') setHasHetmanUpdates(false);
+  };
+
   // 4. Advance Time (+1 year or more)
   const handleAdvanceYear = (years = 1) => {
     if (!gameState) return;
+    const previousHetmanSignature = getHetmanProfileSignature(gameState);
     const result = advanceYear(gameState, years);
     setGameState(result.state);
+    if (previousHetmanSignature !== getHetmanProfileSignature(result.state)) {
+      setHasHetmanUpdates(true);
+    }
     setLastExecutionLogs(null);
     setLastResolutionResult(null);
     persistState(result.state);
@@ -162,6 +185,7 @@ export default function App() {
     setLastExecutionLogs(null);
     setActiveTab('rada');
     setIsDiagnosticsOpen(false);
+    setHasHetmanUpdates(false);
     persistState(fresh);
     setBannerNotice(`Створено нову гру. Володар: ${fresh.identity.rulerName}.`);
   };
@@ -187,6 +211,7 @@ export default function App() {
     setGameState(fresh);
     setLastExecutionLogs(null);
     setIsDiagnosticsOpen(false);
+    setHasHetmanUpdates(false);
     setBannerNotice('Сховище повністю очищено. Розпочато нову кампанію.');
   };
 
@@ -236,7 +261,8 @@ export default function App() {
     <AppShell
       state={gameState}
       activeTab={activeTab}
-      setActiveTab={setActiveTab}
+      setActiveTab={handleTabChange}
+      hasHetmanUpdates={hasHetmanUpdates}
       isSaving={isSaving}
       bannerNotice={bannerNotice}
       onCloseBanner={() => setBannerNotice(null)}
